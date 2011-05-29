@@ -18,7 +18,6 @@ level = [
 			1, 1, 1, 1, 1, 1 
 		]
 level_x = 6
-level_y = 7
 
 pygame.init()
   
@@ -43,7 +42,7 @@ all_sprites_list.add(chomp)
 
 # Init da level
 loadlevel = gamemap.Gamemap("gfx/woodtiles.png", 32,32)
-print loadlevel.tile_table
+
 
 
 # -------- Main Program Loop -----------
@@ -56,6 +55,7 @@ while done==False:
     screen.fill(white)
  
     pos = pygame.mouse.get_pos()
+    oldpos = [chomp.rect.x,chomp.rect.y]
     chomp.rect.x=pos[0] - (chomp.rect.w / 2)
     chomp.rect.y=pos[1] - (chomp.rect.h / 2)  
 
@@ -65,6 +65,9 @@ while done==False:
     for i in level:
         if not i == 0:
             screen.blit(loadlevel.tile_table[i - 1][0], ( ((x % level_x) * 32), math.floor(x / level_x) * 32))
+            if (chomp.rect.x < ((x % level_x) * 32) + 32 and chomp.rect.x > ((x % level_x) * 32)) or (chomp.rect.x + chomp.rect.w < ((x % level_x) * 32) + 32 and chomp.rect.x + chomp.rect.w > ((x % level_x) * 32)) and (chomp.rect.y < (math.floor(x / level_x) * 32) + 32 and chomp.rect.y > (math.floor(x / level_x) * 32)) or (chomp.rect.y + chomp.rect.h < (math.floor(x / level_x) * 32) + 32 and chomp.rect.y + chomp.rect.h > (math.floor(x / level_x) * 32)):
+                chomp.rect.x = oldpos[0]
+                chomp.rect.y = oldpos[1]
         x += 1
     
     # Limit to 20 frames per second
