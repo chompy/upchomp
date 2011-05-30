@@ -43,8 +43,11 @@ all_sprites_list.add(chomp)
 # Init da level
 loadlevel = gamemap.Gamemap("gfx/woodtiles.png", 32,32, level_x)
 
+# Map scroll
+scroll = [(size[0] / 2) - ((level_x * loadlevel.tilewidth) / 2),(size[1] / 2) - (( math.floor(len(level) / level_x) * loadlevel.tileheight) / 2)]
 
-pos = [64,64]
+pos = [64 + scroll[0],64 + scroll[1]]
+# Gravity releated stuff
 GRAVITY = -9.81
 grav_rate = GRAVITY / 20
 falling = 0
@@ -72,17 +75,17 @@ while done==False:
     pos[1] += falling
     
     chomp.rect.x=pos[0]
-    chomp.rect.y=pos[1]    
+    chomp.rect.y=pos[1]
 
     # Draw the level
     x = 0
     i = 0 
     for i in level:
         if not i == 0:
-            screen.blit(loadlevel.tile_table[i - 1][0], ( ((x % level_x) * 32), math.floor(x / level_x) * 32))
+            screen.blit(loadlevel.tile_table[i - 1][0], ( ((x % level_x) * loadlevel.tilewidth) + scroll[0], (math.floor(x / level_x) * loadlevel.tileheight + + scroll[1])) )
             
             # Collision with a tile
-            if loadlevel.collision(chomp,x):
+            if loadlevel.collision(chomp,x,scroll):
                 chomp.rect.x = oldpos[0]
                 chomp.rect.y = oldpos[1]
                 pos[0] = oldpos[0]
