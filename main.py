@@ -44,7 +44,7 @@ all_sprites_list.add(chomp)
 loadlevel = gamemap.Gamemap("gfx/woodtiles.png", 32,32, level_x)
 
 
-pos = [400,400]
+pos = [320,320]
 # -------- Main Program Loop -----------
 while done==False:
     for event in pygame.event.get(): # User did something
@@ -52,17 +52,17 @@ while done==False:
             done=True # Flag that we are done so we exit this loop
         
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP: pos[1] -= 32
-            elif event.key == pygame.K_DOWN: pos[1] += 32
-            if event.key == pygame.K_LEFT: pos[0] -= 32
-            elif event.key == pygame.K_RIGHT: pos[0] += 32            
+            if event.key == pygame.K_UP: pos[1] -= 8
+            elif event.key == pygame.K_DOWN: pos[1] += 8
+            if event.key == pygame.K_LEFT: pos[0] -= 8
+            elif event.key == pygame.K_RIGHT: pos[0] += 8
  
     # Set the screen background
     screen.fill(white)
  
     oldpos = [chomp.rect.x,chomp.rect.y]
-    chomp.rect.x=pos[0] - (chomp.rect.w / 2)
-    chomp.rect.y=pos[1] - (chomp.rect.h / 2)  
+    chomp.rect.x=pos[0]
+    chomp.rect.y=pos[1]
 
     # Draw the level
     x = 0
@@ -72,7 +72,7 @@ while done==False:
             screen.blit(loadlevel.tile_table[i - 1][0], ( ((x % level_x) * 32), math.floor(x / level_x) * 32))
             
             # Collision with a tile
-            if loadlevel.collision(chomp,loadlevel.tile_table[i - 1]):
+            if loadlevel.collision(chomp,x):
                 chomp.rect.x = oldpos[0]
                 chomp.rect.y = oldpos[1]
                 pos[0] = oldpos[0]
