@@ -44,7 +44,11 @@ all_sprites_list.add(chomp)
 loadlevel = gamemap.Gamemap("gfx/woodtiles.png", 32,32, level_x)
 
 
-pos = [320,320]
+pos = [64,64]
+GRAVITY = -9.81
+grav_rate = GRAVITY / 20
+falling = 0
+
 # -------- Main Program Loop -----------
 while done==False:
     for event in pygame.event.get(): # User did something
@@ -52,7 +56,7 @@ while done==False:
             done=True # Flag that we are done so we exit this loop
         
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP: pos[1] -= 8
+            if event.key == pygame.K_UP: falling = -10
             elif event.key == pygame.K_DOWN: pos[1] += 8
             if event.key == pygame.K_LEFT: pos[0] -= 8
             elif event.key == pygame.K_RIGHT: pos[0] += 8
@@ -61,8 +65,14 @@ while done==False:
     screen.fill(white)
  
     oldpos = [chomp.rect.x,chomp.rect.y]
+    
+    # Gravity
+    falling += grav_rate * -1
+    if falling > GRAVITY * -1: falling = GRAVITY * -1
+    pos[1] += falling
+    
     chomp.rect.x=pos[0]
-    chomp.rect.y=pos[1]
+    chomp.rect.y=pos[1]    
 
     # Draw the level
     x = 0
@@ -77,6 +87,7 @@ while done==False:
                 chomp.rect.y = oldpos[1]
                 pos[0] = oldpos[0]
                 pos[1] = oldpos[1]
+                falling = 0
         x += 1
     
     # Limit to 20 frames per second
