@@ -82,14 +82,24 @@ while done==False:
     i = 0 
     for i in level:
         if not i == 0:
-            screen.blit(loadlevel.tile_table[i - 1][0], ( ((x % level_x) * loadlevel.tilewidth) + scroll[0], (math.floor(x / level_x) * loadlevel.tileheight + + scroll[1])) )
+            screen.blit(loadlevel.tile_table[i - 1][0], ( ((x % level_x) * loadlevel.tilewidth) + scroll[0], (math.floor(x / level_x) * loadlevel.tileheight + scroll[1])) )
             
             # Collision with a tile
-            if loadlevel.collision(chomp,x,scroll):
-                chomp.rect.x = oldpos[0]
-                chomp.rect.y = oldpos[1]
-                pos[0] = oldpos[0]
-                pos[1] = oldpos[1]
+            col = loadlevel.collision(chomp,x,scroll)
+            
+            if col:
+                
+                if abs(col[0]) < 32:
+                    if col[1] > 0: pos[1] = oldpos[1] - 1 
+                    else: pos[1] = oldpos[1] + 1
+                if abs(col[1]) < 32:
+                    if col[0] > 0: pos[0] = oldpos[0] - 1 
+                    else: pos[0] = oldpos[0] + 1                
+                
+                
+                
+                chomp.rect.x = pos[0]
+                chomp.rect.y = pos[1]                
                 falling = 0
         x += 1
     

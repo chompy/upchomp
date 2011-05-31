@@ -23,5 +23,6 @@ class Gamemap(object):
 
         if ((sprite.rect.x >= tile_x and sprite.rect.x <= tile_x + self.tilewidth)) or ((sprite.rect.x + sprite.rect.w >= tile_x and sprite.rect.x + sprite.rect.w <= tile_x + self.tilewidth)):
           if ((sprite.rect.y >= tile_y and sprite.rect.y <= tile_y + self.tileheight) or (sprite.rect.y + sprite.rect.h >= tile_y and sprite.rect.y + sprite.rect.h <= tile_y + self.tileheight)):
-            return 1
+            
+            return [tile_x  - sprite.rect.x, tile_y - sprite.rect.y]
         return 0
