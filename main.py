@@ -7,18 +7,6 @@ white    = ( 255, 255, 255)
 green    = (   0, 255,   0)
 red      = ( 255,   0,   0)
  
-# Level
-level = [
-			1, 1, 1, 1, 1, 1,
-			2, 0, 0, 0, 0, 2,
-			2, 0, 0, 0, 0, 2,
-			2, 0, 0, 0, 1, 2,
-			2, 0, 0, 1, 0, 2,
-			2, 0, 1, 0, 0, 2,			
-			1, 1, 1, 1, 1, 1 
-		]
-level_x = 6
-
 pygame.init()
   
 # Set the height and width of the screen
@@ -41,10 +29,10 @@ chomp = chompy.Chompy()
 all_sprites_list.add(chomp)
 
 # Init da level
-loadlevel = gamemap.Gamemap("gfx/woodtiles.png", 32,32, level_x)
+loadlevel = gamemap.Gamemap("map1.map")
 
 # Map scroll
-scroll = [(size[0] / 2) - ((level_x * loadlevel.tilewidth) / 2),(size[1] / 2) - (( math.floor(len(level) / level_x) * loadlevel.tileheight) / 2)]
+scroll = [(size[0] / 2) - ((loadlevel.mapwidth * loadlevel.tilesize[0]) / 2),(size[1] / 2) - (( math.floor(len(loadlevel.map) / loadlevel.mapwidth) * loadlevel.tilesize[1]) / 2)]
 
 pos = [64 + scroll[0],64 + scroll[1]]
 # Gravity releated stuff
@@ -64,9 +52,25 @@ while done==False:
             if event.key == pygame.K_LEFT: pos[0] -= 8
             elif event.key == pygame.K_RIGHT: pos[0] += 8
  
-    # Set the screen background
-    screen.fill(white)
- 
+    # Draw the background
+    screen.fill(white) 
+
+    if loadlevel.themeparser.get("images","background"):
+        for yy in xrange(loadlevel.bgrows):
+            for xx in xrange(loadlevel.bgcolumns):
+                # Start a new row
+                if xx == 0 and yy > 0:
+                    # Move the rectangle
+                    loadlevel.bg_rect = loadlevel.bg_rect.move([-(loadlevel.bgcolumns -1 ) * loadlevel.bg_rect.width, loadlevel.bg_rect.height])
+                # Continue a row
+                if xx > 0:
+                    # Move the rectangle
+                    loadlevel.bg_rect = loadlevel.bg_rect.move([loadlevel.bg_rect.width, 0])
+                screen.blit(loadlevel.background,loadlevel.bg_rect)
+        loadlevel.bg_rect.x = 0
+        loadlevel.bg_rect.y = 0
+
+
     oldpos = [chomp.rect.x,chomp.rect.y]
     
     # Gravity
@@ -80,26 +84,28 @@ while done==False:
     # Draw the level
     x = 0
     i = 0 
-    for i in level:
-        if not i == 0:
-            screen.blit(loadlevel.tile_table[i - 1][0], ( ((x % level_x) * loadlevel.tilewidth) + scroll[0], (math.floor(x / level_x) * loadlevel.tileheight + scroll[1])) )
+    for i in loadlevel.map:
+        # Render Tiles
+        if loadlevel.themeparser.get(i, "tile"):
             
-            # Collision with a tile
+            tile = loadlevel.themeparser.get(i, "tile")
+            tile = tile.split(",")
+            
+            screen.blit(loadlevel.tile_table[int(tile[0])][int(tile[1])], ( ((x % loadlevel.mapwidth) * loadlevel.tilesize[0]) + scroll[0], (math.floor(x / loadlevel.mapwidth) * loadlevel.tilesize[1] + scroll[1])) )
+            
+        # Collision with a tile
+        if loadlevel.themeparser.getboolean(i,"collide"):
             col = loadlevel.collision(chomp,x,scroll)
             
             if col:
-                
-                if abs(col[0]) < 32:
-                    if col[1] > 0: pos[1] = oldpos[1] - 1 
-                    else: pos[1] = oldpos[1] + 1
-                if abs(col[1]) < 32:
-                    if col[0] > 0: pos[0] = oldpos[0] - 1 
-                    else: pos[0] = oldpos[0] + 1                
-                
-                
-                
-                chomp.rect.x = pos[0]
-                chomp.rect.y = pos[1]                
+                dir_x = pos[0] - oldpos[0]
+                dir_y = pos[1] - oldpos[1]
+                if dir_x > 0: dir_x = 1
+                else: dir_x = -1
+                if dir_y > 0: dir_y = 1
+                else: dir_y = -1                
+                chomp.rect.x = pos[0] = oldpos[0]
+                chomp.rect.y = pos[1] = oldpos[1] - dir_y              
                 falling = 0
         x += 1
     

@@ -1,28 +1,55 @@
-import pygame, math
+import pygame, math, ConfigParser
 class Gamemap(object): 
 
-    def __init__(self, filename, width, height, maptilewidth):
-        self.tilewidth = width
-        self.tileheight = height
-        self.maptilewidth = maptilewidth
-        self.scroll = [0,0]
+    def __init__(self, map="map1.map"):
+        self.parser = ConfigParser.ConfigParser()
+        self.parser.read("map/"+map)
         
-        image = pygame.image.load(filename).convert()
+        self.themeparser = ConfigParser.ConfigParser()
+        self.themeparser.read("tile/" + self.parser.get("level","theme") + ".ini")
+        
+        self.tilesize = [int(self.themeparser.get("images","tile_width")), int(self.themeparser.get("images","tile_height"))]
+        
+        # Load background
+        if self.themeparser.get("images","background"):
+            self.background = pygame.image.load("gfx/" + self.themeparser.get("images","background")).convert()
+            self.bg_rect = self.background.get_rect()
+            screensize = pygame.display.get_surface()
+            screensize = screensize.get_size()
+            
+            self.bgrows = int(screensize[1]/self.bg_rect.height) + 1
+            self.bgcolumns = int(screensize[0]/self.bg_rect.width) + 1
+        
+        # Begin parsing map
+        mapp = self.parser.get("level","map")
+        # Remove all spaces...
+        mapp = mapp.replace(" ","")
+        # Each line is seperated by a return.
+        mapp = mapp.split("\n")
+               
+        # Load the tiles into an array.
+        self.map = []
+        self.mapwidth = 0
+        self.mapheight = len(mapp)
+        for i in mapp:
+            if len(i) > self.mapwidth: self.mapwidth = len(i)
+            for x in range(len(i)):
+                self.map.append(i[x])
+               
+        # Load the tile images and begin placing them...               
+        image = pygame.image.load("gfx/" + self.themeparser.get("images","tileset")).convert()
         image_width, image_height = image.get_size()
         self.tile_table = []
-        for tile_x in range(0, image_width/width):
+        for tile_x in range(0, image_width/self.tilesize[0]):
             line = []
             self.tile_table.append(line)
-            for tile_y in range(0, image_height/height):
-                rect = (tile_x*width, tile_y*height, width, height)
+            for tile_y in range(0, image_height/self.tilesize[1]):
+                rect = (tile_x*self.tilesize[0], tile_y*self.tilesize[1], self.tilesize[0], self.tilesize[1])
                 line.append(image.subsurface(rect))
+         
                 
     def collision(self,sprite,tileno,scroll):
-        tile_x = ((tileno % self.maptilewidth) * self.tilewidth) + scroll[0]
-        tile_y = math.floor((tileno / self.maptilewidth) * self.tileheight) + scroll[1]
-
-        if ((sprite.rect.x >= tile_x and sprite.rect.x <= tile_x + self.tilewidth)) or ((sprite.rect.x + sprite.rect.w >= tile_x and sprite.rect.x + sprite.rect.w <= tile_x + self.tilewidth)):
-          if ((sprite.rect.y >= tile_y and sprite.rect.y <= tile_y + self.tileheight) or (sprite.rect.y + sprite.rect.h >= tile_y and sprite.rect.y + sprite.rect.h <= tile_y + self.tileheight)):
-            
-            return [tile_x  - sprite.rect.x, tile_y - sprite.rect.y]
-        return 0
+        tile_x = ((tileno % self.mapwidth) * self.tilesize[0]) + scroll[0]
+        tile_y = math.floor((tileno / self.mapwidth) * self.tilesize[1]) + scroll[1]
+        tile_rect = pygame.Rect(tile_x, tile_y, self.tilesize[0], self.tilesize[1])
+        return sprite.rect.colliderect(tile_rect)
