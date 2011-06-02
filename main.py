@@ -46,6 +46,12 @@ speed = 0.0
 max_speed = 16
 move = 0
 
+
+# Animation Clock
+animation = pygame.time.get_ticks()
+collide_animation = []
+
+
 # Gravity releated stuff
 GRAVITY = -9.81
 grav_rate = GRAVITY / 20
@@ -53,7 +59,9 @@ falling = 0
 
 # -------- Main Program Loop -----------
 while done==False:
-
+    
+    animation = pygame.time.get_ticks()
+    
     for event in pygame.event.get(): # User did something
         if event.type == pygame.QUIT: # If user clicked close
             done=True # Flag that we are done so we exit this loop
@@ -80,9 +88,9 @@ while done==False:
             if speed > max_speed * -1: speed -= float(max_speed) / 32.0
     else: 
         pos[0] += math.floor(speed)
-        if speed > 0: speed -= float(max_speed) / 16.0
-        elif speed < 0: speed += float(max_speed) / 16.0
-        elif abs(speed) < 1: speed = 0
+        if abs(speed) < 1: speed = 0
+        elif speed > 0: speed -= float(max_speed) / 64.0
+        elif speed < 0: speed += float(max_speed) / 64.0
  
     lscroll = scroll
     scroll = [(size[0] / 2) - pos[0] , (size[1] / 2) - pos[1] ]        
@@ -118,32 +126,81 @@ while done==False:
     i = 0 
     for i in loadlevel.map:
         # Render Tiles
+
+        tile_x = ((x % loadlevel.mapwidth) * loadlevel.tilesize[0])
+        tile_y = (math.floor(x / loadlevel.mapwidth) * loadlevel.tilesize[1])        
+        
         if loadlevel.themeparser.get(i, "tile"):
             
-            tile = loadlevel.themeparser.get(i, "tile")
-            tile = tile.split(",")
-            tile_x = ((x % loadlevel.mapwidth) * loadlevel.tilesize[0])
-            tile_y = (math.floor(x / loadlevel.mapwidth) * loadlevel.tilesize[1])
-            screen.blit(loadlevel.tile_table[int(tile[0])][int(tile[1])], (tile_x + scroll[0], tile_y + scroll[1] ) )
+            tile = loadlevel.themeparser.getint(i, "tile")
+            
+            # Tiles with animation
+            if loadlevel.themeparser.get(i, "animation"):
+                if not loadlevel.themeparser.get(i, "collide") or not loadlevel.themeparser.getboolean(i, "animate_on_collide"):
+                    tile = tile + (math.floor(animation / (1000 / loadlevel.themeparser.getint("images", "animation_framerate")) ) % (loadlevel.themeparser.getint(i, "animation") - loadlevel.themeparser.getint(i, "tile")))
+                else:
+
+                    for y in range(len(collide_animation)):
+                       
+                        if collide_animation[y][0] == x and collide_animation[y][1] > collide_animation[y][2]:                          
+                            tile = tile + collide_animation[y][2]
+                            if (math.floor(animation / (1000 / loadlevel.themeparser.getint("images", "animation_framerate")) ) % (loadlevel.themeparser.getint(i, "animation") - loadlevel.themeparser.getint(i, "tile"))) == collide_animation[y][2]:                                                             
+                                collide_animation[y][2] += 1
+                            break
+             
+            tile_frame_x = tile % (loadlevel.tile_image_size[0] / loadlevel.tilesize[0])
+            tile_frame_y = math.floor(tile / (loadlevel.tile_image_size[0] / loadlevel.tilesize[0]))
+
+            if tile_frame_y > 0: print collide_animation
+
+            screen.blit(loadlevel.tile_table[int(tile_frame_x)][int(tile_frame_y)], (tile_x + scroll[0], tile_y + scroll[1] ) )
 
             
         # Collision with a tile
         if loadlevel.themeparser.getboolean(i,"collide"):
             col = loadlevel.collision(chomp.colliderect,x)
             tilename = loadlevel.themeparser.get(i, "name")
+            
+            # If a collision happens...
             if col:
+                
+                # If an animation was supposed to play when the collision happened...
+                if loadlevel.themeparser.get(i, "animation") and loadlevel.themeparser.getboolean(i, "animate_on_collide"):
+                
+                    # Check to make sure this animation isn't already queued..
+                    add_to_collide = 1                  
+                    for y in range(len(collide_animation)):
+                    
+                        # If queued already reset the animation frame back to 0.
+                        if collide_animation[y][0] == x: 
+                            if collide_animation[y][2] == collide_animation[y][1]: collide_animation[y][2] = 0
+                            add_to_collide = 0                           
+                            break
+                    
+                    # If not queued add it to the queue..
+                    if add_to_collide: 
+                        collide_animation.append( [x, loadlevel.themeparser.getint(i, "animation") - loadlevel.themeparser.getint(i, "tile"), 0] )
+                    
+                
+                # If player hits a spring...
                 if tilename == "spring":
-                    falling = loadlevel.themeparser.getint(i, "value") * -1
+                    # Wait till first frame of animation is shown before springing.
+                    for y in range(len(collide_animation)):
+                        if collide_animation[y][0] == x: 
+                            if collide_animation[y][2] > 0: falling = loadlevel.themeparser.getint(i, "value") * -1
+                            
+                # Any other collision should just be treated like a wall or floor collision...
                 else:
                     tilerect = pygame.Rect(tile_x,tile_y,loadlevel.tilesize[0],loadlevel.tilesize[1])  
                     offset = [chomp.colliderect.x - tilerect.x, chomp.colliderect.y - tilerect.y]
-                    print offset
-                    
+
+                    # Check for horizontal collision...
                     if abs(offset[1]) <  loadlevel.tilesize[1] / 2:
                         if offset[0] >  loadlevel.tilesize[0] / 2: pos[0] = tilerect.x + loadlevel.tilesize[0]
                         elif offset[0] <=  loadlevel.tilesize[0] / 2: pos[0] = tilerect.x - loadlevel.tilesize[0]
                         speed = 0
                         
+                    # Check for vertical collision.
                     if abs(offset[0]) < loadlevel.tilesize[0] / 2:
                         if offset[1] > 0: pos[1] = tilerect.y + loadlevel.tilesize[1]
                         elif offset[1] <= 0: pos[1] = tilerect.y -  loadlevel.tilesize[1]
@@ -153,7 +210,6 @@ while done==False:
   
     
     # Update position to account for scrolling
-
     chomp.colliderect.x = pos[0]
     chomp.colliderect.y = pos[1]
        
@@ -161,7 +217,7 @@ while done==False:
     chomp.rect.y=pos[1] + scroll[1]
           
     # Limit to 20 frames per second
-    clock.tick(20)
+    clock.tick(30)
 
    	# Draw Sprites
     all_sprites_list.draw(screen)

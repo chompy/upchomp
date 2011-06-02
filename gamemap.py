@@ -30,6 +30,7 @@ class Gamemap(object):
         # Load the tile images and begin placing them...               
         image = pygame.image.load("gfx/" + self.themeparser.get("images","tileset")).convert_alpha()
         image_width, image_height = image.get_size()
+        self.tile_image_size = [image_width,image_height]
         self.tile_table = []
         for tile_x in range(0, image_width/self.tilesize[0]):
             line = []
