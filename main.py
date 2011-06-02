@@ -142,10 +142,12 @@ while done==False:
 
                     for y in range(len(collide_animation)):
                        
-                        if collide_animation[y][0] == x and collide_animation[y][1] > collide_animation[y][2]:                          
-                            tile = tile + collide_animation[y][2]
-                            if (math.floor(animation / (1000 / loadlevel.themeparser.getint("images", "animation_framerate")) ) % (loadlevel.themeparser.getint(i, "animation") - loadlevel.themeparser.getint(i, "tile"))) == collide_animation[y][2]:                                                             
-                                collide_animation[y][2] += 1
+                        if collide_animation[y][0] == x and collide_animation[y][1] > math.floor(collide_animation[y][2] / (math.floor(clock.get_fps()) / loadlevel.themeparser.getint("images", "animation_framerate"))):                          
+                            tile = tile + math.floor(collide_animation[y][2] / (math.floor(clock.get_fps()) / loadlevel.themeparser.getint("images", "animation_framerate")))
+                            collide_animation[y][2] += 1
+                            
+                                                  
+                                
                             break
              
             tile_frame_x = tile % (loadlevel.tile_image_size[0] / loadlevel.tilesize[0])
@@ -166,14 +168,14 @@ while done==False:
                 
                 # If an animation was supposed to play when the collision happened...
                 if loadlevel.themeparser.get(i, "animation") and loadlevel.themeparser.getboolean(i, "animate_on_collide"):
-                
+                    
                     # Check to make sure this animation isn't already queued..
                     add_to_collide = 1                  
                     for y in range(len(collide_animation)):
-                    
+                       
                         # If queued already reset the animation frame back to 0.
                         if collide_animation[y][0] == x: 
-                            if collide_animation[y][2] == collide_animation[y][1]: collide_animation[y][2] = 0
+                            if math.floor(collide_animation[y][2] / (math.floor(clock.get_fps()) / loadlevel.themeparser.getint("images", "animation_framerate"))) == collide_animation[y][1]: collide_animation[y][2] = 0
                             add_to_collide = 0                           
                             break
                     
@@ -187,7 +189,7 @@ while done==False:
                     # Wait till first frame of animation is shown before springing.
                     for y in range(len(collide_animation)):
                         if collide_animation[y][0] == x: 
-                            if collide_animation[y][2] > 0: falling = loadlevel.themeparser.getint(i, "value") * -1
+                            if collide_animation[y][2] / (math.floor(clock.get_fps()) / loadlevel.themeparser.getint("images", "animation_framerate")) > .3: falling = loadlevel.themeparser.getint(i, "value") * -1
                             
                 # Any other collision should just be treated like a wall or floor collision...
                 else:
