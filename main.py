@@ -24,9 +24,6 @@ clock=pygame.time.Clock()
 # Sprites
 all_sprites_list = pygame.sprite.RenderPlain()
  
-# Init da Chomp
-chomp = chompy.Chompy()
-all_sprites_list.add(chomp)
 
 # Init da level
 loadlevel = gamemap.Gamemap("map1.map")
@@ -34,7 +31,14 @@ loadlevel = gamemap.Gamemap("map1.map")
 # Map scroll
 scroll = [(size[0] / 2) - ((loadlevel.mapwidth * loadlevel.tilesize[0]) / 2),(size[1] / 2) - (( math.floor(len(loadlevel.map) / loadlevel.mapwidth) * loadlevel.tilesize[1]) / 2)]
 
-pos = [64 + scroll[0],64 + scroll[1]]
+# Init da Chomp
+chomp = chompy.Chompy()
+all_sprites_list.add(chomp)
+pos = [32 + scroll[0],0 + scroll[1]]
+speed = 0.0
+max_speed = 16
+move = 0
+
 # Gravity releated stuff
 GRAVITY = -9.81
 grav_rate = GRAVITY / 20
@@ -46,11 +50,28 @@ while done==False:
         if event.type == pygame.QUIT: # If user clicked close
             done=True # Flag that we are done so we exit this loop
         
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP: falling = -10
-            elif event.key == pygame.K_DOWN: pos[1] += 8
-            if event.key == pygame.K_LEFT: pos[0] -= 8
-            elif event.key == pygame.K_RIGHT: pos[0] += 8
+        if event.type == pygame.MOUSEBUTTONDOWN: 
+            move = event.pos[0]
+
+        elif event.type == pygame.MOUSEBUTTONUP: 
+            move = 0
+            
+        if event.type == pygame.MOUSEMOTION and move:
+            move = event.pos[0]
+        
+    if move:
+            
+        if move > size[0] / 2:
+            pos[0] += math.floor(speed)
+            if speed < max_speed: speed += float(max_speed) / 32.0
+        else:
+            pos[0] += math.floor(speed)
+            if speed > max_speed * -1: speed -= float(max_speed) / 32.0
+    else: 
+        pos[0] += math.floor(speed)
+        if speed > 0: speed -= float(max_speed) / 16.0
+        elif speed < 0: speed += float(max_speed) / 16.0
+        elif abs(speed) < 1: speed = 0
  
     # Draw the background
     screen.fill(white) 
@@ -90,23 +111,29 @@ while done==False:
             
             tile = loadlevel.themeparser.get(i, "tile")
             tile = tile.split(",")
-            
             screen.blit(loadlevel.tile_table[int(tile[0])][int(tile[1])], ( ((x % loadlevel.mapwidth) * loadlevel.tilesize[0]) + scroll[0], (math.floor(x / loadlevel.mapwidth) * loadlevel.tilesize[1] + scroll[1])) )
+
             
         # Collision with a tile
         if loadlevel.themeparser.getboolean(i,"collide"):
             col = loadlevel.collision(chomp,x,scroll)
-            
+            tilename = loadlevel.themeparser.get(i, "name")
             if col:
-                dir_x = pos[0] - oldpos[0]
-                dir_y = pos[1] - oldpos[1]
-                if dir_x > 0: dir_x = 1
-                else: dir_x = -1
-                if dir_y > 0: dir_y = 1
-                else: dir_y = -1                
-                chomp.rect.x = pos[0] = oldpos[0]
-                chomp.rect.y = pos[1] = oldpos[1] - dir_y              
-                falling = 0
+                if tilename == "spring":
+                    falling = loadlevel.themeparser.getint(i, "value") * -1
+                else:
+                    dir_x = pos[0] - oldpos[0]
+                    dir_y = pos[1] - oldpos[1]
+                    
+                    if falling > 2: speed = 0
+                    
+                    if dir_x > 0: dir_x = 1
+                    else: dir_x = -1
+                    if dir_y > 0: dir_y = 1
+                    else: dir_y = -1                
+                    chomp.rect.x = pos[0] = oldpos[0]
+                    chomp.rect.y = pos[1] = oldpos[1] - dir_y              
+                    falling = 0
         x += 1
     
     # Limit to 20 frames per second

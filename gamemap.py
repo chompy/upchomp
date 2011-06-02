@@ -35,9 +35,9 @@ class Gamemap(object):
             if len(i) > self.mapwidth: self.mapwidth = len(i)
             for x in range(len(i)):
                 self.map.append(i[x])
-               
+     
         # Load the tile images and begin placing them...               
-        image = pygame.image.load("gfx/" + self.themeparser.get("images","tileset")).convert()
+        image = pygame.image.load("gfx/" + self.themeparser.get("images","tileset")).convert_alpha()
         image_width, image_height = image.get_size()
         self.tile_table = []
         for tile_x in range(0, image_width/self.tilesize[0]):
