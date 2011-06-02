@@ -6,3 +6,4 @@ class Chompy(pygame.sprite.Sprite):
 		self.image = pygame.image.load("gfx/chompy.png").convert_alpha()
 		
 		self.rect = self.image.get_rect()
+		self.colliderect = pygame.Rect(self.rect.x, self.rect.x, self.rect.w, self.rect.h)
