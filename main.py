@@ -47,7 +47,7 @@ move = 0
 
 
 dialog = dialog.Dialog()
-dialog.setMessageBox("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus commodo ornare semper. Pellentesque libero massa, luctus vitae fermentum vitae, venenatis ac nunc. Proin a ipsum est. Sed nunc velit, faucibus a molestie eget, elementum quis velit. Nunc odio ante, vehicula eget scelerisque a, tincidunt nec ante. Praesent nisi risus, tristique id ultricies vel, tincidunt sed tortor. Phasellus hendrerit nisl at urna fringilla ultrices. Praesent dignissim mauris at velit pellentesque aliquam. Aliquam ut purus ac lorem gravida elementum ac in lectus. Duis hendrerit justo semper felis mollis sit amet fermentum ipsum pulvinar.","Test Level 1")
+dialog.setMessageBox(size,"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus commodo ornare semper. Pellentesque libero massa, luctus vitae fermentum vitae, venenatis ac nunc. Proin a ipsum est. Sed nunc velit, faucibus a molestie eget, elementum quis velit. Nunc odio ante, vehicula eget scelerisque a, tincidunt nec ante. Praesent nisi risus, tristique id ultricies vel, tincidunt sed tortor. Phasellus hendrerit nisl at urna fringilla ultrices. Praesent dignissim mauris at velit pellentesque aliquam. Aliquam ut purus ac lorem gravida elementum ac in lectus. Duis hendrerit justo semper felis mollis sit amet fermentum ipsum pulvinar.","Test Level 1", [['Quit >>> >>',pygame.quit],['Long Ass Button',pygame.quit]] )
 
 chomp.update(scroll,move,size)
 # -------- Main Program Loop -----------
