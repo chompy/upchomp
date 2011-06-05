@@ -50,7 +50,7 @@ class Dialog(object):
         self.showbox = 0
         
     def calculateSize(self,size):
-    
+        
         # Variables to save calculations to...
         self.text_lines = []
 
@@ -76,20 +76,22 @@ class Dialog(object):
                         self.final_text.append(text_str[1:])
                         
                         # Get the width of the widest line.
-                        if self.font.size(text_str)[0] > box_text_size[0]: box_text_size[0] = self.font.size(text_str)[0]
+                        if self.font.size(text_str[1:])[0] > box_text_size[0]: box_text_size[0] = self.font.size(text_str[1:])[0]
                         
                         text_str = ""
-                else: self.final_text.append(text_str[1:])
+                else: 
+                    if self.font.size(text_str[1:])[0] > box_text_size[0]: box_text_size[0] = self.font.size(text_str[1:])[0]
+                    self.final_text.append(text_str[1:])
                
         box_text_size[1] = len(self.final_text) * self.font.get_linesize()     
 
         # Size of box with text and padding.
-        self.boxsize = [box_text_size[0] + TILE_SIZE[0], box_text_size[1] + TILE_SIZE[1] * self.text_push]   
-        
-        if self.button: btn_space_add = 1
-             
-        self.boxrange = [math.floor(self.boxsize[0] / TILE_SIZE[0]) + 1, math.floor(self.boxsize[1] / TILE_SIZE[1]) + 1 + btn_space_add]
 
+        if self.button: btn_space_add = 2
+        else: btn_space_add = 0
+                
+        self.boxsize = [box_text_size[0] + TILE_SIZE[0], box_text_size[1] + (TILE_SIZE[1] * self.text_push) + (TILE_SIZE[1] * btn_space_add)]
+        self.boxrange = [math.floor(self.boxsize[0] / TILE_SIZE[0]) + 1, math.floor(self.boxsize[1] / TILE_SIZE[1]) + 1]       
                             
     def drawBox(self,screen,size):
         if not self.showbox: return 0
@@ -146,14 +148,16 @@ class Dialog(object):
        
         # Display Buttons
         button_start_x = 0
-
+        button_positions = []
         for i in range(len(self.button)):
             button_text_size = self.font.size(self.button[i][0])
             button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
-                        
+            
             for x in range(0, button_tile_width):
-                pos = [button_start_x + ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) + (TILE_SIZE[0] / 2), (len(self.final_text) + 2 + (self.text_push / 1.5)) * TILE_SIZE[1] ]
+                pos = [button_start_x + ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) + (TILE_SIZE[0] / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (self.font.get_linesize() * len(self.final_text)) + TILE_SIZE[1] ]
+               
                 if x == 0:
+                    button_positions.append(pos) # Button position array for button rect
                     screen.blit(self.tile_table[3][self.buttonstate[i]], (pos[0],pos[1]) )
                 elif x > 0 and x < button_tile_width - 1:
                     screen.blit(self.tile_table[4][self.buttonstate[i]], (pos[0],pos[1]) )     
@@ -162,11 +166,11 @@ class Dialog(object):
                    
             # Display Button Text
             self.font.set_bold(1)                   
-            screen.blit(self.font.render(self.button[i][0],1,self.title_color), ( button_start_x + ((size[0] - self.boxsize[0]) / 2) + TILE_SIZE[0] + (button_tile_width / 2), (len(self.final_text) + 2 + (self.text_push / 1.5)) * TILE_SIZE[1]  + (TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2) ))
+            screen.blit(self.font.render(self.button[i][0],1,self.title_color), ( button_start_x + ((size[0] - self.boxsize[0]) / 2) + TILE_SIZE[0] + (button_tile_width / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (len(self.final_text) * self.font.get_linesize())  + TILE_SIZE[1] + (TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2) ))
             
             button_start_x = (int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2) * TILE_SIZE[0]
                
-        # Close event
+        # Button events
         for event in pygame.event.get():
             self.buttonstate['close_over'] = 0
             for i in range(len(self.buttonstate)):
@@ -177,14 +181,23 @@ class Dialog(object):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if close_btn.collidepoint(event.pos[0], event.pos[1]):
                     self.closeMessageBox() 
-                    
+                for i in range(len(self.button)):
+                    button_text_size = self.font.size(self.button[i][0])
+                    button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
+                    button_rect = pygame.Rect(button_positions[i][0], button_positions[i][1], button_tile_width * TILE_SIZE[0], TILE_SIZE[1])
+
+                    # If button click initiate passed function
+                    if button_rect.collidepoint(event.pos[0], event.pos[1]):
+                        self.button[i][1]()
+                                            
             elif event.type == pygame.MOUSEMOTION:
+                # Change rollover state when mousing over the buttons
                 if close_btn.collidepoint(event.pos[0], event.pos[1]): 
                     self.buttonstate['close_over'] = 1
                 for i in range(len(self.button)):
                     button_text_size = self.font.size(self.button[i][0])
                     button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
-                    button_rect = pygame.Rect(0, i * TILE_SIZE[1], button_tile_width * TILE_SIZE[0], TILE_SIZE[1])
+                    button_rect = pygame.Rect(button_positions[i][0], button_positions[i][1], button_tile_width * TILE_SIZE[0], TILE_SIZE[1])
 
                     if button_rect.collidepoint(event.pos[0], event.pos[1]):
                         self.buttonstate[i] = 1
