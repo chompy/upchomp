@@ -59,13 +59,14 @@ class Dialog(object):
                 text_str = text_str + " " + text_arr[i]  
                  
                 if i < len(text_arr) - 1:
-                    text_size = self.font.size(text_str + text_arr[i + 1])
-                    
-                    # Get the width of the widest line.
-                    if text_size[0] > box_text_size[0]: box_text_size[0] = text_size[0]
+                    text_size = self.font.size(text_str + text_arr[i + 1])                    
                                        
                     if text_size[0] > max_box_size[0]:
                         final_text.append(text_str[1:])
+                        
+                        # Get the width of the widest line.
+                        if self.font.size(text_str)[0] > box_text_size[0]: box_text_size[0] = self.font.size(text_str)[0]
+                        
                         text_str = ""
                 else: final_text.append(text_str[1:])
                 
@@ -76,7 +77,7 @@ class Dialog(object):
         for y in range(0, int(boxrange[1])):
             for x in range(0, int(boxrange[0])):
                 # Determine which block to use...
-                pos = [ ((size[0] - boxsize[0]) / 2) + (x * TILE_SIZE[0]) , ((size[1] - boxsize[1]) / 2) + (y * TILE_SIZE[1])  ]
+                pos = [ ((size[0] - boxsize[0]) / 2) + (x * TILE_SIZE[0]) - (TILE_SIZE[0] / 2) , ((size[1] - boxsize[1]) / 2) + (y * TILE_SIZE[1])  ]
                 
                 # Top left corner.
                 if y == 0 and x == 0:
@@ -90,7 +91,7 @@ class Dialog(object):
                     if not self.buttonstate['close_over']:
                         screen.blit(self.tile_table[2][0], (pos[0],pos[1]) )
                     else:
-                        screen.blit(self.tile_table[3][1], (pos[0],pos[1]) )
+                        screen.blit(self.tile_table[3][2], (pos[0],pos[1]) )
                         
                 # Bottom left corner.
                 elif y == boxrange[1] - 1 and x == 0:
@@ -126,7 +127,10 @@ class Dialog(object):
         # Close event
         for event in pygame.event.get():
             self.buttonstate['close_over'] = 0
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 if close_btn.collidepoint(event.pos[0], event.pos[1]):
                     self.closeMessageBox() 
             elif event.type == pygame.MOUSEMOTION:
