@@ -11,6 +11,9 @@ class Gamemap(object):
         self.tilesize = [int(self.themeparser.get("images","tile_width")), int(self.themeparser.get("images","tile_height"))]
         
         # Variables to use...
+        
+        # Level states... 0-Playing, 1-Won, 2-Lost
+        self.state = 0
 
         # Animation Clock
         self.animation = pygame.time.get_ticks()
@@ -116,7 +119,7 @@ class Gamemap(object):
                 tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
                 tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))
     
-                if tile_frame_y > 0: print self.collide_animation
+                
     
                 screen.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)], (tile_x + scroll[0], tile_y + scroll[1] ) )
     
@@ -146,14 +149,17 @@ class Gamemap(object):
                         if add_to_collide: 
                             self.collide_animation.append( [x, self.themeparser.getint(i, "animation") - self.themeparser.getint(i, "tile"), 0] )
                         
-                    
                     # If player hits a spring...
                     if tilename == "spring":
                         # Wait till first frame of animation is shown before springing.
                         for y in range(len(self.collide_animation)):
                             if self.collide_animation[y][0] == x: 
                                 if self.collide_animation[y][2] / (math.floor(clock.get_fps()) / self.themeparser.getint("images", "animation_framerate")) > .3: chomp.falling = self.themeparser.getint(i, "value") * -1
-                                
+                       
+                    # If player hits the end of the level...
+                    elif tilename == "level_end":
+                        self.state = 1     # Set level state to win.                        
+                                         
                     # Any other collision should just be treated like a wall or floor collision...
                     else:
                         tilerect = pygame.Rect(tile_x,tile_y,self.tilesize[0],self.tilesize[1])  

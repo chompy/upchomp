@@ -6,18 +6,36 @@ max_speed = 16
 
 class Chompy(pygame.sprite.Sprite):
     def __init__(self):
-        self.speed = 0.0    
-        self.falling = 0    
-        		
+       		
+        """Load a Chompy sprite."""
+    
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("gfx/chompy.png").convert_alpha()
 		
         self.rect = self.image.get_rect()
         self.colliderect = pygame.Rect(self.rect.x, self.rect.x, self.rect.w, self.rect.h)
     
-        self.pos = [self.rect.x, self.rect.y]
-		
+       
+	
+    def reset(self):
+    
+        """Resets Chompy back to his default state."""
+        
+        self.speed = 0.0    
+        self.falling = 0  
+        self.pos = [self.rect.x, self.rect.y]  
+    
+        	
     def update(self,scroll,move,size):
+    
+        """
+        Updates Chompy's position.
+        
+        @param array scroll Screen scroll position.
+        @param double move Direction player is attempt to make Chompy move in.
+        @param array size Current screen size.
+        """
+    
         # Gravity
         self.falling += grav_rate * -1
         if self.falling > GRAVITY * -1: self.falling = GRAVITY * -1

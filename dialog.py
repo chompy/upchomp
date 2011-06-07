@@ -30,6 +30,7 @@ class Dialog(object):
         self.buttonstate = { 'close_over' : 0 }
                 
     def setMessageBox(self,size,message,title="",buttons=[]):
+
         self.text = message
         self.title = title
         self.button = buttons
@@ -45,6 +46,7 @@ class Dialog(object):
         self.showbox = 1
         
         self.calculateSize(size)
+
 
     def closeMessageBox(self):
         self.showbox = 0
@@ -93,13 +95,13 @@ class Dialog(object):
         self.boxsize = [box_text_size[0] + TILE_SIZE[0], box_text_size[1] + (TILE_SIZE[1] * self.text_push) + (TILE_SIZE[1] * btn_space_add)]
         self.boxrange = [math.floor(self.boxsize[0] / TILE_SIZE[0]) + 1, math.floor(self.boxsize[1] / TILE_SIZE[1]) + 1]       
                             
-    def drawBox(self,screen,size):
+    def drawBox(self,screen,size,events):
         if not self.showbox: return 0
         
         for y in range(0, int(self.boxrange[1])):
             for x in range(0, int(self.boxrange[0])):
                 # Determine which block to use...
-                pos = [ ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) - (TILE_SIZE[0] / 2) , ((size[1] - self.boxsize[1]) / 2) + (y * TILE_SIZE[1])  ]
+                pos = [ ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) - (TILE_SIZE[0]) + TILE_SIZE[0] / 2 , ((size[1] - self.boxsize[1]) / 2) + (y * TILE_SIZE[1])  ]
                 
                 # Top left corner.
                 if y == 0 and x == 0:
@@ -138,12 +140,13 @@ class Dialog(object):
         if self.title:
             self.font.set_bold(1)
             self.font.set_underline(1)
-            screen.blit(self.font.render(self.title, 1, self.title_color), ( ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] / 2), ((size[1] - self.boxsize[1]) / 2) + TILE_SIZE[1] / 2 ))
+            screen.blit(self.font.render(self.title, 0, self.title_color), ( ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] / 2), ((size[1] - self.boxsize[1]) / 2) + TILE_SIZE[1] / 2 ))
         
         self.font.set_bold(0)
         self.font.set_underline(0)
         for i in range(len(self.final_text)):
-            screen.blit(self.font.render(self.final_text[i], 1, self.text_color), ( ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] / 2), ((size[1] - self.boxsize[1]) / 2) + (i * self.font.get_linesize()) + TILE_SIZE[1] * self.text_push))
+            screen.blit(self.font.render(self.final_text[i], 0, self.text_color), ( ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] / 2), ((size[1] - self.boxsize[1]) / 2) + (i * self.font.get_linesize()) + TILE_SIZE[1] * self.text_push))
+            
 
        
         # Display Buttons
@@ -166,19 +169,17 @@ class Dialog(object):
                    
             # Display Button Text
             self.font.set_bold(1)                   
-            screen.blit(self.font.render(self.button[i][0],1,self.title_color), ( button_start_x + ((size[0] - self.boxsize[0]) / 2) + TILE_SIZE[0] + (button_tile_width / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (len(self.final_text) * self.font.get_linesize())  + TILE_SIZE[1] + (TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2) ))
+            screen.blit(self.font.render(self.button[i][0],0,self.title_color), ( button_start_x + ((size[0] - self.boxsize[0]) / 2) + TILE_SIZE[0] + (button_tile_width / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (len(self.final_text) * self.font.get_linesize())  + TILE_SIZE[1] + (TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2) ))
             
             button_start_x = (int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2) * TILE_SIZE[0]
                
         # Button events
-        for event in pygame.event.get():
+
+        for event in events:
             self.buttonstate['close_over'] = 0
             for i in range(len(self.buttonstate)):
                 self.buttonstate[i] = 0
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 if close_btn.collidepoint(event.pos[0], event.pos[1]):
                     self.closeMessageBox() 
                 for i in range(len(self.button)):
@@ -189,6 +190,7 @@ class Dialog(object):
                     # If button click initiate passed function
                     if button_rect.collidepoint(event.pos[0], event.pos[1]):
                         self.button[i][1]()
+                        self.closeMessageBox() 
                                             
             elif event.type == pygame.MOUSEMOTION:
                 # Change rollover state when mousing over the buttons
@@ -201,6 +203,10 @@ class Dialog(object):
 
                     if button_rect.collidepoint(event.pos[0], event.pos[1]):
                         self.buttonstate[i] = 1
+                        
+            # If screen size changes
+            elif event.type == pygame.VIDEORESIZE:
+                self.calculateSize(event.size)                  
                     
             
         return 1

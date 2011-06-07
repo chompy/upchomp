@@ -1,5 +1,4 @@
-
-import pygame, math, chompy, gamemap, dialog
+import pygame, math, chompy, gamemap, dialog, hud, transition, sys
 
 # Define some colors
 black    = (   0,   0,   0)
@@ -10,12 +9,14 @@ red      = ( 255,   0,   0)
 class Game(object):
 
     def __init__(self):
+    
+        """Inits the game."""
  
         pygame.init()
 
         # Screen/Dialog stuff
         size=[800,480]
-        self.screen=pygame.display.set_mode(size)
+        self.screen=pygame.display.set_mode(size, pygame.RESIZABLE)
         pygame.display.set_caption("UpChomp")
  
         # Used to manage how fast the screen updates
@@ -26,15 +27,33 @@ class Game(object):
 
         # Init da Chomp
         self.chomp = chompy.Chompy()
-        self.all_sprites_list.add(self.chomp)
+        self.all_sprites_list.add(self.chomp)   
 
+        # Make a dialog object.
+        self.dlogbox = dialog.Dialog()
         
-
+        # Setup Hud
+        self.hud = hud.Hud()
+        
+        # Setup Transition
+        self.transition = transition.Transition()
+        
         # Load a level...
         self.startLevel()
         
+    def levelTransition(self):
+        size = self.screen.get_size()
+        self.transition.verticalSwipe(size)
+        self.dlogbox.closeMessageBox()
+                
+        
     def startLevel(self):
-       
+    
+        """Loads a level and begins gameplay."""
+        
+        # Reset Chompy
+        self.chomp.reset()
+        
         # Screen size
         size = self.screen.get_size()
         
@@ -52,19 +71,22 @@ class Game(object):
         # If player is moving...
         move = 0
         
+        # Level time
+        start_time = pygame.time.get_ticks()
+        time = 0
+        
         # Load Dialog box
-        dlogbox = dialog.Dialog()
-        dlogbox.setMessageBox(size,"The first level! Should be easy, just play and win!","Test Level 1", [['Play!',dlogbox.closeMessageBox],['Quit',pygame.quit]] )
+        self.dlogbox.setMessageBox(size,self.level.parser.get("level","desc"), self.level.parser.get("level","name"), [['Play!',self.dlogbox.closeMessageBox],['Quit',sys.exit]] )
         
         #Loop until the user clicks the close button.
-        done=False
+        self.done=False
                     
         # -------- Main Program Loop -----------
-        while done==False:
-        
-            for event in pygame.event.get(): # User did something
+        while self.done==False:
+            events = pygame.event.get()
+            for event in events: # User did something
                 if event.type == pygame.QUIT: # If user clicked close
-                    done=True # Flag that we are done so we exit this loop
+                    self.done=True # Flag that we are done so we exit this loop
                 
                 if event.type == pygame.MOUSEBUTTONDOWN: 
                     move = event.pos[0]
@@ -77,8 +99,10 @@ class Game(object):
                 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == 292: pygame.display.toggle_fullscreen()
-         
-             
+                elif event.type == pygame.VIDEORESIZE:
+                    self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
+                    size = event.size
+                    
             lscroll = scroll
             scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]        
         
@@ -92,14 +116,32 @@ class Game(object):
                   
             # Limit to 30 frames per second
             self.clock.tick(30)
-               
+            
+            # Update time
+            time = pygame.time.get_ticks() - start_time
+            
             # If a dialog box isn't up...
-            if not dlogbox.drawBox(self.screen,size):
+            if not self.dlogbox.drawBox(self.screen,size,events):
                 # Draw Sprites
                 self.all_sprites_list.draw(self.screen)  
-                # Update Chomp Movement
-                self.chomp.update(scroll,move,size)       
-                
+                # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
+                if not self.level.state: self.chomp.update(scroll,move,size)       
+                # Update Hud
+                self.hud.update(self.screen,time)
+                # Check level state
+                if self.level.state == 1:
+                    self.chomp.speed = 0
+                    self.chomp.falling = 0
+                    if self.transition.type == 0: self.dlogbox.setMessageBox(size,"SCORE: 4000 / TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',sys.exit]] )
+                    
+            # If there is a transition playing
+            transition_status = self.transition.update(self.screen)
+            if transition_status:
+                if transition_status < 1:
+                    self.transition.type = 0
+                    start_time = pygame.time.get_ticks()
+                    time = 0
+                if transition_status and transition_status < 2 and self.level.state: self.startLevel()          
             
             # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
