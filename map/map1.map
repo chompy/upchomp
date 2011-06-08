@@ -1,4 +1,9 @@
-[level]
+[pack]
+name = Chompy's Maps
+desc = Enter the world of maps made by Chompy.
+order = map1,map1
+
+[map1]
 theme = wood
 startpos = 1,0
 name = Test Level 1

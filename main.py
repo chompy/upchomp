@@ -37,10 +37,43 @@ class Game(object):
         
         # Setup Transition
         self.transition = transition.Transition()
+
+        # Game State: 0-Playing, 1-Main Menu, 2-Pack Select
+        self.state = 2
         
-        # Load a level...
-        self.startLevel()
+        # Set Current Map
+        self.map_file = ""
         
+        # Enter game loop
+        self.gameLoop()
+        
+    def gameLoop(self):
+    
+        # Options for each game state
+        options = {
+            0: self.startLevel,      # Playing
+            2: self.packSelect       # Map Pack Select
+        }
+    
+        done = False
+        while not done:
+            # State -1 means quit.
+            if self.state == -1: done = True
+            
+            # Try to load a function for the current state
+            try: options[self.state]()
+            # If unable to find a function quit with an error.
+            except KeyError: 
+                print "[ERROR] Not a valid game state. Exiting..."
+                done = True
+            
+        # Exit Game
+        pygame.quit()
+
+    def packSelect(self):
+        self.map_file = "map1.map"
+        self.state = 0
+                        
     def levelTransition(self):
         size = self.screen.get_size()
         self.transition.verticalSwipe(size)
@@ -58,10 +91,10 @@ class Game(object):
         size = self.screen.get_size()
         
         # Init da level
-        self.level = gamemap.Gamemap("map1.map")
+        self.level = gamemap.Gamemap(self.map_file)
 
         # Place character in level
-        pos = self.level.parser.get("level","startpos").split(",")
+        pos = self.level.parser.get(self.level.packMaps[self.level.current_map],"startpos").split(",")
         self.chomp.pos[0] = int(pos[0]) * self.level.tilesize[0]
         self.chomp.pos[1] = int(pos[1]) * self.level.tilesize[1]
         self.chomp.colliderect.x = self.chomp.pos[0]
@@ -76,17 +109,18 @@ class Game(object):
         time = 0
         
         # Load Dialog box
-        self.dlogbox.setMessageBox(size,self.level.parser.get("level","desc"), self.level.parser.get("level","name"), [['Play!',self.dlogbox.closeMessageBox],['Quit',sys.exit]] )
+        self.dlogbox.setMessageBox(size,self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Quit',sys.exit]] )
         
         #Loop until the user clicks the close button.
-        self.done=False
+        done=False
                     
         # -------- Main Program Loop -----------
-        while self.done==False:
+        while not done:
             events = pygame.event.get()
             for event in events: # User did something
                 if event.type == pygame.QUIT: # If user clicked close
-                    self.done=True # Flag that we are done so we exit this loop
+                    done=True # Flag that we are done so we exit this loop
+                    self.state = -1 # Set game state to -1(Quit)
                 
                 if event.type == pygame.MOUSEBUTTONDOWN: 
                     move = event.pos[0]
@@ -105,8 +139,7 @@ class Game(object):
                     
             lscroll = scroll
             scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]        
-        
-            
+           
             # Draw the background
             self.screen.fill(white) 
             self.level.drawBackground(self.screen,scroll)
@@ -141,13 +174,9 @@ class Game(object):
                     self.transition.type = 0
                     start_time = pygame.time.get_ticks()
                     time = 0
-                if transition_status and transition_status < 2 and self.level.state: self.startLevel()          
+                if transition_status and transition_status < 2 and self.level.state: done = True  
             
             # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
-             
-        # Be IDLE friendly. If you forget this line, the program will 'hang'
-        # on exit.
-        pygame.quit ()
  
 Game()

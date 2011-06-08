@@ -2,27 +2,51 @@ import pygame, math, ConfigParser
 class Gamemap(object): 
 
     def __init__(self, map="map1.map"):
+        
+        """
+        Inits the gamemap module, allows maps to be loaded and rendered.
+        
+        @param string map - Map Filename
+        """
+        
+        # Ini Parsers
         self.parser = ConfigParser.ConfigParser()
-        self.parser.read("map/"+map)
-        
         self.themeparser = ConfigParser.ConfigParser()
-        self.themeparser.read("tile/" + self.parser.get("level","theme") + ".ini")
         
-        self.tilesize = [int(self.themeparser.get("images","tile_width")), int(self.themeparser.get("images","tile_height"))]
-        
-        # Variables to use...
-        
-        # Level states... 0-Playing, 1-Won, 2-Lost
-        self.state = 0
+        # Load this map pack
+        self.parser.read("map/"+map)
 
+        # Current map
+        self.packMaps = self.parser.get("pack","order").split(",")
+        self.current_map = 0       
+                
         # Animation Clock
         self.animation = pygame.time.get_ticks()
         self.collide_animation = []
+
+        # Level states... 0-Playing, 1-Won, 2-Lost
+        self.state = 0      
+        
+        # Load the first map
+        self.loadLevel()  
+                                  
+   
+    def loadLevel(self):
+    
+        """Loads current map which is specified by the self.current_map var."""
+
+        # Load map theme.
+        self.themeparser.read("tile/" + self.parser.get(self.packMaps[self.current_map],"theme") + ".ini")
+        
+        # Get size of this maps tiles
+        self.tilesize = [int(self.themeparser.get("images","tile_width")), int(self.themeparser.get("images","tile_height"))]
         
         # Begin parsing map
-        mapp = self.parser.get("level","map")
+        mapp = self.parser.get(self.packMaps[self.current_map],"map")
+        
         # Remove all spaces...
         mapp = mapp.replace(" ","")
+        
         # Each line is seperated by a return.
         mapp = mapp.split("\n")
                
@@ -59,8 +83,18 @@ class Gamemap(object):
             
             if screensize[0] > self.mapwidth * self.tilesize[0]: self.bgcolumns = (int(screensize[0]/self.bg_rect.width) + 1) * 4
             else: self.bgcolumns = (int( (self.mapwidth * self.tilesize[0]) /self.bg_rect.width) + 1) * 4
-                                        
+                                    
+                                              
     def collision(self,rect,tileno):
+    
+        """
+        Checks for a collision before a given rect and a map tile.
+        
+        @param pygame.rect rect - Rectangle of object colliding with a tile.
+        @param int tileno - Tile number. Tile number goes from top left tile to bottom right tile.
+        @return true if there is a collision
+        """
+    
         tile_x = ((tileno % self.mapwidth) * self.tilesize[0])
         tile_y = math.floor((tileno / self.mapwidth) * self.tilesize[1])
         tile_rect = pygame.Rect(tile_x, tile_y, self.tilesize[0], self.tilesize[1])
@@ -68,6 +102,13 @@ class Gamemap(object):
         
     
     def drawBackground(self,screen,scroll):
+    
+        """
+        Draws a background image and gives it paralax.
+        
+        @param pygame.display.set_mode screen - Screen object used to render items to the screen
+        @param array scroll - X and Y offset of current map scroll.
+        """
 
         if self.themeparser.get("images","background"):
             self.bg_rect.x -= self.bg_rect.w + (scroll[0] / 8)
@@ -87,6 +128,16 @@ class Gamemap(object):
             self.bg_rect.y = 0
             
     def updateTiles(self,screen,scroll,clock,chomp):
+    
+        """
+        Draws all tiles to the screen.
+        
+        @param pygame.display.set_mode screen - Screen object used to render items to the screen.
+        @param array scroll - X and Y offset of current map scroll.
+        @param pygame.time.Clock clock - Pygame clock object.
+        @param pygame.sprite chomp - Pygame sprite object, player character.
+        """
+    
         # Animation clock
         self.animation = pygame.time.get_ticks()
         
