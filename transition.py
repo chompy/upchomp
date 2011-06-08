@@ -1,6 +1,6 @@
 import pygame,math
 
-SPEED = 33.5
+SPEED = 16
 
 class Transition(object):
 

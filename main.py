@@ -166,14 +166,18 @@ class Game(object):
                     self.chomp.speed = 0
                     self.chomp.falling = 0
                     if self.transition.type == 0: self.dlogbox.setMessageBox(size,"SCORE: 4000 / TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',sys.exit]] )
+            
+            # Reset time as long as dialog box is up
+            else:
+                start_time = pygame.time.get_ticks()
+                time = 0
+            
                     
             # If there is a transition playing
             transition_status = self.transition.update(self.screen)
             if transition_status:
                 if transition_status < 1:
                     self.transition.type = 0
-                    start_time = pygame.time.get_ticks()
-                    time = 0
                 if transition_status and transition_status < 2 and self.level.state: done = True  
             
             # Go ahead and update the screen with what we've drawn.
