@@ -14,9 +14,7 @@ class Chompy(pygame.sprite.Sprite):
 		
         self.rect = self.image.get_rect()
         self.colliderect = pygame.Rect(self.rect.x, self.rect.x, self.rect.w, self.rect.h)
-    
-       
-	
+   	
     def reset(self):
     
         """Resets Chompy back to his default state."""
@@ -58,6 +56,6 @@ class Chompy(pygame.sprite.Sprite):
         # Update position
         self.colliderect.x = self.pos[0]
         self.colliderect.y = self.pos[1]
-       
+        
         self.rect.x= self.pos[0] + scroll[0]
         self.rect.y= self.pos[1] + scroll[1]

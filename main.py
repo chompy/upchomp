@@ -108,6 +108,9 @@ class Game(object):
         start_time = pygame.time.get_ticks()
         time = 0
         
+        # Load skills into the Hud
+        self.hud.loadSkills(self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","))
+        
         # Load Dialog box
         self.dlogbox.setMessageBox(size,self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Quit',sys.exit]] )
         
@@ -160,7 +163,7 @@ class Game(object):
                 # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
                 if not self.level.state: self.chomp.update(scroll,move,size)       
                 # Update Hud
-                self.hud.update(self.screen,time)
+                self.hud.update(self.screen,size,time)
                 # Check level state
                 if self.level.state == 1:
                     self.chomp.speed = 0

@@ -224,8 +224,12 @@ class Gamemap(object):
                             
                         # Check for vertical collision.
                         if abs(offset[0]) < self.tilesize[0] / 2:
-                            if offset[1] > 0: chomp.pos[1] = tilerect.y + self.tilesize[1]
-                            elif offset[1] <= 0: chomp.pos[1] = tilerect.y -  self.tilesize[1]
-                            chomp.falling = 0                
+                            if offset[1] > 0: 
+                                chomp.pos[1] = tilerect.y + self.tilesize[1] - 1
+                                if chomp.falling > 0: chomp.falling = 0
+                            elif offset[1] <= 0: 
+                                chomp.pos[1] = tilerect.y -  self.tilesize[1] + 1
+                                if chomp.falling > 0: chomp.falling = 0
+
                        
             x += 1                
