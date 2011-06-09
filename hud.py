@@ -69,3 +69,22 @@ class Hud(object):
                 screen.blit(self.font.render("x" + str(self.skills[i]) ,0,self.object_color), (  pos[0] + SKILL_TILE_SIZE[0] , pos[1]) )        
                                 
                 x += 1   
+                
+                
+    def checkSkillActivation(self,events):
+        for event in events:
+            for i in range(len(self.buttonstate)):
+                self.buttonstate[i] = 0
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if close_btn.collidepoint(event.pos[0], event.pos[1]):
+                    self.closeMessageBox() 
+                for i in range(len(self.button)):
+                    button_text_size = self.font.size(self.button[i][0])
+                    button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
+                    button_rect = pygame.Rect(button_positions[i][0], button_positions[i][1], button_tile_width * TILE_SIZE[0], TILE_SIZE[1])
+        
+                    # If button click initiate passed function
+                    if button_rect.collidepoint(event.pos[0], event.pos[1]):
+                        self.button[i][1]()
+                        self.closeMessageBox()     
+                        

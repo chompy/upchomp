@@ -1,0 +1,4 @@
+title=UpChomp v1
+author=Chompy Creations (Nathan Ogden)
+api=1
+orientation=landscape
