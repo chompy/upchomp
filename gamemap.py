@@ -128,7 +128,7 @@ class Gamemap(object):
             self.bg_rect.x = 0
             self.bg_rect.y = 0
             
-    def updateTiles(self,screen,scroll,fps,chomp):
+    def updateTiles(self,screen,scroll,size,fps,chomp):
     
         """
         Draws all tiles to the screen.
@@ -150,7 +150,7 @@ class Gamemap(object):
     
             tile_x = ((x % self.mapwidth) * self.tilesize[0])
             tile_y = (math.floor(x / self.mapwidth) * self.tilesize[1])        
-            
+
             if self.themeparser.get(i, "tile"):
                 
                 tile = self.themeparser.getint(i, "tile")

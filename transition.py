@@ -21,7 +21,7 @@ class Transition(object):
         # Update a vertical swipe
         elif self.type == 1:
             if self.pos[1] < self.size[1] * 2:
-                self.pos[1] += self.speed
+                self.pos[1] += self.speed 
                 screen.blit(self.surface, (self.pos[0],self.pos[1]))
             return (self.size[1] * 2.0) / (self.pos[1] + self.size[1])
         

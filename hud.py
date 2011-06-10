@@ -42,9 +42,7 @@ class Hud(object):
             
         
         
-    def update(self,screen,size,time,clock):  
-        #FPS
-        screen.blit(self.font.render(str(clock),0,self.object_color), (128,SPACING) )
+    def update(self,screen,size,time,):  
         
         # Time and Score     
         screen.blit(self.font.render("SCORE:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,SPACING + SHADOW_OFFSET) )

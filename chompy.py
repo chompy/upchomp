@@ -1,8 +1,8 @@
 import pygame, math
 
-GRAVITY = -9500
+GRAVITY = -9.81
 grav_rate = GRAVITY / 20
-max_speed = 512
+max_speed = 16
 
 class Chompy(pygame.sprite.Sprite):
     def __init__(self):
@@ -24,7 +24,7 @@ class Chompy(pygame.sprite.Sprite):
         self.pos = [self.rect.x, self.rect.y]  
     
         	
-    def update(self,scroll,move,size,timer):
+    def update(self,scroll,move,size):
     
         """
         Updates Chompy's position.
@@ -33,22 +33,22 @@ class Chompy(pygame.sprite.Sprite):
         @param double move Direction player is attempt to make Chompy move in.
         @param array size Current screen size.
         """
-    
+           
         # Gravity
-        self.falling += (grav_rate * timer) * -1
+        self.falling += (grav_rate) * -1
         if self.falling > GRAVITY * -1: self.falling = (GRAVITY * -1)
-        self.pos[1] += self.falling * timer
-   
+        self.pos[1] += self.falling
+        
         # Movement
         if move:              
             if move > size[0] / 2:
-                self.pos[0] += math.floor(self.speed) * timer
+                self.pos[0] += math.floor(self.speed)
                 if self.speed < max_speed: self.speed += (float(max_speed) / 32.0)
             else:
-                self.pos[0] += math.floor(self.speed) * timer
+                self.pos[0] += math.floor(self.speed)
                 if self.speed > max_speed * -1: self.speed -= (float(max_speed) / 32.0) 
         else: 
-            self.pos[0] += math.floor(self.speed) * timer
+            self.pos[0] += math.floor(self.speed)
             if abs(self.speed) < 1: self.speed = 0
             elif self.speed > 0: self.speed -= (float(max_speed) / 64.0)
             elif self.speed < 0: self.speed += (float(max_speed) / 64.0)

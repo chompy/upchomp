@@ -1,5 +1,4 @@
 import pygame, math, chompy, gamemap, dialog, hud, transition, sys
-from lib import fpsclock
 
 try:
     import android
@@ -55,14 +54,12 @@ class Game(object):
         # Game State: 0-Playing, 1-Main Menu, 2-Pack Select
         self.state = 2
         
-        # Set Current Map
-        self.map_file = ""
-        
-        # FPS Timer
-        self.timer = fpsclock.FpsClock()
-        self.timer.begin()
+        # Frame rate
         self.frames = 1
         
+        # Set Current Map
+        self.map_file = ""
+                
         # Enter game loop
         self.gameLoop()
         
@@ -140,6 +137,9 @@ class Game(object):
         # -------- Main Program Loop -----------
         while not done:
         
+          # Only Update every .0025 seconds
+          while pygame.time.get_ticks() % 25 == 0:       
+        
             # Plus one frame
             self.frames += 1
             
@@ -177,11 +177,8 @@ class Game(object):
             self.level.drawBackground(self.screen,scroll)
           
             # Draw tiles and handle tile collision with player
-            self.level.updateTiles(self.screen,scroll,(self.frames / ((self.timer.get_current_time() / 1000) + 1) ) ,self.chomp)
+            self.level.updateTiles(self.screen,scroll,size,(self.frames / ((pygame.time.get_ticks() / 1000) + 1) ) ,self.chomp)
                   
-            # Limit to 30 frames per second
-            #self.clock.tick(30)
-            self.timer.tick()
             
             # Update time
             time = pygame.time.get_ticks() - start_time
@@ -191,9 +188,9 @@ class Game(object):
                 # Draw Sprites
                 self.all_sprites_list.draw(self.screen)  
                 # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
-                if not self.level.state: self.chomp.update(scroll,move,size,self.timer.get_frame_duration())       
+                if not self.level.state: self.chomp.update(scroll,move,size)       
                 # Update Hud
-                self.hud.update(self.screen,size,time,self.timer.get_frame_duration())
+                self.hud.update(self.screen,size,time)
                 # Check level state
                 if self.level.state == 1:
                     self.chomp.speed = 0
