@@ -1,8 +1,8 @@
 import pygame, math
 
-GRAVITY = -9.81
+GRAVITY = -9500
 grav_rate = GRAVITY / 20
-max_speed = 16
+max_speed = 512
 
 class Chompy(pygame.sprite.Sprite):
     def __init__(self):
@@ -24,7 +24,7 @@ class Chompy(pygame.sprite.Sprite):
         self.pos = [self.rect.x, self.rect.y]  
     
         	
-    def update(self,scroll,move,size):
+    def update(self,scroll,move,size,timer):
     
         """
         Updates Chompy's position.
@@ -35,23 +35,23 @@ class Chompy(pygame.sprite.Sprite):
         """
     
         # Gravity
-        self.falling += grav_rate * -1
-        if self.falling > GRAVITY * -1: self.falling = GRAVITY * -1
-        self.pos[1] += self.falling
+        self.falling += (grav_rate * timer) * -1
+        if self.falling > GRAVITY * -1: self.falling = (GRAVITY * -1)
+        self.pos[1] += self.falling * timer
    
         # Movement
         if move:              
             if move > size[0] / 2:
-                self.pos[0] += math.floor(self.speed)
-                if self.speed < max_speed: self.speed += float(max_speed) / 32.0
+                self.pos[0] += math.floor(self.speed) * timer
+                if self.speed < max_speed: self.speed += (float(max_speed) / 32.0)
             else:
-                self.pos[0] += math.floor(self.speed)
-                if self.speed > max_speed * -1: self.speed -= float(max_speed) / 32.0
+                self.pos[0] += math.floor(self.speed) * timer
+                if self.speed > max_speed * -1: self.speed -= (float(max_speed) / 32.0) 
         else: 
-            self.pos[0] += math.floor(self.speed)
+            self.pos[0] += math.floor(self.speed) * timer
             if abs(self.speed) < 1: self.speed = 0
-            elif self.speed > 0: self.speed -= float(max_speed) / 64.0
-            elif self.speed < 0: self.speed += float(max_speed) / 64.0            
+            elif self.speed > 0: self.speed -= (float(max_speed) / 64.0)
+            elif self.speed < 0: self.speed += (float(max_speed) / 64.0)
 
         # Update position
         self.colliderect.x = self.pos[0]

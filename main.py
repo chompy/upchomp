@@ -1,4 +1,13 @@
 import pygame, math, chompy, gamemap, dialog, hud, transition, sys
+from lib import fpsclock
+
+try:
+    import android
+    #print "[OS] Running on Android."
+except ImportError:
+    #print "[OS] Running on PC."
+    android = None
+
 
 # Define some colors
 black    = (   0,   0,   0)
@@ -18,6 +27,11 @@ class Game(object):
         size=[800,480]
         self.screen=pygame.display.set_mode(size, pygame.RESIZABLE)
         pygame.display.set_caption("UpChomp")
+
+        # [Android] Map the back button to the escape key.
+        if android:
+          android.init()
+          android.map_key(android.KEYCODE_BACK, pygame.K_ESCAPE)
  
         # Used to manage how fast the screen updates
         self.clock=pygame.time.Clock()
@@ -44,6 +58,11 @@ class Game(object):
         # Set Current Map
         self.map_file = ""
         
+        # FPS Timer
+        self.timer = fpsclock.FpsClock()
+        self.timer.begin()
+        self.frames = 1
+        
         # Enter game loop
         self.gameLoop()
         
@@ -64,7 +83,7 @@ class Game(object):
             try: options[self.state]()
             # If unable to find a function quit with an error.
             except KeyError: 
-                print "[ERROR] Not a valid game state. Exiting..."
+                #print "[ERROR] Not a valid game state. Exiting..."
                 done = True
             
         # Exit Game
@@ -116,9 +135,14 @@ class Game(object):
         
         #Loop until the user clicks the close button.
         done=False
-                    
+
+        pygame.event.set_allowed((pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEMOTION, pygame.VIDEORESIZE, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP))                    
         # -------- Main Program Loop -----------
         while not done:
+        
+            # Plus one frame
+            self.frames += 1
+            
             events = pygame.event.get()
             for event in events: # User did something
                 if event.type == pygame.QUIT: # If user clicked close
@@ -140,6 +164,11 @@ class Game(object):
                     self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
                     size = event.size
                     
+            # Pause with Android
+            if android:
+              if android.check_pause():
+                android.wait_for_resume()
+                    
             lscroll = scroll
             scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]        
            
@@ -148,10 +177,11 @@ class Game(object):
             self.level.drawBackground(self.screen,scroll)
           
             # Draw tiles and handle tile collision with player
-            self.level.updateTiles(self.screen,scroll,self.clock,self.chomp)
+            self.level.updateTiles(self.screen,scroll,(self.frames / ((self.timer.get_current_time() / 1000) + 1) ) ,self.chomp)
                   
             # Limit to 30 frames per second
-            self.clock.tick(30)
+            #self.clock.tick(30)
+            self.timer.tick()
             
             # Update time
             time = pygame.time.get_ticks() - start_time
@@ -161,9 +191,9 @@ class Game(object):
                 # Draw Sprites
                 self.all_sprites_list.draw(self.screen)  
                 # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
-                if not self.level.state: self.chomp.update(scroll,move,size)       
+                if not self.level.state: self.chomp.update(scroll,move,size,self.timer.get_frame_duration())       
                 # Update Hud
-                self.hud.update(self.screen,size,time)
+                self.hud.update(self.screen,size,time,self.timer.get_frame_duration())
                 # Check level state
                 if self.level.state == 1:
                     self.chomp.speed = 0

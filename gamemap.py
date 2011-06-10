@@ -1,4 +1,5 @@
-import pygame, math, ConfigParser
+import pygame, math
+from lib import ConfigParser
 class Gamemap(object): 
 
     def __init__(self, map="map1.map"):
@@ -127,7 +128,7 @@ class Gamemap(object):
             self.bg_rect.x = 0
             self.bg_rect.y = 0
             
-    def updateTiles(self,screen,scroll,clock,chomp):
+    def updateTiles(self,screen,scroll,fps,chomp):
     
         """
         Draws all tiles to the screen.
@@ -162,8 +163,8 @@ class Gamemap(object):
     
                         for y in range(len(self.collide_animation)):
                            
-                            if self.collide_animation[y][0] == x and self.collide_animation[y][1] > math.floor(self.collide_animation[y][2] / (math.floor(clock.get_fps()) / self.themeparser.getint("images", "animation_framerate"))):                          
-                                tile = tile + math.floor(self.collide_animation[y][2] / (math.floor(clock.get_fps()) / self.themeparser.getint("images", "animation_framerate")))
+                            if self.collide_animation[y][0] == x and self.collide_animation[y][1] > math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.themeparser.getint("images", "animation_framerate"))):                          
+                                tile = tile + math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.themeparser.getint("images", "animation_framerate")))
                                 self.collide_animation[y][2] += 1
                                 break
                  
@@ -192,7 +193,7 @@ class Gamemap(object):
                            
                             # If queued already reset the animation frame back to 0.
                             if self.collide_animation[y][0] == x: 
-                                if math.floor(self.collide_animation[y][2] / (math.floor(clock.get_fps()) / self.themeparser.getint("images", "animation_framerate"))) == self.collide_animation[y][1]: self.collide_animation[y][2] = 0
+                                if math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.themeparser.getint("images", "animation_framerate"))) == self.collide_animation[y][1]: self.collide_animation[y][2] = 0
                                 add_to_collide = 0                           
                                 break
                         
@@ -205,7 +206,7 @@ class Gamemap(object):
                         # Wait till first frame of animation is shown before springing.
                         for y in range(len(self.collide_animation)):
                             if self.collide_animation[y][0] == x: 
-                                if self.collide_animation[y][2] / (math.floor(clock.get_fps()) / self.themeparser.getint("images", "animation_framerate")) > .3: chomp.falling = self.themeparser.getint(i, "value") * -1
+                                if self.collide_animation[y][2] / (math.floor(fps) / self.themeparser.getint("images", "animation_framerate")) > .3: chomp.falling = self.themeparser.getint(i, "value") * -1
                        
                     # If player hits the end of the level...
                     elif tilename == "level_end":
