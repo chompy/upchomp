@@ -1,26 +1,13 @@
-import pygame, math
-from lib import ConfigParser
+import pygame, math, iniget
+
 class Gamemap(object): 
 
     def __init__(self, map="map1.map"):
         
         """
         Inits the gamemap module, allows maps to be loaded and rendered.
-        
-        @param string map - Map Filename
-        """
-        
-        # Ini Parsers
-        self.parser = ConfigParser.ConfigParser()
-        self.themeparser = ConfigParser.ConfigParser()
-        
-        # Load this map pack
-        self.parser.read("map/"+map)
-
-        # Current map
-        self.packMaps = self.parser.get("pack","order").split(",")
-        self.current_map = 0       
-                
+        """        
+                  
         # Animation Clock
         self.animation = pygame.time.get_ticks()
         self.collide_animation = []
@@ -32,12 +19,22 @@ class Gamemap(object):
         self.loadLevel()  
                                   
    
-    def loadLevel(self):
+    def loadLevel(self, map="map1.map"):
     
-        """Loads current map which is specified by the self.current_map var."""
+        """
+        Loads current map which is specified by the self.current_map var.
+        @param string map - Map Filename
+        """
 
-        # Load map theme.
-        self.themeparser.read("tile/" + self.parser.get(self.packMaps[self.current_map],"theme") + ".ini")
+        # Load current map
+        self.parser = iniget.iniGet("map/"+map)         
+
+        # Current map
+        self.packMaps = self.parser.get("pack","order").split(",")
+        self.current_map = 0         
+        
+        # Load theme
+        self.themeparser = iniget.iniGet("tile/" + self.parser.get(self.packMaps[self.current_map],"theme") + ".ini")    
         
         # Get size of this maps tiles
         self.tilesize = [int(self.themeparser.get("images","tile_width")), int(self.themeparser.get("images","tile_height"))]
@@ -72,19 +69,23 @@ class Gamemap(object):
                 rect = (tile_x*self.tilesize[0], tile_y*self.tilesize[1], self.tilesize[0], self.tilesize[1])
                 line.append(image.subsurface(rect))
 
-                
+        screensize = pygame.display.get_surface()
+        screensize = screensize.get_size()       
+                 
         # Load background
         if self.themeparser.get("images","background"):
             self.background = pygame.image.load("gfx/" + self.themeparser.get("images","background")).convert()
             self.bg_rect = self.background.get_rect()
-            screensize = pygame.display.get_surface()
-            screensize = screensize.get_size()
+
             if screensize[1] > self.mapheight * self.tilesize[1]: self.bgrows = (int(screensize[1]/self.bg_rect.height) + 1) * 4
             else: self.bgrows = (int( (self.mapheight * self.tilesize[1]) /self.bg_rect.height) + 1) * 4
             
             if screensize[0] > self.mapwidth * self.tilesize[0]: self.bgcolumns = (int(screensize[0]/self.bg_rect.width) + 1) * 4
             else: self.bgcolumns = (int( (self.mapwidth * self.tilesize[0]) /self.bg_rect.width) + 1) * 4
-                                    
+
+        # Calculate Map stuff
+        self.calcMap(screensize)
+                                            
                                               
     def collision(self,rect,tileno):
     
@@ -128,6 +129,28 @@ class Gamemap(object):
             self.bg_rect.x = 0
             self.bg_rect.y = 0
             
+    
+    def calcMap(self,size):
+        self.tiles = []
+        
+        self.ani_framerate = float(self.themeparser.getInt("images", "animation_framerate"))
+        
+        x = 0
+        for i in self.map:
+            self.tiles.append( {
+                'name'          :   self.themeparser.get(i, "name"),
+                'tile'          :   self.themeparser.getInt(i, "tile"),
+                'animation'     :   self.themeparser.getInt(i, "animation"),
+                'collide'       :   self.themeparser.getBool(i, "collide"),
+                'ani_collide'   :   self.themeparser.getBool(i, "animate_on_collide"),
+                'value'         :   self.themeparser.getInt(i, "value"),
+                'x'             :   ((x % self.mapwidth) * self.tilesize[0]), 
+                'y'             :   (math.floor(x / self.mapwidth) * self.tilesize[1]),
+            })
+
+            x += 1
+        
+            
     def updateTiles(self,screen,scroll,size,fps,chomp):
     
         """
@@ -145,47 +168,40 @@ class Gamemap(object):
         # Draw the level
         x = 0
         i = 0 
-        for i in self.map:
-            # Render Tiles
-    
-            tile_x = ((x % self.mapwidth) * self.tilesize[0])
-            tile_y = (math.floor(x / self.mapwidth) * self.tilesize[1])        
+        for i in self.tiles:
 
-            if self.themeparser.get(i, "tile"):
-                
-                tile = self.themeparser.getint(i, "tile")
-                
+        
+            if i['tile']:
+                tile = i['tile'] - 1
+
                 # Tiles with animation
-                if self.themeparser.get(i, "animation"):
-                    if not self.themeparser.get(i, "collide") or not self.themeparser.getboolean(i, "animate_on_collide"):
-                        tile = tile + (math.floor(self.animation / (1000 / self.themeparser.getint("images", "animation_framerate")) ) % (self.themeparser.getint(i, "animation") - self.themeparser.getint(i, "tile")))
+                if i['animation']:
+                    if not i['collide'] or not i['ani_collide']:
+                        tile = tile + (math.floor(self.animation / (1000 / self.ani_framerate) ) % (i['animation'] - tile))
                     else:
     
                         for y in range(len(self.collide_animation)):
                            
-                            if self.collide_animation[y][0] == x and self.collide_animation[y][1] > math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.themeparser.getint("images", "animation_framerate"))):                          
-                                tile = tile + math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.themeparser.getint("images", "animation_framerate")))
+                            if self.collide_animation[y][0] == x and self.collide_animation[y][1] > math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate)):                          
+                                tile = tile + math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate))
                                 self.collide_animation[y][2] += 1
                                 break
                  
                 tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
                 tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))
-    
-                
-    
-                screen.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)], (tile_x + scroll[0], tile_y + scroll[1] ) )
-    
+     
+                screen.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)], (i['x'] + scroll[0], i['y'] + scroll[1] ) )   
                 
             # Collision with a tile
-            if self.themeparser.getboolean(i,"collide"):
+            if i['collide']:
                 col = self.collision(chomp.colliderect,x)
-                tilename = self.themeparser.get(i, "name")
+                tilename = i['name']
                 
                 # If a collision happens...
                 if col:
                     
                     # If an animation was supposed to play when the collision happened...
-                    if self.themeparser.get(i, "animation") and self.themeparser.getboolean(i, "animate_on_collide"):
+                    if i['animation'] and i['ani_collide']:
                         
                         # Check to make sure this animation isn't already queued..
                         add_to_collide = 1                  
@@ -193,20 +209,20 @@ class Gamemap(object):
                            
                             # If queued already reset the animation frame back to 0.
                             if self.collide_animation[y][0] == x: 
-                                if math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.themeparser.getint("images", "animation_framerate"))) == self.collide_animation[y][1]: self.collide_animation[y][2] = 0
+                                if math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate)) == self.collide_animation[y][1]: self.collide_animation[y][2] = 0
                                 add_to_collide = 0                           
                                 break
                         
                         # If not queued add it to the queue..
                         if add_to_collide: 
-                            self.collide_animation.append( [x, self.themeparser.getint(i, "animation") - self.themeparser.getint(i, "tile"), 0] )
+                            self.collide_animation.append( [x, i['animation'] - tile, 0] )
                         
                     # If player hits a spring...
                     if tilename == "spring":
                         # Wait till first frame of animation is shown before springing.
                         for y in range(len(self.collide_animation)):
                             if self.collide_animation[y][0] == x: 
-                                if self.collide_animation[y][2] / (math.floor(fps) / self.themeparser.getint("images", "animation_framerate")) > .3: chomp.falling = self.themeparser.getint(i, "value") * -1
+                                if self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate) > .3: chomp.falling = i['value'] * -1
                        
                     # If player hits the end of the level...
                     elif tilename == "level_end":
@@ -214,7 +230,7 @@ class Gamemap(object):
                                          
                     # Any other collision should just be treated like a wall or floor collision...
                     else:
-                        tilerect = pygame.Rect(tile_x,tile_y,self.tilesize[0],self.tilesize[1])  
+                        tilerect = pygame.Rect(i['x'],i['y'],self.tilesize[0],self.tilesize[1])  
                         offset = [chomp.colliderect.x - tilerect.x, chomp.colliderect.y - tilerect.y]
     
                         # Check for horizontal collision...
@@ -226,7 +242,7 @@ class Gamemap(object):
                         # Check for vertical collision.
                         if abs(offset[0]) < self.tilesize[0] / 2:
                             if offset[1] > 0: 
-                                chomp.pos[1] = tilerect.y + self.tilesize[1] - 1
+                                chomp.pos[1] = tilerect.y + self.tilesize[1]
                                 if chomp.falling > 0: chomp.falling = 0
                             elif offset[1] <= 0: 
                                 chomp.pos[1] = tilerect.y -  self.tilesize[1] + 1

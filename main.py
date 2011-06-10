@@ -24,7 +24,7 @@ class Game(object):
 
         # Screen/Dialog stuff
         size=[800,480]
-        self.screen=pygame.display.set_mode(size, pygame.RESIZABLE)
+        self.screen=pygame.display.set_mode(size, pygame.RESIZABLE | pygame.HWSURFACE | pygame.DOUBLEBUF)
         pygame.display.set_caption("UpChomp")
 
         # [Android] Map the back button to the escape key.
