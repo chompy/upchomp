@@ -9,10 +9,7 @@ except ImportError:
 
 
 # Define some colors
-black    = (   0,   0,   0)
 white    = ( 255, 255, 255)
-green    = (   0, 255,   0)
-red      = ( 255,   0,   0)
 
 class Game(object):
 
@@ -24,7 +21,8 @@ class Game(object):
 
         # Screen/Dialog stuff
         size=[800,480]
-        self.screen=pygame.display.set_mode(size, pygame.RESIZABLE | pygame.HWSURFACE | pygame.DOUBLEBUF)
+        self.screen=pygame.display.set_mode(size, pygame.RESIZABLE | pygame.HWSURFACE
+        )
         pygame.display.set_caption("UpChomp")
 
         # [Android] Map the back button to the escape key.
@@ -190,7 +188,7 @@ class Game(object):
                 # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
                 if not self.level.state: self.chomp.update(scroll,move,size)       
                 # Update Hud
-                self.hud.update(self.screen,size,time)
+                self.hud.update(self.screen,size,time,self.frames)
                 self.hud.checkSkillActivation(events, size)
                 # Check level state
                 if self.level.state == 1:
