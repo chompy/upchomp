@@ -18,18 +18,22 @@ class Game(object):
         """Inits the game."""
  
         pygame.init()
+        
+        # Set size here so Android can overwrite it.
+        size=[420,320]
 
-        # Screen/Dialog stuff
-        size=[800,480]
-        self.screen=pygame.display.set_mode(size, pygame.RESIZABLE | pygame.HWSURFACE
-        )
-        pygame.display.set_caption("UpChomp")
-
-        # [Android] Map the back button to the escape key.
+        # [Android] Map the back button to the escape key and set game size to screen size.
         if android:
           android.init()
           android.map_key(android.KEYCODE_BACK, pygame.K_ESCAPE)
- 
+          disp_info = pygame.display.Info()
+          size = [disp_info.current_w, disp_info.current_h]
+        
+        # Screen/Dialog stuff
+        self.screen=pygame.display.set_mode(size, pygame.RESIZABLE)
+        pygame.display.set_caption("UpChomp")
+
+
         # Used to manage how fast the screen updates
         self.clock=pygame.time.Clock()
 
