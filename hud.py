@@ -70,21 +70,16 @@ class Hud(object):
                                 
                 x += 1   
                 
+        # Quit button
+        screen.blit(self.tile_table[2][2], ( size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)) )                
                 
-    def checkSkillActivation(self,events):
+                
+    def checkSkillActivation(self, events, size):
         for event in events:
-            for i in range(len(self.buttonstate)):
-                self.buttonstate[i] = 0
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if close_btn.collidepoint(event.pos[0], event.pos[1]):
-                    self.closeMessageBox() 
-                for i in range(len(self.button)):
-                    button_text_size = self.font.size(self.button[i][0])
-                    button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
-                    button_rect = pygame.Rect(button_positions[i][0], button_positions[i][1], button_tile_width * TILE_SIZE[0], TILE_SIZE[1])
-        
-                    # If button click initiate passed function
-                    if button_rect.collidepoint(event.pos[0], event.pos[1]):
-                        self.button[i][1]()
-                        self.closeMessageBox()     
+            if event.type == pygame.MOUSEBUTTONDOWN:                       
+                # Quit button
+                button_rect = pygame.Rect(size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0], SKILL_TILE_SIZE[1])
+                if button_rect.collidepoint(event.pos[0], event.pos[1]):
+                    pygame.quit()
+                    quit()
                         

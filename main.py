@@ -191,6 +191,7 @@ class Game(object):
                 if not self.level.state: self.chomp.update(scroll,move,size)       
                 # Update Hud
                 self.hud.update(self.screen,size,time)
+                self.hud.checkSkillActivation(events, size)
                 # Check level state
                 if self.level.state == 1:
                     self.chomp.speed = 0
