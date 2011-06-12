@@ -31,18 +31,27 @@ class Hud(object):
                 rect = (tile_x*SKILL_TILE_SIZE[0], tile_y*SKILL_TILE_SIZE[1], SKILL_TILE_SIZE[0], SKILL_TILE_SIZE[1])
                 line.append(image.subsurface(rect))      
         
-    def loadSkills(self,skills):
+    def loadSkills(self, skills, size):
         self.skills = {
             'up'        : 0,
             'heli'      : 0
         }
         
+        self.skill_data = []
         for i in skills:
             self.skills[i] += 1
-            
+        
+        x = 0
+        for i in self.skills:
+          self.skill_data.append([
+            i,
+            [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
+            pygame.Rect(math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0] * 2, SKILL_TILE_SIZE[1])             
+          ])
+          x += 1
         
         
-    def update(self,screen,size,time,frames):  
+    def update(self, screen, size, time, frames):  
         
         # Time and Score     
         screen.blit(self.font.render("SCORE:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,SPACING + SHADOW_OFFSET) )
@@ -63,14 +72,14 @@ class Hud(object):
         
         # Skills
         x = 0
-        for i in self.skills:
-            if self.skills[i] > 0:
-                pos = [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)]
+        for i in self.skill_data:
+            if self.skills[i[0]] > 0:
+                pos = i[1]
                 # Render skill icon
-                screen.blit(self.tile_table[self.skilltiles[i][0]][self.skilltiles[i][1]], (pos[0],pos[1]) )
+                screen.blit(self.tile_table[self.skilltiles[i[0]][0]][self.skilltiles[i[0]][1]], (pos[0],pos[1]) )
                 # Render skill amount text
-                screen.blit(self.font.render("x" + str(self.skills[i]) ,0,self.dropshadow_color), (  pos[0] + SKILL_TILE_SIZE[0] + SHADOW_OFFSET , pos[1] + SHADOW_OFFSET) )                
-                screen.blit(self.font.render("x" + str(self.skills[i]) ,0,self.object_color), (  pos[0] + SKILL_TILE_SIZE[0] , pos[1]) )        
+                screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.dropshadow_color), (  pos[0] + SKILL_TILE_SIZE[0] + SHADOW_OFFSET , pos[1] + SHADOW_OFFSET) )                
+                screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.object_color), (  pos[0] + SKILL_TILE_SIZE[0] , pos[1]) )        
                                 
                 x += 1   
                 
@@ -78,7 +87,7 @@ class Hud(object):
         screen.blit(self.tile_table[2][2], ( size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)) )                
                 
                 
-    def checkSkillActivation(self, events, size):
+    def checkSkillActivation(self, events, size, chomp):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:                       
                 # Quit button
@@ -86,4 +95,12 @@ class Hud(object):
                 if button_rect.collidepoint(event.pos[0], event.pos[1]):
                     pygame.quit()
                     quit()
+                    
+                # Other buttons
+                for i in self.skill_data:
+                  button_rect = i[2]
+                  if button_rect.collidepoint(event.pos[0], event.pos[1]):
+                    if self.skills[i[0]] > 0:
+                      self.skills[i[0]] -= 1
+                      chomp.activateSkill(i[0])
                         

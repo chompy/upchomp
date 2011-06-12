@@ -196,7 +196,7 @@ class Gamemap(object):
             if i['collide']:
                 col = self.collision(chomp.colliderect,x)
                 tilename = i['name']
-                
+
                 # If a collision happens...
                 if col:
                     
@@ -247,6 +247,8 @@ class Gamemap(object):
                             elif offset[1] <= 0: 
                                 chomp.pos[1] = tilerect.y -  self.tilesize[1] + 1
                                 if chomp.falling > 0: chomp.falling = 0
+                                # Disable chomp's ability to move on the ground
+                                chomp.moveok = 0
 
                        
             x += 1                

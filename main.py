@@ -1,4 +1,4 @@
-import pygame, math, chompy, gamemap, dialog, hud, transition, sys
+import pygame, math, chompy, gamemap, dialog, hud, transition, sys, iniget
 
 try:
     import android
@@ -6,6 +6,8 @@ try:
 except ImportError:
     #print "[OS] Running on PC."
     android = None
+
+settings = iniget.iniGet("settings.ini")
 
 
 # Define some colors
@@ -34,7 +36,7 @@ class Game(object):
           size = [disp_info.current_w, disp_info.current_h]
           
           # Activate accelerometer
-          android.accelerometer_enable(1)
+          if settings.getBool("android","accelerometer_enable"): android.accelerometer_enable(1)
         
         # Screen/Dialog stuff
         self.screen=pygame.display.set_mode(size, pygame.RESIZABLE)
@@ -134,7 +136,7 @@ class Game(object):
         time = 0
         
         # Load skills into the Hud
-        self.hud.loadSkills(self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","))
+        self.hud.loadSkills(self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","), size)
         
         # Load Dialog box
         self.dlogbox.setMessageBox(size,self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Quit',sys.exit]] )
@@ -145,86 +147,104 @@ class Game(object):
         pygame.event.set_allowed((pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEMOTION, pygame.VIDEORESIZE, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP))                    
         # -------- Main Program Loop -----------
         while not done:
-        
-          # Only Update every .0025 seconds
-          while pygame.time.get_ticks() % 50 == 0:       
-        
-            # Plus one frame
-            self.frames += 1
-            
-            events = pygame.event.get()
-            for event in events: # User did something
-                if event.type == pygame.QUIT: # If user clicked close
-                    done=True # Flag that we are done so we exit this loop
-                    self.state = -1 # Set game state to -1(Quit)
-                
-                if event.type == pygame.MOUSEBUTTONDOWN: 
-                    move = (event.pos[0] - (size[0] / 2))
-        
-                elif event.type == pygame.MOUSEBUTTONUP: 
-                    move = 0
-                    
-                elif event.type == pygame.MOUSEMOTION and move:
-                    move = (event.pos[0] - (size[0] / 2))
-                
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == 292: pygame.display.toggle_fullscreen()
-                elif event.type == pygame.VIDEORESIZE:
-                    self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
-                    size = event.size
-                    
-            # Android events
-            if android:
-              if android.check_pause():
-                android.wait_for_resume()
-                
-              accel = android.accelerometer_reading()
-              move = accel[1]
 
-                
-            lscroll = scroll
-            scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]        
-           
-            # Draw the background
-            self.screen.fill(white) 
-            self.level.drawBackground(self.screen,scroll)
+          # Set frame rate to 30.
+          self.clock.tick(30)       
+      
+          # Plus one frame
+          self.frames += 1
           
-            # Draw tiles and handle tile collision with player
-            self.level.updateTiles(self.screen,scroll,size,(self.frames / ((pygame.time.get_ticks() / 1000) + 1) ) ,self.chomp)
+          events = pygame.event.get()
+          for event in events: # User did something
+              if event.type == pygame.QUIT: # If user clicked close
+                  done=True # Flag that we are done so we exit this loop
+                  self.state = -1 # Set game state to -1(Quit)
+              
+              if event.type == pygame.MOUSEBUTTONDOWN: 
+                  move = (event.pos[0] - (size[0] / 2))
+      
+              elif event.type == pygame.MOUSEBUTTONUP: 
+                  move = 0
                   
-            
-            # Update time
-            time = pygame.time.get_ticks() - start_time
-            
-            # If a dialog box isn't up...
-            if not self.dlogbox.drawBox(self.screen,size,events):
-                # Draw Sprites
-                self.all_sprites_list.draw(self.screen)  
-                # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
-                if not self.level.state: self.chomp.update(scroll,move,size)       
-                # Update Hud
-                self.hud.update(self.screen,size,time,self.frames)
-                self.hud.checkSkillActivation(events, size)
-                # Check level state
-                if self.level.state == 1:
-                    self.chomp.speed = 0
-                    self.chomp.falling = 0
-                    if self.transition.type == 0: self.dlogbox.setMessageBox(size,"SCORE: 4000 / TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',sys.exit]] )
-            
-            # Reset time as long as dialog box is up
-            else:
-                start_time = pygame.time.get_ticks()
-                time = 0
-            
-                    
-            # If there is a transition playing
-            transition_status = self.transition.update(self.screen)
-            if transition_status:
-                if transition_status < 1:
-                    self.transition.type = 0
-                if transition_status and transition_status < 2 and self.level.state: done = True  
-            
-            # Go ahead and update the screen with what we've drawn.
-            pygame.display.flip()
+              elif event.type == pygame.MOUSEMOTION and move:
+                  move = (event.pos[0] - (size[0] / 2))
+              
+              elif event.type == pygame.KEYDOWN:
+                  if event.key == 292: pygame.display.toggle_fullscreen()
+              elif event.type == pygame.VIDEORESIZE:
+                  self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
+                  size = event.size
+                  
+          # Android events
+          if android:
+            if android.check_pause():
+              android.wait_for_resume()
+              
+            accel = android.accelerometer_reading()
+            move = accel[1]
+
+              
+          lscroll = scroll
+          scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]        
+         
+          # Draw the background
+          self.screen.fill(white) 
+          self.level.drawBackground(self.screen,scroll)
+        
+          # Draw tiles and handle tile collision with player
+          self.level.updateTiles(self.screen,scroll,size,(self.frames / ((pygame.time.get_ticks() / 1000) + 1) ) ,self.chomp)
+                
+          
+          # Update time
+          time = pygame.time.get_ticks() - start_time
+          
+          # If a dialog box isn't up...
+          if not self.dlogbox.drawBox(self.screen,size,events):
+              # Draw Sprites
+              self.all_sprites_list.draw(self.screen)  
+              # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
+              if not self.level.state: self.chomp.update(scroll,move,size)       
+              
+              # If Chompy can't move it's game over...
+              if not self.chomp.moveok and self.chomp.speed == 0: 
+                self.level.state = 2
+              
+              # If Chompy falls below the level...
+              if self.chomp.colliderect.y > self.level.mapheight * self.level.tilesize[1]:
+                self.level.state = 2
+                
+              # Game over level state...
+              if self.level.state == 2:
+                self.chomp.speed = .1
+                self.chomp.falling = .1
+                self.chomp.moveok = 1
+                if self.transition.type == 0: 
+                  self.dlogbox.setMessageBox(size,"Chompy didn't make it...", "Oh No!!", [['Retry',self.levelTransition],['Quit',sys.exit]] )
+                
+              # Update Hud
+              self.hud.update(self.screen,size,time,self.frames)
+              self.hud.checkSkillActivation(events, size, self.chomp)
+              # Check level state
+              if self.level.state == 1:
+                  self.chomp.speed = 0
+                  self.chomp.falling = 0
+                  if self.transition.type == 0: 
+                    self.dlogbox.setMessageBox(size,"SCORE: 4000 / TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',sys.exit]] )
+          
+          # Reset time as long as dialog box is up
+          else:
+              start_time = pygame.time.get_ticks()
+              time = 0
+          
+                  
+          # If there is a transition playing
+          transition_status = self.transition.update(self.screen)
+          if transition_status:
+              if transition_status < 1:
+                  self.transition.type = 0
+              if transition_status and transition_status < 2 and self.level.state: done = True  
+          
+          # Go ahead and update the screen with what we've drawn.
+          pygame.display.flip()
  
 Game()
