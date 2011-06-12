@@ -22,12 +22,19 @@ class Game(object):
         # Set size here so Android can overwrite it.
         size=[420,320]
 
-        # [Android] Map the back button to the escape key and set game size to screen size.
+        # Do some android stuff
         if android:
           android.init()
+          
+          # Map back key to to escape
           android.map_key(android.KEYCODE_BACK, pygame.K_ESCAPE)
+          
+          # Get display size and set game size to it
           disp_info = pygame.display.Info()
           size = [disp_info.current_w, disp_info.current_h]
+          
+          # Activate accelerometer
+          android.accelerometer_enable(1)
         
         # Screen/Dialog stuff
         self.screen=pygame.display.set_mode(size, pygame.RESIZABLE)
@@ -140,7 +147,7 @@ class Game(object):
         while not done:
         
           # Only Update every .0025 seconds
-          while pygame.time.get_ticks() % 25 == 0:       
+          while pygame.time.get_ticks() % 50 == 0:       
         
             # Plus one frame
             self.frames += 1
@@ -152,13 +159,13 @@ class Game(object):
                     self.state = -1 # Set game state to -1(Quit)
                 
                 if event.type == pygame.MOUSEBUTTONDOWN: 
-                    move = event.pos[0]
+                    move = (event.pos[0] - (size[0] / 2))
         
                 elif event.type == pygame.MOUSEBUTTONUP: 
                     move = 0
                     
                 elif event.type == pygame.MOUSEMOTION and move:
-                    move = event.pos[0]
+                    move = (event.pos[0] - (size[0] / 2))
                 
                 elif event.type == pygame.KEYDOWN:
                     if event.key == 292: pygame.display.toggle_fullscreen()
@@ -166,11 +173,15 @@ class Game(object):
                     self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
                     size = event.size
                     
-            # Pause with Android
+            # Android events
             if android:
               if android.check_pause():
                 android.wait_for_resume()
-                    
+                
+              accel = android.accelerometer_reading()
+              move = accel[1]
+
+                
             lscroll = scroll
             scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]        
            

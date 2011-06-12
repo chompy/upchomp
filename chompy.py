@@ -41,12 +41,12 @@ class Chompy(pygame.sprite.Sprite):
         
         # Movement
         if move:              
-            if move > size[0] / 2:
+            if move > 1:
                 self.pos[0] += math.floor(self.speed)
-                if self.speed < max_speed: self.speed += (float(max_speed) / 32.0)
-            else:
+                if self.speed < max_speed: self.speed += ((float(max_speed) / 32.0))
+            elif move < -1:
                 self.pos[0] += math.floor(self.speed)
-                if self.speed > max_speed * -1: self.speed -= (float(max_speed) / 32.0) 
+                if self.speed > max_speed * -1: self.speed -= ((float(max_speed) / 32.0))
         else: 
             self.pos[0] += math.floor(self.speed)
             if abs(self.speed) < 1: self.speed = 0

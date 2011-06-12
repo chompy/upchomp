@@ -57,7 +57,9 @@ class Hud(object):
         screen.blit(self.font.render(str(round(time / 1000.0,2)) ,0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 4.5) + SHADOW_OFFSET) )
         screen.blit(self.font.render(str(round(time / 1000.0,2)),0,self.value_color), (SPACING,SPACING * 4.5) )                
         
-        screen.blit(self.font.render(str(frames / (pygame.time.get_ticks() / 1000) ),0,self.value_color), (size[0] - self.font.size(str(frames / (pygame.time.get_ticks() / 1000) ))[0] - (SPACING / 2) ,SPACING * 1.5) )      
+        msg = str(frames / (pygame.time.get_ticks() / 1000) )
+        #msg = str(android.accelerometer_reading()[1])
+        screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )      
         
         # Skills
         x = 0
