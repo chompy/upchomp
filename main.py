@@ -136,7 +136,7 @@ class Game(object):
         time = 0
         
         # Load skills into the Hud
-        self.hud.loadSkills(self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","), size)
+        self.hud.loadSkills(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","))
         
         # Load Dialog box
         self.dlogbox.setMessageBox(size,self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Quit',sys.exit]] )
@@ -203,7 +203,7 @@ class Game(object):
               # Draw Sprites
               self.all_sprites_list.draw(self.screen)  
               # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
-              if not self.level.state: self.chomp.update(scroll,move,size)       
+              if not self.level.state: self.chomp.update(scroll, self.screen, move, size)       
               
               # If Chompy can't move it's game over...
               if not self.chomp.moveok and self.chomp.speed == 0: 

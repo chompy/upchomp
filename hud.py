@@ -31,25 +31,28 @@ class Hud(object):
                 rect = (tile_x*SKILL_TILE_SIZE[0], tile_y*SKILL_TILE_SIZE[1], SKILL_TILE_SIZE[0], SKILL_TILE_SIZE[1])
                 line.append(image.subsurface(rect))      
         
-    def loadSkills(self, skills, size):
-        self.skills = {
-            'up'        : 0,
-            'heli'      : 0
-        }
+    def loadSkills(self, size, skills = 0):
         
-        self.skill_data = []
-        for i in skills:
-            self.skills[i] += 1
+        # If skills is provided then load them in, otherwise we're just resizing the screen.
+        if skills:
+            self.skills = {
+                'up'        : 0,
+                'heli'      : 0
+            }        
+            self.skill_data = []
+            for i in skills:
+                self.skills[i] += 1
         
         x = 0
+        self.skill_data = []
         for i in self.skills:
-          self.skill_data.append([
-            i,
-            [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
-            pygame.Rect(math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0] * 2, SKILL_TILE_SIZE[1])             
-          ])
-          x += 1
-        
+            self.skill_data.append([
+              i,
+              [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
+              pygame.Rect(math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0] * 2, SKILL_TILE_SIZE[1])             
+            ])
+            x += 1
+          
         
     def update(self, screen, size, time, frames):  
         
@@ -89,7 +92,20 @@ class Hud(object):
                 
     def checkSkillActivation(self, events, size, chomp):
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:                       
+            if event.type == pygame.VIDEORESIZE:
+                self.loadSkills(size)
+                
+            # Activate skills with keyboard
+            elif event.type == pygame.KEYDOWN:
+                # skills
+                for i in range(len(self.skill_data)):
+                    key = pygame.key.name(event.key)
+                    if int(key) == i + 1:
+                        if self.skills[ self.skill_data[i][0] ] > 0:
+                            self.skills[ self.skill_data[i][0] ] -= 1
+                            chomp.activateSkill( self.skill_data[i][0] )
+                            
+            elif event.type == pygame.MOUSEBUTTONDOWN:                       
                 # Quit button
                 button_rect = pygame.Rect(size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0], SKILL_TILE_SIZE[1])
                 if button_rect.collidepoint(event.pos[0], event.pos[1]):
