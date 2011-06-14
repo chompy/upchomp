@@ -1,7 +1,7 @@
-import pygame, math, chompy, gamemap, dialog, hud, transition, sys, iniget
+import pygame, math, chompy, sound, gamemap, dialog, hud, transition, sys, iniget
 
 try:
-    import android
+    import android, android_mixer
     #print "[OS] Running on Android."
 except ImportError:
     #print "[OS] Running on PC."
@@ -52,6 +52,9 @@ class Game(object):
         # Init da Chomp
         self.chomp = chompy.Chompy()
         self.all_sprites_list.add(self.chomp)   
+        
+        # Initalize Sound
+        self.sound = sound.Sound()
 
         # Make a dialog object.
         self.dlogbox = dialog.Dialog()
@@ -160,7 +163,7 @@ class Game(object):
                   done=True # Flag that we are done so we exit this loop
                   self.state = -1 # Set game state to -1(Quit)
               
-              if event.type == pygame.MOUSEBUTTONDOWN: 
+              elif event.type == pygame.MOUSEBUTTONDOWN: 
                   move = (event.pos[0] - (size[0] / 2))
       
               elif event.type == pygame.MOUSEBUTTONUP: 
@@ -171,9 +174,11 @@ class Game(object):
               
               elif event.type == pygame.KEYDOWN:
                   if event.key == 292: pygame.display.toggle_fullscreen()
+                  
               elif event.type == pygame.VIDEORESIZE:
                   self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
                   size = event.size
+                  self.hud.loadSkills(size)
                   
           # Android events
           if android:
@@ -181,7 +186,8 @@ class Game(object):
               android.wait_for_resume()
               
             accel = android.accelerometer_reading()
-            move = accel[1]
+            if abs(accel[1]) > 1.5:
+                move = accel[1]
 
               
           lscroll = scroll
@@ -192,18 +198,21 @@ class Game(object):
           self.level.drawBackground(self.screen,scroll)
         
           # Draw tiles and handle tile collision with player
-          self.level.updateTiles(self.screen,scroll,size,(self.frames / ((pygame.time.get_ticks() / 1000) + 1) ) ,self.chomp)
+          self.level.updateTiles(self.screen,scroll,size,(self.frames / ((pygame.time.get_ticks() / 1000) + 1) ) ,self.chomp, self.sound)
                 
           
           # Update time
           time = pygame.time.get_ticks() - start_time
+          
+          # Android Sound Loops
+          if android: self.sound.update()
           
           # If a dialog box isn't up...
           if not self.dlogbox.drawBox(self.screen,size,events):
               # Draw Sprites
               self.all_sprites_list.draw(self.screen)  
               # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
-              if not self.level.state: self.chomp.update(scroll, self.screen, move, size)       
+              if not self.level.state: self.chomp.update(scroll, self.screen, move, size, self.sound)       
               
               # If Chompy can't move it's game over...
               if not self.chomp.moveok and self.chomp.speed == 0: 
@@ -223,7 +232,7 @@ class Game(object):
                 
               # Update Hud
               self.hud.update(self.screen,size,time,self.frames)
-              self.hud.checkSkillActivation(events, size, self.chomp)
+              self.hud.checkSkillActivation(events, size, self.chomp, self.sound)
               # Check level state
               if self.level.state == 1:
                   self.chomp.speed = 0

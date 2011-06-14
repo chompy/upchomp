@@ -130,7 +130,7 @@ class Gamemap(object):
             self.bg_rect.y = 0
             
     
-    def calcMap(self,size):
+    def calcMap(self, size):
         self.tiles = []
         
         self.ani_framerate = float(self.themeparser.getInt("images", "animation_framerate"))
@@ -151,7 +151,7 @@ class Gamemap(object):
             x += 1
         
             
-    def updateTiles(self,screen,scroll,size,fps,chomp):
+    def updateTiles(self, screen, scroll, size, fps, chomp, sound):
     
         """
         Draws all tiles to the screen.
@@ -222,7 +222,9 @@ class Gamemap(object):
                         # Wait till first frame of animation is shown before springing.
                         for y in range(len(self.collide_animation)):
                             if self.collide_animation[y][0] == x: 
-                                if self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate) > .3: chomp.falling = i['value'] * -1
+                                if self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate) > .3: 
+                                    chomp.falling = i['value'] * -1
+                                    sound.playSfx("sfx/spring.wav", 0)
                        
                     # If player hits the end of the level...
                     elif tilename == "level_end":

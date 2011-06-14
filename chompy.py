@@ -66,7 +66,7 @@ class Chompy(pygame.sprite.Sprite):
         }
     
     
-    def activateSkill(self, name):
+    def activateSkill(self, name, sound = ""):
         """
         Activates a Chompy skill!
         
@@ -77,13 +77,15 @@ class Chompy(pygame.sprite.Sprite):
         if name == "heli":
             self.skills['heli'] = 90
             self.progress_max = 90
+            
+            if sound: sound.playSfx("sfx/heli.wav", -1)
             return 1
         elif name == "up":
             self.falling = -10
         else:
             return 0
         	
-    def update(self, scroll, screen, move, size):
+    def update(self, scroll, screen, move, size, sound):
     
         """
         Updates Chompy's position.
@@ -95,13 +97,17 @@ class Chompy(pygame.sprite.Sprite):
         """
         
         # Skills
+        
+        # Heli
         if self.skills['heli'] > 0: 
             self.skills['heli'] -= 1
             ani = pygame.time.get_ticks() % 4
                         
             screen.blit(self.heli_tiles[ani][0], (self.rect.x, self.rect.y - TILE_SIZE[1]))
-
-            self.falling = 0
+            
+            if self.falling > 0: self.falling = 0
+        
+        if self.skills['heli'] == 1: sound.stopSfxFile("sfx/heli.wav")
                     
         # Gravity [Ignore gravity when Heli skill is activate or Chompy is jumping]
         if not self.skills['heli'] or self.falling < 0:

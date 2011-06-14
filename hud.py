@@ -48,7 +48,7 @@ class Hud(object):
         for i in self.skills:
             self.skill_data.append([
               i,
-              [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
+              [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
               pygame.Rect(math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0] * 2, SKILL_TILE_SIZE[1])             
             ])
             x += 1
@@ -69,9 +69,9 @@ class Hud(object):
         screen.blit(self.font.render(str(round(time / 1000.0,2)) ,0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 4.5) + SHADOW_OFFSET) )
         screen.blit(self.font.render(str(round(time / 1000.0,2)),0,self.value_color), (SPACING,SPACING * 4.5) )                
         
-        msg = str(frames / (pygame.time.get_ticks() / 1000) )
+        #msg = str(frames / (pygame.time.get_ticks() / 1000) )
         #msg = str(android.accelerometer_reading()[1])
-        screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )      
+        #screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )      
         
         # Skills
         x = 0
@@ -90,20 +90,22 @@ class Hud(object):
         screen.blit(self.tile_table[2][2], ( size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)) )                
                 
                 
-    def checkSkillActivation(self, events, size, chomp):
+    def checkSkillActivation(self, events, size, chomp, sound = ""):
+
         for event in events:
-            if event.type == pygame.VIDEORESIZE:
-                self.loadSkills(size)
-                
+               
             # Activate skills with keyboard
-            elif event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 # skills
                 for i in range(len(self.skill_data)):
                     key = pygame.key.name(event.key)
-                    if int(key) == i + 1:
-                        if self.skills[ self.skill_data[i][0] ] > 0:
-                            self.skills[ self.skill_data[i][0] ] -= 1
-                            chomp.activateSkill( self.skill_data[i][0] )
+                    try:
+                        if int(key) == i + 1:
+                            if self.skills[ self.skill_data[i][0] ] > 0:
+                                self.skills[ self.skill_data[i][0] ] -= 1
+                                chomp.activateSkill( self.skill_data[i][0], sound )
+                    except ValueError:
+                        break
                             
             elif event.type == pygame.MOUSEBUTTONDOWN:                       
                 # Quit button
@@ -118,5 +120,5 @@ class Hud(object):
                   if button_rect.collidepoint(event.pos[0], event.pos[1]):
                     if self.skills[i[0]] > 0:
                       self.skills[i[0]] -= 1
-                      chomp.activateSkill(i[0])
+                      chomp.activateSkill(i[0], sound)
                         
