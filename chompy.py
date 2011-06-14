@@ -2,7 +2,7 @@ import pygame, math
 
 GRAVITY = -9.81
 grav_rate = GRAVITY / 20
-max_speed = 8.0
+max_speed = 6.0
 speed_rate = max_speed * 2.0
 
 TILE_SIZE = [32,32]
@@ -25,6 +25,7 @@ class Chompy(pygame.sprite.Sprite):
         self.colliderect = pygame.Rect(self.rect.x, self.rect.x, self.rect.w, self.rect.h)
         
         self.moveok = 1
+        self.stopclock = -1
         
         self.skills = {
             'heli'    : 0,
@@ -77,10 +78,12 @@ class Chompy(pygame.sprite.Sprite):
         if name == "heli":
             self.skills['heli'] = 90
             self.progress_max = 90
+            self.falling = -1
             
             if sound: sound.playSfx("sfx/heli.wav", -1)
             return 1
         elif name == "up":
+            if sound: sound.playSfx("sfx/up.wav", 0)
             self.falling = -10
         else:
             return 0
@@ -108,7 +111,11 @@ class Chompy(pygame.sprite.Sprite):
             if self.falling > 0: self.falling = 0
         
         if self.skills['heli'] == 1: sound.stopSfxFile("sfx/heli.wav")
-                    
+                 
+        # Start the clock when Chompy is not moving...if it hits 0 game over.
+        if self.stopclock > 0:
+            self.stopclock -= 1
+           
         # Gravity [Ignore gravity when Heli skill is activate or Chompy is jumping]
         if not self.skills['heli'] or self.falling < 0:
             self.falling += (grav_rate) * -1
@@ -116,13 +123,19 @@ class Chompy(pygame.sprite.Sprite):
             self.pos[1] += self.falling
         
         # Movement
-        if move and self.moveok:              
-            if move > 1:
+        if move and self.moveok:   
+            if move > 4: move = 4
+            elif move < -4: move = -4
+            
+            if move > 0 and move < .5: move = .5
+            elif move < 0 and move > -.5: move = -.5
+                       
+            if move > .5:
                 self.pos[0] += math.floor(self.speed)
-                if self.speed < max_speed: self.speed += ((float(max_speed) / speed_rate))
-            elif move < -1:
+                if self.speed < max_speed: self.speed += ((float(max_speed) / (max_speed / abs(move) )  )) 
+            elif move < -.5:
                 self.pos[0] += math.floor(self.speed)
-                if self.speed > max_speed * -1: self.speed -= ((float(max_speed) / speed_rate))
+                if self.speed > max_speed * -1: self.speed -= ((float(max_speed) / (max_speed / abs(move) ) ))
         else: 
             self.pos[0] += math.floor(self.speed)
             if abs(self.speed) < 1: self.speed = 0

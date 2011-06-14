@@ -54,7 +54,7 @@ class Hud(object):
             x += 1
           
         
-    def update(self, screen, size, time, frames):  
+    def update(self, screen, size, time, frames, move):  
         
         # Time and Score     
         screen.blit(self.font.render("SCORE:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,SPACING + SHADOW_OFFSET) )
@@ -71,7 +71,8 @@ class Hud(object):
         
         #msg = str(frames / (pygame.time.get_ticks() / 1000) )
         #msg = str(android.accelerometer_reading()[1])
-        #screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )      
+        msg = str(move)
+        screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )      
         
         # Skills
         x = 0

@@ -9,7 +9,6 @@ except ImportError:
 
 settings = iniget.iniGet("settings.ini")
 
-
 # Define some colors
 white    = ( 255, 255, 255)
 
@@ -48,7 +47,7 @@ class Game(object):
 
         # Sprites
         self.all_sprites_list = pygame.sprite.RenderPlain()
-
+        
         # Init da Chomp
         self.chomp = chompy.Chompy()
         self.all_sprites_list.add(self.chomp)   
@@ -66,7 +65,7 @@ class Game(object):
         self.transition = transition.Transition()
 
         # Game State: 0-Playing, 1-Main Menu, 2-Pack Select
-        self.state = 2
+        self.state = 1
         
         # Init Game Map
         self.level = gamemap.Gamemap()
@@ -85,6 +84,7 @@ class Game(object):
         # Options for each game state
         options = {
             0: self.startLevel,      # Playing
+            1: self.menu,       # Main Menu
             2: self.packSelect       # Map Pack Select
         }
     
@@ -102,7 +102,94 @@ class Game(object):
             
         # Exit Game
         pygame.quit()
+        
+    def menu(self):
+        done = 0
+        
+        # Screen size
+        size = self.screen.get_size()
+        
+        # Load background        
+        background = pygame.image.load("gfx/menu_bg.png").convert()
+        title_logo = pygame.image.load("gfx/title_logo.png").convert_alpha()        
+        bg_rect = background.get_rect()
+        
+        tl_rect_big = title_logo.get_rect()
+        
+        new_size = [tl_rect_big.w / (tl_rect_big.h / size[1]) , size[1] ]                
+        title_logo_sized = pygame.transform.smoothscale(title_logo, (new_size[0], new_size[1]))
+        
+        tl_rect = title_logo_sized.get_rect()
+        if size[1] > bg_rect.h: bgrows = int(math.ceil(size[1] / bg_rect.h) * 2)
+        if size[0] > bg_rect.w: bgcols = int(math.ceil(size[0] / bg_rect.w) * 2)
+        
+        tl_rect.x = (size[0] / 2) - (tl_rect.w / 2)
+        tl_rect.y = (size[1] / 2) - (tl_rect.h / 2)
+   
+        bgoffset = 0
+        while not done:
+            # Set frame rate to 30.
+            self.clock.tick(30)      
+            events = pygame.event.get()
+            
+            # Android events
+            if android:
+                if android.check_pause():
+                    android.wait_for_resume()
+              
+                          
+            for event in events: # User did something
+                if event.type == pygame.QUIT: # If user clicked close
+                    done=True # Flag that we are done so we exit this loop
+                    self.state = -1 # Set game state to -1(Quit)
 
+                elif event.type == pygame.VIDEORESIZE:
+                    self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
+                    size = event.size
+
+                    if size[1] > bg_rect.h: bgrows = int(math.ceil(size[1] / bg_rect.h) * 2)
+                    if size[0] > bg_rect.w: bgcols = int(math.ceil(size[0] / bg_rect.w) * 2)
+                    bg_rect.x = 0
+                    bg_rect.y = 0
+                    bgoffset = 0
+                   
+                    new_size = [tl_rect_big.w / (tl_rect_big.h / size[1]) , size[1] ]                
+                    title_logo_sized = pygame.transform.smoothscale(title_logo, (new_size[0], new_size[1]))       
+                    
+                    tl_rect = title_logo_sized.get_rect()
+                    tl_rect.x = (size[0] / 2) - (tl_rect.w / 2)
+                    tl_rect.y = (size[1] / 2) - (tl_rect.h / 2)
+                    
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    done = 1
+                    self.state = 2
+                   
+           
+            # Background       
+            bg_rect.x -= bg_rect.w 
+            bg_rect.y -= bg_rect.h
+            for yy in xrange(bgrows):
+                for xx in xrange(bgcols):
+                    # Start a new row
+                    if xx == 0 and yy > 0:
+                        # Move the rectangle
+                        bg_rect = bg_rect.move([-(bgcols -1 ) * bg_rect.w, bg_rect.h])
+                    # Continue a row
+                    if xx > 0:
+                        # Move the rectangle
+                        bg_rect = bg_rect.move([bg_rect.w, 0])
+                    self.screen.blit(background, bg_rect)
+            bg_rect.x = 0 + bgoffset
+            bg_rect.y = 0 + bgoffset
+            bgoffset -= 1
+            if bgoffset > 10: bgoffset = 0
+            
+            # Title Logo
+            self.screen.blit(title_logo_sized, tl_rect)
+               
+            # Go ahead and update the screen with what we've drawn.
+            pygame.display.flip()             
+        
     def packSelect(self):
         self.map_file = "map2.map"
         self.state = 0
@@ -175,16 +262,25 @@ class Game(object):
                   self.state = -1 # Set game state to -1(Quit)
               
               elif event.type == pygame.MOUSEBUTTONDOWN: 
-                  move = (event.pos[0] - (size[0] / 2))
+                  move = (event.pos[0] - (size[0] / 2.0)) / (size[0] / 8.0)
       
               elif event.type == pygame.MOUSEBUTTONUP: 
                   move = 0
                   
               elif event.type == pygame.MOUSEMOTION and move:
-                  move = (event.pos[0] - (size[0] / 2))
+                  move = (event.pos[0] - (size[0] / 2.0)) / (size[0] / 8.0)
               
               elif event.type == pygame.KEYDOWN:
-                  if event.key == 292: pygame.display.toggle_fullscreen()
+                  # Move with keyboard
+                  if event.key == pygame.K_LEFT: move = -4
+                  elif event.key == pygame.K_RIGHT: move = 4
+                  
+                  # Toogle Fullscreen
+                  elif event.key == 292: pygame.display.toggle_fullscreen()
+                  
+              elif event.type == pygame.KEYUP:
+                  # Move with keyboard
+                  if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT: move = 0                               
                   
               elif event.type == pygame.VIDEORESIZE:
                   self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
@@ -197,8 +293,8 @@ class Game(object):
               android.wait_for_resume()
               
             accel = android.accelerometer_reading()
-            if abs(accel[1]) > 1.5:
-                move = accel[1]
+            if abs(accel[1]) > .5:
+                move = accel[1] * 1.4
 
               
           lscroll = scroll
@@ -227,6 +323,10 @@ class Game(object):
               
               # If Chompy can't move it's game over...
               if not self.chomp.moveok and self.chomp.speed == 0: 
+                if self.chomp.stopclock < 0: self.chomp.stopclock = 30
+              else: self.chomp.stopclock = -1
+
+              if self.chomp.stopclock == 0:
                 self.level.state = 2
               
               # If Chompy falls below the level...
@@ -242,7 +342,7 @@ class Game(object):
                   self.dlogbox.setMessageBox(size,"Chompy didn't make it...", "Oh No!!", [['Retry',self.levelTransition],['Quit',sys.exit]] )
                 
               # Update Hud
-              self.hud.update(self.screen,size,time,self.frames)
+              self.hud.update(self.screen,size,time,self.frames,move)
               self.hud.checkSkillActivation(events, size, self.chomp, self.sound)
               # Check level state
               if self.level.state == 1:
