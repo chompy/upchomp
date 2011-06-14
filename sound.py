@@ -45,7 +45,9 @@ class Sound(object):
     def stopAllSfx(self):
         for i in range(len(self.sfx)):
             self.sfx[i][0] = ""              
-            self.sfx[i][1].stop()
+            self.sfx[i][3] = 0        
+            if self.sfx[i][1].get_busy():
+                self.sfx[i][1].stop()
             
     def stopSfxFile(self, file):
         for i in range(len(self.sfx)):

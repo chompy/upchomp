@@ -68,6 +68,9 @@ class Game(object):
         # Game State: 0-Playing, 1-Main Menu, 2-Pack Select
         self.state = 2
         
+        # Init Game Map
+        self.level = gamemap.Gamemap()
+        
         # Frame rate
         self.frames = 1
         
@@ -101,8 +104,12 @@ class Game(object):
         pygame.quit()
 
     def packSelect(self):
-        self.map_file = "map1.map"
+        self.map_file = "map2.map"
         self.state = 0
+        
+    def nextLevel(self):
+        self.level.current_map += 1
+        self.levelTransition()
                         
     def levelTransition(self):
         size = self.screen.get_size()
@@ -119,10 +126,11 @@ class Game(object):
         
         # Screen size
         size = self.screen.get_size()
-        
-        # Init da level
-        self.level = gamemap.Gamemap(self.map_file)
 
+        # Load Level
+        self.level.loadLevel(self.map_file)  
+        self.level.state = 0
+        
         # Place character in level
         pos = self.level.parser.get(self.level.packMaps[self.level.current_map],"startpos").split(",")
         self.chomp.pos[0] = int(pos[0]) * self.level.tilesize[0]
@@ -132,7 +140,7 @@ class Game(object):
         scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]       
                         
         # If player is moving...
-        move = 0
+        move = 0      
         
         # Level time
         start_time = pygame.time.get_ticks()
@@ -146,6 +154,9 @@ class Game(object):
         
         #Loop until the user clicks the close button.
         done=False
+
+        # Stop all sounds
+        self.sound.stopAllSfx()
 
         pygame.event.set_allowed((pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEMOTION, pygame.VIDEORESIZE, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP))                    
         # -------- Main Program Loop -----------
@@ -238,7 +249,7 @@ class Game(object):
                   self.chomp.speed = 0
                   self.chomp.falling = 0
                   if self.transition.type == 0: 
-                    self.dlogbox.setMessageBox(size,"SCORE: 4000 / TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',sys.exit]] )
+                    self.dlogbox.setMessageBox(size,"SCORE: 4000 / TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
           
           # Reset time as long as dialog box is up
           else:

@@ -2,7 +2,7 @@ import pygame, math, iniget
 
 class Gamemap(object): 
 
-    def __init__(self, map="map1.map"):
+    def __init__(self):
         
         """
         Inits the gamemap module, allows maps to be loaded and rendered.
@@ -14,10 +14,8 @@ class Gamemap(object):
 
         # Level states... 0-Playing, 1-Won, 2-Lost
         self.state = 0      
-        
-        # Load the first map
-        self.loadLevel()  
-                                  
+              
+        self.current_map = 0                           
    
     def loadLevel(self, map="map1.map"):
     
@@ -31,7 +29,7 @@ class Gamemap(object):
 
         # Current map
         self.packMaps = self.parser.get("pack","order").split(",")
-        self.current_map = 0         
+        
         
         # Load theme
         self.themeparser = iniget.iniGet("tile/" + self.parser.get(self.packMaps[self.current_map],"theme") + ".ini")    
