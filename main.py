@@ -88,7 +88,7 @@ class Game(object):
         options = {
             0: self.startLevel,      # Playing
             1: self.displayMenu,     # Main Menu
-            2: self.packSelect       # Map Pack Select
+            2: self.mapSelect        # Map Pack Select
         }
 
         done = False
@@ -108,10 +108,12 @@ class Game(object):
 
     def displayMenu(self):
         self.state = self.menu.show(self.screen, self.clock)
-
-    def packSelect(self):
-        self.map_file = "map2.map"
-        self.state = 0
+        
+    def mapSelect(self):
+        self.map_file = self.menu.mapSelect(self.screen, self.clock)  
+        if self.map_file == 0: self.state = 1
+        elif self.map_file == -1: self.state = -1
+        else: self.state = 0     
 
     def nextLevel(self):
         self.level.current_map += 1
@@ -191,8 +193,8 @@ class Game(object):
 
                 elif event.type == pygame.KEYDOWN:
                     # Move with keyboard
-                    if event.key == pygame.K_LEFT: move = -4
-                    elif event.key == pygame.K_RIGHT: move = 4
+                    if event.key == pygame.K_LEFT: move = -2.5
+                    elif event.key == pygame.K_RIGHT: move = 2.5
 
                     # Toogle Fullscreen
                     elif event.key == 292: pygame.display.toggle_fullscreen()

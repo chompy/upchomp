@@ -3,7 +3,7 @@ import pygame, math
 GRAVITY = -9.81
 grav_rate = GRAVITY / 20
 max_speed = 6.0
-speed_rate = max_speed * 1.5
+speed_rate = max_speed / 10
 
 TILE_SIZE = [32,32]
 
@@ -131,14 +131,14 @@ class Chompy(pygame.sprite.Sprite):
             elif move < 0 and move > -.5: move = -.5
 
             self.pos[0] += math.floor(self.speed)
-            if move > 0 and self.speed < max_speed: self.speed += (max_speed / 5) * abs(move)
-            if move < 0 and self.speed > max_speed * -1: self.speed -= (max_speed / 5) * abs(move)
+            if move > 0 and self.speed < max_speed: self.speed += speed_rate
+            if move < 0 and self.speed > max_speed * -1: self.speed -= speed_rate
  
         else:
             self.pos[0] += math.floor(self.speed)
             if abs(self.speed) < 1: self.speed = 0
-            elif self.speed > 0: self.speed -= (float(max_speed) / (speed_rate * 4) )
-            elif self.speed < 0: self.speed += (float(max_speed) / (speed_rate * 4) )
+            elif self.speed > 0: self.speed -= speed_rate / 4
+            elif self.speed < 0: self.speed += speed_rate / 4
 
         # If Chompy goes up into the air reenable movement.
         if self.falling < 0: self.moveok = 1

@@ -210,3 +210,46 @@ class Dialog(object):
                     
             
         return 1
+        
+    def makeButton(self, text, btnpos, size, screen, events):
+
+        """
+        Makes a button that can be placed anywhere.
+        """
+    
+        button_text_size = self.font.size(text)
+        button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
+        rect = pygame.Rect(btnpos[0], btnpos[1], button_tile_width * TILE_SIZE[0], TILE_SIZE[1])
+        
+        btn_state = 0
+        btn_click = 0
+        
+        # Get mouse pos to see if roll over
+        mouse_pos = pygame.mouse.get_pos()
+        if rect.collidepoint(mouse_pos[0], mouse_pos[1]): 
+            btn_state = 1
+                       
+            # See if mouse button was clicked
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN: btn_click = 1
+        
+        for x in range(0, button_tile_width):
+            pos = [btnpos[0] + (x * TILE_SIZE[0]) + (TILE_SIZE[0] / 2), btnpos[1]]
+           
+            if x == 0:
+                screen.blit(self.tile_table[3][btn_state], (pos[0],pos[1]) )
+            elif x > 0 and x < button_tile_width - 1:
+                screen.blit(self.tile_table[4][btn_state], (pos[0],pos[1]) )     
+            elif x == button_tile_width - 1:                           
+                screen.blit(self.tile_table[5][btn_state], (pos[0],pos[1]) )     
+               
+        # Display Button Text
+        self.font.set_bold(1)                   
+        screen.blit(self.font.render(text, 0, self.title_color), ( btnpos[0] + TILE_SIZE[0] + (button_tile_width / 2), btnpos[1] + ((TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2)) ))
+        
+        return btn_click
+        
+    def getButtonSize(self, text):
+        button_text_size = self.font.size(text)
+        button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
+        return [button_tile_width * TILE_SIZE[0], TILE_SIZE[1]]
