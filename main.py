@@ -21,7 +21,7 @@ class Game(object):
         pygame.init()
 
         # Set size here so Android can overwrite it.
-        size=[420,320]
+        size=[640,480]
 
         # Do some android stuff
         if android:
