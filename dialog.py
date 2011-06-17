@@ -181,7 +181,8 @@ class Dialog(object):
                 self.buttonstate[i] = 0
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if close_btn.collidepoint(event.pos[0], event.pos[1]):
-                    self.closeMessageBox() 
+                    self.closeMessageBox()
+                    return -1 
                 for i in range(len(self.button)):
                     button_text_size = self.font.size(self.button[i][0])
                     button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
@@ -206,7 +207,7 @@ class Dialog(object):
                         
             # If screen size changes
             elif event.type == pygame.VIDEORESIZE:
-                self.calculateSize(event.size)                  
+                self.calculateSize(event.size)
                     
             
         return 1

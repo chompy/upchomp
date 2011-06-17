@@ -124,7 +124,6 @@ class Game(object):
         self.transition.verticalSwipe(size)
         self.dlogbox.closeMessageBox()
 
-
     def startLevel(self):
 
         """Loads a level and begins gameplay."""
@@ -235,8 +234,9 @@ class Game(object):
             if android: self.sound.update()
 
             # If a dialog box isn't up...
-            if not self.dlogbox.drawBox(self.screen,size,events):
-                    # Draw Sprites
+            dbox = self.dlogbox.drawBox(self.screen, size, events)
+            if not dbox:
+                # Draw Sprites
                 self.all_sprites_list.draw(self.screen)
                 # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
                 if not self.level.state: self.chomp.update(scroll, self.screen, move, size, self.sound)
@@ -271,6 +271,10 @@ class Game(object):
                     if self.transition.type == 0:
                         self.dlogbox.setMessageBox(size,"SCORE: 4000 / TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
 
+            # If closed by clicking X.
+            elif dbox == -1: 
+                done = 1
+                self.state = 2
             # Reset time as long as dialog box is up
             else:
                 start_time = pygame.time.get_ticks()

@@ -220,7 +220,7 @@ class Gamemap(object):
                         # Wait till first frame of animation is shown before springing.
                         for y in range(len(self.collide_animation)):
                             if self.collide_animation[y][0] == x:
-                                if self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate) > .3:
+                                if self.ani_framerate > 0 and fps > 0 and self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate) > .3:
                                     chomp.falling = i['value'] * -1
                                     sound.playSfx("sfx/spring.wav", 0)
 

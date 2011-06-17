@@ -32,9 +32,8 @@ class Hud(object):
                 line.append(image.subsurface(rect))
 
     def loadSkills(self, size, skills = 0):
-
-        # If skills is provided then load them in, otherwise we're just resizing the screen.
-        if skills:
+        # If skills is provided then load them in, otherwise we're just resizing the screen.      
+        if not skills[0] == '' or not skills:
             self.skills = {
                 'up'        : 0,
                 'heli'      : 0
@@ -43,16 +42,19 @@ class Hud(object):
             for i in skills:
                 self.skills[i] += 1
 
-        x = 0
-        self.skill_data = []
-        for i in self.skills:
-            self.skill_data.append([
-              i,
-              [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
-              pygame.Rect(math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0] * 2, SKILL_TILE_SIZE[1])
-            ])
-            x += 1
-
+            x = 0        
+            self.skill_data = []
+        
+            for i in self.skills:
+                self.skill_data.append([
+                  i,
+                  [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
+                  pygame.Rect(math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0] * 2, SKILL_TILE_SIZE[1])
+                ])
+                x += 1
+        else:
+            self.skill_data = 0
+       
 
     def update(self, screen, size, time, frames, move):
 
@@ -76,16 +78,17 @@ class Hud(object):
 
         # Skills
         x = 0
-        for i in self.skill_data:
-            if self.skills[i[0]] > 0:
-                pos = i[1]
-                # Render skill icon
-                screen.blit(self.tile_table[self.skilltiles[i[0]][0]][self.skilltiles[i[0]][1]], (pos[0],pos[1]) )
-                # Render skill amount text
-                screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.dropshadow_color), (  pos[0] + SKILL_TILE_SIZE[0] + SHADOW_OFFSET , pos[1] + SHADOW_OFFSET) )
-                screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.object_color), (  pos[0] + SKILL_TILE_SIZE[0] , pos[1]) )
-
-                x += 1
+        if self.skill_data:
+            for i in self.skill_data:
+                if self.skills[i[0]] > 0:
+                    pos = i[1]
+                    # Render skill icon
+                    screen.blit(self.tile_table[self.skilltiles[i[0]][0]][self.skilltiles[i[0]][1]], (pos[0],pos[1]) )
+                    # Render skill amount text
+                    screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.dropshadow_color), (  pos[0] + SKILL_TILE_SIZE[0] + SHADOW_OFFSET , pos[1] + SHADOW_OFFSET) )
+                    screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.object_color), (  pos[0] + SKILL_TILE_SIZE[0] , pos[1]) )
+    
+                    x += 1
 
         # Quit button
         screen.blit(self.tile_table[2][2], ( size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)) )
@@ -98,15 +101,16 @@ class Hud(object):
             # Activate skills with keyboard
             if event.type == pygame.KEYDOWN:
                 # skills
-                for i in range(len(self.skill_data)):
-                    key = pygame.key.name(event.key)
-                    try:
-                        if int(key) == i + 1:
-                            if self.skills[ self.skill_data[i][0] ] > 0:
-                                self.skills[ self.skill_data[i][0] ] -= 1
-                                chomp.activateSkill( self.skill_data[i][0], sound )
-                    except ValueError:
-                        break
+                if self.skill_data:
+                    for i in range(len(self.skill_data)):
+                        key = pygame.key.name(event.key)
+                        try:
+                            if int(key) == i + 1:
+                                if self.skills[ self.skill_data[i][0] ] > 0:
+                                    self.skills[ self.skill_data[i][0] ] -= 1
+                                    chomp.activateSkill( self.skill_data[i][0], sound )
+                        except ValueError:
+                            break
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # Quit button
@@ -116,9 +120,10 @@ class Hud(object):
                     quit()
 
                 # Other buttons
-                for i in self.skill_data:
-                    button_rect = i[2]
-                    if button_rect.collidepoint(event.pos[0], event.pos[1]):
-                        if self.skills[i[0]] > 0:
-                            self.skills[i[0]] -= 1
-                            chomp.activateSkill(i[0], sound)
+                if self.skill_data:
+                    for i in self.skill_data:
+                        button_rect = i[2]
+                        if button_rect.collidepoint(event.pos[0], event.pos[1]):
+                            if self.skills[i[0]] > 0:
+                                self.skills[i[0]] -= 1
+                                chomp.activateSkill(i[0], sound)
