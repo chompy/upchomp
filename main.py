@@ -110,6 +110,7 @@ class Game(object):
         self.state = self.menu.show(self.screen, self.clock)
         
     def mapSelect(self):
+        self.level.current_map = 0
         self.map_file = self.menu.mapSelect(self.screen, self.clock)  
         if self.map_file == 0: self.state = 1
         elif self.map_file == -1: self.state = -1

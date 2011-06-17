@@ -33,7 +33,9 @@ class Hud(object):
 
     def loadSkills(self, size, skills = 0):
         # If skills is provided then load them in, otherwise we're just resizing the screen.      
-        if not skills[0] == '' or not skills:
+        if not skills or skills[0] == '': skills = 0
+        
+        if skills:
             self.skills = {
                 'up'        : 0,
                 'heli'      : 0
