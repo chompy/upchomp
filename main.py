@@ -223,7 +223,7 @@ class Game(object):
 
             # Draw the background
             self.screen.fill(white)
-            self.level.drawBackground(self.screen,scroll)
+            self.level.drawBackground(self.screen, scroll, size)
 
             # Draw tiles and handle tile collision with player
             self.level.updateTiles(self.screen,scroll,size,(self.frames / ((pygame.time.get_ticks() / 1000) + 1) ) ,self.chomp, self.sound)

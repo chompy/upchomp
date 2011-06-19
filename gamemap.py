@@ -75,12 +75,28 @@ class Gamemap(object):
             self.background = pygame.image.load("gfx/" + self.themeparser.get("images","background")).convert()
             self.bg_rect = self.background.get_rect()
 
-            if screensize[1] > self.mapheight * self.tilesize[1]: self.bgrows = (int(screensize[1]/self.bg_rect.height) + 1) * 4
-            else: self.bgrows = (int( (self.mapheight * self.tilesize[1]) /self.bg_rect.height) + 1) * 4
+            if not self.themeparser.getBool("images","no_repeat_y"):
+                if screensize[1] > self.mapheight * self.tilesize[1]: self.bgrows = (int(screensize[1]/self.bg_rect.height) + 1) * 4
+                else: self.bgrows = (int( (self.mapheight * self.tilesize[1]) /self.bg_rect.height) + 1) * 4
+            else: self.bgrows = 1
 
+            
             if screensize[0] > self.mapwidth * self.tilesize[0]: self.bgcolumns = (int(screensize[0]/self.bg_rect.width) + 1) * 4
-            else: self.bgcolumns = (int( (self.mapwidth * self.tilesize[0]) /self.bg_rect.width) + 1) * 4
+            else: self.bgcolumns = (int( (self.mapwidth * self.tilesize[0]) /self.bg_rect.width) + 1) * 4            
 
+        if self.themeparser.get("images","background2"):
+            self.background2 = pygame.image.load("gfx/" + self.themeparser.get("images","background2")).convert_alpha()
+            self.bg_rect2 = self.background2.get_rect()
+
+            if not self.themeparser.getBool("images","no_repeat_y"):
+                if screensize[1] > self.mapheight * self.tilesize[1]: self.bgrows2 = (int(screensize[1]/self.bg_rect2.height) + 1) * 4
+                else: self.bgrows2 = (int( (self.mapheight * self.tilesize[1]) /self.bg_rect2.height) + 1) * 4
+            else: self.bgrows2 = 1
+
+            
+            if screensize[0] > self.mapwidth * self.tilesize[0]: self.bgcolumns2 = (int(screensize[0]/self.bg_rect2.width) + 1) * 4
+            else: self.bgcolumns2 = (int( (self.mapwidth * self.tilesize[0]) /self.bg_rect2.width) + 1) * 4              
+            
         # Calculate Map stuff
         self.calcMap(screensize)
 
@@ -101,7 +117,7 @@ class Gamemap(object):
         return rect.colliderect(tile_rect)
 
 
-    def drawBackground(self,screen,scroll):
+    def drawBackground(self, screen, scroll, size):
 
         """
         Draws a background image and gives it paralax.
@@ -111,8 +127,8 @@ class Gamemap(object):
         """
 
         if self.themeparser.get("images","background"):
-            self.bg_rect.x -= self.bg_rect.w + (scroll[0] / 8)
-            self.bg_rect.y -= self.bg_rect.h + (scroll[1] / 8)
+            self.bg_rect.x -= self.bg_rect.w - (scroll[0] / 16)
+            self.bg_rect.y -= self.bg_rect.h - (scroll[1] / 16)
             for yy in xrange(self.bgrows):
                 for xx in xrange(self.bgcolumns):
                     # Start a new row
@@ -123,9 +139,34 @@ class Gamemap(object):
                     if xx > 0:
                         # Move the rectangle
                         self.bg_rect = self.bg_rect.move([self.bg_rect.width, 0])
+                    
+                    # Bind BG to bottom if only one vertical image.        
+                    if self.bgrows == 1: self.bg_rect.y = size[1] - self.bg_rect.h
+                    
                     screen.blit(self.background,self.bg_rect)
             self.bg_rect.x = 0
             self.bg_rect.y = 0
+            
+        if self.themeparser.get("images","background2"):
+            self.bg_rect2.x -= self.bg_rect2.w - (scroll[0] / 8)
+            self.bg_rect2.y -= self.bg_rect2.h - (scroll[1] / 8)
+            for yy in xrange(self.bgrows2):
+                for xx in xrange(self.bgcolumns2):
+                    # Start a new row
+                    if xx == 0 and yy > 0:
+                        # Move the rectangle
+                        self.bg_rect2 = self.bg_rect2.move([-(self.bgcolumns2 -1 ) * self.bg_rect2.width, self.bg_rect2.height])
+                    # Continue a row
+                    if xx > 0:
+                        # Move the rectangle
+                        self.bg_rect2 = self.bg_rect2.move([self.bg_rect2.width, 0])
+                    
+                    # Bind BG to bottom if only one vertical image.        
+                    if self.bgrows2 == 1: self.bg_rect2.y = size[1] - self.bg_rect2.h
+                    
+                    screen.blit(self.background2,self.bg_rect2)
+            self.bg_rect2.x = 0
+            self.bg_rect2.y = 0            
 
 
     def calcMap(self, size):

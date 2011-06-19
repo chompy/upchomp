@@ -9,17 +9,17 @@ class iniGet(object):
     def get(self, group, item):
         try:
             return self.parser.get(group, item)
-        except ValueError, KeyError:
+        except:
             return 0
 
     def getInt(self, group, item):
         try:
             return self.parser.getint(group, item)
-        except ValueError, KeyError:
+        except:
             return 0
 
     def getBool(self, group, item):
         try:
             return self.parser.getboolean(group, item)
-        except ValueError, KeyError:
+        except:
             return 0
