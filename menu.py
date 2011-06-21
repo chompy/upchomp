@@ -1,5 +1,9 @@
-import pygame, math, os, iniget, dialog
+import pygame, math, os, iniget, dialog, imagehelper
 
+# Image Helper Object
+imghelp = imagehelper.imageHelper()
+
+# Attempt to load Android modules.
 try:
     import android, android_mixer
 except ImportError:
@@ -17,13 +21,7 @@ class Menu(object):
         scrollarrows = pygame.image.load("gfx/scroll_arrows.png").convert_alpha()
         image_width, image_height = scrollarrows.get_size()
         tile_image_size = [image_width,image_height]
-        self.scrollarrows = []
-        for tile_x in range(0, image_width/TILE_SIZE[0]):
-            line = []
-            self.scrollarrows.append(line)
-            for tile_y in range(0, image_height/TILE_SIZE[1]):
-                rect = (tile_x*TILE_SIZE[0], tile_y*TILE_SIZE[1], TILE_SIZE[0], TILE_SIZE[1])
-                line.append(scrollarrows.subsurface(rect))        
+        self.scrollarrows = imghelp.makeTiles(scrollarrows, TILE_SIZE)    
         
         # Load font
         self.font = pygame.font.Font("font/volter.ttf",18)
@@ -33,7 +31,7 @@ class Menu(object):
         self.background = pygame.image.load("gfx/menu_bg.png").convert()
         self.bg_rect = self.background.get_rect()  
         self.bgoffset = 0     
-          
+    
     def show(self, screen, clock):
         done = 0
         menu_end_state = 0
@@ -310,7 +308,10 @@ class Menu(object):
             if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, screen, events):
                 returnVal = 0
                 done = 1
-                        
+             
+            # Dialog Box
+            self.dialog.drawBox(screen, size, events)
+                           
             # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()     
             

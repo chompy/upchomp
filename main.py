@@ -1,4 +1,4 @@
-import pygame, math, menu, chompy, sound, gamemap, dialog, hud, transition, sys, iniget
+import pygame, math, menu, chompy, sound, gamemap, dialog, hud, transition, sys, iniget, traceback
 
 try:
     import android, android_mixer
@@ -8,6 +8,7 @@ except ImportError:
     android = None
 
 settings = iniget.iniGet("settings.ini")
+error_log = open('error.log', 'w')
 
 # Define some colors
 white    = ( 255, 255, 255)
@@ -136,8 +137,14 @@ class Game(object):
         size = self.screen.get_size()
 
         # Load Level
-        self.level.loadLevel(self.map_file)
-        self.level.state = 0
+        try:
+            self.level.loadLevel(self.map_file)
+            self.level.state = 0
+        except:
+            traceback.print_exc(5, error_log)
+            self.menu.dialog.setMessageBox(size, "There was an error with loading this map.", "Error", [['OK',self.menu.dialog.closeMessageBox]] )  
+            self.state = 2
+            return 0
 
         # Place character in level
         pos = self.level.parser.get(self.level.packMaps[self.level.current_map],"startpos").split(",")

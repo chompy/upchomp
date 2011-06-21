@@ -1,5 +1,9 @@
-import pygame, math
+import pygame, math, imagehelper
 
+# Image Helper Object
+imghelp = imagehelper.imageHelper()
+
+# Constants
 GRAVITY = -9.81
 grav_rate = GRAVITY / 20
 max_speed = 6.0
@@ -18,7 +22,7 @@ class Chompy(pygame.sprite.Sprite):
         
         # Heli Skill tiles
         self.heli = pygame.image.load("gfx/heli.png").convert_alpha()
-        self.heli_tiles = self.loadTiles(self.heli)
+        self.heli_tiles = imghelp.makeTiles(self.heli, TILE_SIZE)
 
         self.progress = pygame.Surface((TILE_SIZE[0], 1))
 
@@ -32,26 +36,6 @@ class Chompy(pygame.sprite.Sprite):
             'heli'    : 0,
             'up'      : 0
         }
-
-    def loadTiles(self, image):
-
-        """
-        Load tiled images.
-
-        @param pygame.image.load
-        @return array Tile table
-        """
-
-        image_width, image_height = image.get_size()
-        tile_table = []
-        for tile_x in range(0, image_width/TILE_SIZE[0]):
-            line = []
-            tile_table.append(line)
-            for tile_y in range(0, image_height/TILE_SIZE[1]):
-                rect = (tile_x*TILE_SIZE[0], tile_y*TILE_SIZE[1], TILE_SIZE[0], TILE_SIZE[1])
-                line.append(image.subsurface(rect))
-
-        return tile_table
 
     def reset(self):
 

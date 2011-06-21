@@ -1,4 +1,9 @@
-import pygame, math
+import pygame, math, imagehelper
+
+# Image Helper Object
+imghelp = imagehelper.imageHelper()
+
+# Constants
 SPACING = 24
 SHADOW_OFFSET = 2
 SKILL_TILE_SIZE = [32,32]
@@ -23,13 +28,7 @@ class Hud(object):
         image = pygame.image.load("gfx/skills.png").convert_alpha()
         image_width, image_height = image.get_size()
         self.tile_image_size = [image_width,image_height]
-        self.tile_table = []
-        for tile_x in range(0, image_width/SKILL_TILE_SIZE[0]):
-            line = []
-            self.tile_table.append(line)
-            for tile_y in range(0, image_height/SKILL_TILE_SIZE[1]):
-                rect = (tile_x*SKILL_TILE_SIZE[0], tile_y*SKILL_TILE_SIZE[1], SKILL_TILE_SIZE[0], SKILL_TILE_SIZE[1])
-                line.append(image.subsurface(rect))
+        self.tile_table = imghelp.makeTiles(image, SKILL_TILE_SIZE)
 
     def loadSkills(self, size, skills = 0):
         # If skills is provided then load them in, otherwise we're just resizing the screen.      
