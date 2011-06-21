@@ -93,7 +93,19 @@ class Dialog(object):
         else: btn_space_add = 0
                 
         self.boxsize = [box_text_size[0] + TILE_SIZE[0], box_text_size[1] + (TILE_SIZE[1] * self.text_push) + (TILE_SIZE[1] * btn_space_add)]
-        self.boxrange = [math.floor(self.boxsize[0] / TILE_SIZE[0]) + 1, math.floor(self.boxsize[1] / TILE_SIZE[1]) + 1]       
+        self.boxrange = [math.floor(self.boxsize[0] / TILE_SIZE[0]) + 1, math.floor(self.boxsize[1] / TILE_SIZE[1]) + 1]   
+        
+        
+        # Get Button Size
+        button_width = 0
+        for i in range(len(self.button)):
+            button_text_size = self.font.size(self.button[i][0])
+            button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
+            button_width += button_tile_width * TILE_SIZE[0]
+            
+        if button_width > self.boxsize[0]: 
+            self.boxsize[0] = button_width
+            self.boxrange[0] = math.floor(button_width / TILE_SIZE[0]) + 2
                             
     def drawBox(self,screen,size,events):
         if not self.showbox: return 0

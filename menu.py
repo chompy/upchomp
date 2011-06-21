@@ -4,13 +4,27 @@ try:
     import android, android_mixer
 except ImportError:
     android = None
+    
+TILE_SIZE = [32,32]    
 
 class Menu(object):
     def __init__(self):
 
         # Dialog
         self.dialog = dialog.Dialog()
-    
+        
+        # Scroll Arrows
+        scrollarrows = pygame.image.load("gfx/scroll_arrows.png").convert_alpha()
+        image_width, image_height = scrollarrows.get_size()
+        tile_image_size = [image_width,image_height]
+        self.scrollarrows = []
+        for tile_x in range(0, image_width/TILE_SIZE[0]):
+            line = []
+            self.scrollarrows.append(line)
+            for tile_y in range(0, image_height/TILE_SIZE[1]):
+                rect = (tile_x*TILE_SIZE[0], tile_y*TILE_SIZE[1], TILE_SIZE[0], TILE_SIZE[1])
+                line.append(scrollarrows.subsurface(rect))        
+        
         # Load font
         self.font = pygame.font.Font("font/volter.ttf",18)
         self.titlefont = pygame.font.Font("font/volter2.ttf",28)
@@ -210,18 +224,27 @@ class Menu(object):
                 elif event.type == pygame.VIDEORESIZE:
                     self.resizeTitle(event.size, screen)
                     size = event.size
+                    map_list_scroll = 0
+                    map_selected = 0                    
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     x = 0
                     for i in mapList:
                         fontSize = self.font.size(i[1])
-                        rect = pygame.Rect(64, x * LIST_SPACING + LIST_START_POS, fontSize[0], fontSize[1])
+                        rect = pygame.Rect(64, x * LIST_SPACING + LIST_START_POS - (map_list_scroll * LIST_SPACING), fontSize[0], fontSize[1])
                         if rect.collidepoint(event.pos[0], event.pos[1]):
                             map_selected = x
-                        x += 1   
+                        x += 1 
+                        
+                    if scroll_down_collide and scroll_down:
+                        map_list_scroll += 1  
+                        if map_list_scroll > cut_off: map_list_scroll = cut_off
+
+                    if scroll_up_collide and map_list_scroll > 0:
+                        map_list_scroll -= 1
+ 
                    
             # Render the background
-            
             self.renderBg(size, screen)
             
             # Title Text
@@ -232,12 +255,49 @@ class Menu(object):
             # Map List
             
             x = 0
+            scroll_down = 0
+            max_text_width = 0
+            cut_off = 0
             for i in mapList:
-                screen.blit( self.font.render(i[1], 0, [0,0,0]), (66, x * LIST_SPACING + LIST_START_POS + 2) )
-                screen.blit( self.font.render(i[1], 0, [255,255,255]), (64, x * LIST_SPACING + LIST_START_POS) )
+                pos = [64, x * LIST_SPACING + LIST_START_POS - (map_list_scroll * LIST_SPACING) ]
+                if self.font.size(i[1])[0] > max_text_width: max_text_width = self.font.size(i[1])[0]                
+                if not pos[1] > size[1] - 64 and not pos[1] < 64:                    
+                    screen.blit( self.font.render(i[1], 0, [0,0,0]), (pos[0] + 2, pos[1] + 2) )
+                    screen.blit( self.font.render(i[1], 0, [255,255,255]), (pos[0], pos[1]) )
+                else: 
+                    scroll_down = 1
+                    cut_off += 1
                 x += 1
+                
+            # Render scroll down arrow
+            if scroll_down and not map_list_scroll >= cut_off:
+                pos = [max_text_width + 78, size[1] - 92]
+                rect = pygame.Rect(pos[0], pos[1], TILE_SIZE[0], TILE_SIZE[1])
+                mouse = pygame.mouse.get_pos()
+                if not rect.collidepoint(mouse[0], mouse[1]):
+                    screen.blit( self.scrollarrows[0][0], (pos[0], pos[1]) )
+                    scroll_down_collide = 0
+                else: 
+                    screen.blit( self.scrollarrows[1][0], (pos[0], pos[1]) )
+                    scroll_down_collide = 1
+            else: scroll_down_collide = 0
+                                
+            # Render scroll up arrow
+            if map_list_scroll > 0:
+                pos = [max_text_width + 78, 64]
+                rect = pygame.Rect(pos[0], pos[1], TILE_SIZE[0], TILE_SIZE[1])
+                mouse = pygame.mouse.get_pos()
+                if not rect.collidepoint(mouse[0], mouse[1]):
+                    screen.blit( self.scrollarrows[0][1], (pos[0], pos[1]) )
+                    scroll_up_collide = 0
+                else: 
+                    screen.blit( self.scrollarrows[1][1], (pos[0], pos[1]) )
+                    scroll_up_collide = 1
+            else: scroll_up_collide = 0
             
+                        
             # Map Selected Arrow
+            if map_selected < map_list_scroll: map_selected = map_list_scroll
             screen.blit(maparrow, ( 32, LIST_START_POS + (LIST_SPACING * map_selected) - (LIST_SPACING * map_list_scroll)   ) )
             
  

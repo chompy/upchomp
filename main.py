@@ -237,11 +237,11 @@ class Game(object):
             # If a dialog box isn't up...
             dbox = self.dlogbox.drawBox(self.screen, size, events)
             if not dbox:
-                # Draw Sprites
-                self.all_sprites_list.draw(self.screen)
                 # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
                 if not self.level.state: self.chomp.update(scroll, self.screen, move, size, self.sound)
-
+                # Draw Sprites
+                self.all_sprites_list.draw(self.screen)
+                
                 # If Chompy can't move it's game over...
                 if not self.chomp.moveok and self.chomp.speed == 0:
                     if self.chomp.stopclock < 0: self.chomp.stopclock = 30

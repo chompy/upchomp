@@ -14,7 +14,8 @@ class Chompy(pygame.sprite.Sprite):
 
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("gfx/chompy.png").convert_alpha()
-
+        self.image2 = self.image
+        
         # Heli Skill tiles
         self.heli = pygame.image.load("gfx/heli.png").convert_alpha()
         self.heli_tiles = self.loadTiles(self.heli)
@@ -140,6 +141,7 @@ class Chompy(pygame.sprite.Sprite):
             elif self.speed > 0: self.speed -= speed_rate / 4
             elif self.speed < 0: self.speed += speed_rate / 4
 
+            
         # If Chompy goes up into the air reenable movement.
         if self.falling < 0: self.moveok = 1
 
