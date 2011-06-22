@@ -11,8 +11,10 @@ SKILL_TILE_SIZE = [32,32]
 class Hud(object):
 
     def __init__(self):
+    
+        """ Inits the Hud """
+    
         # Load font
-
         self.font = pygame.font.Font("font/volter2.ttf",18)
 
         self.object_color = [255, 179, 0]
@@ -29,8 +31,19 @@ class Hud(object):
         image_width, image_height = image.get_size()
         self.tile_image_size = [image_width,image_height]
         self.tile_table = imghelp.makeTiles(image, SKILL_TILE_SIZE)
+        
+        # Go back to map select if this var is true...
+        self.doMapSelect = 0
 
     def loadSkills(self, size, skills = 0):
+        
+        """
+        Loads up skills on the hud.
+        
+        @param array size - Size of screen.
+        @param array skills - Array containing names of all the skills to be used.
+        """
+    
         # If skills is provided then load them in, otherwise we're just resizing the screen.      
         if not skills or skills[0] == '': skills = 0
         
@@ -57,7 +70,15 @@ class Hud(object):
             self.skill_data = 0
        
 
-    def update(self, screen, size, time, frames, move):
+    def update(self, screen, size, time):
+    
+        """
+        Updates the hud on the screen.
+        
+        @param pygame.screen screen - Pygame screen object.
+        @param array size - Size of screen.
+        @param int time - Ticks the level as been running.
+        """
 
         # Time and Score
         screen.blit(self.font.render("SCORE:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,SPACING + SHADOW_OFFSET) )
@@ -72,10 +93,8 @@ class Hud(object):
         screen.blit(self.font.render(str(round(time / 1000.0,2)) ,0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 4.5) + SHADOW_OFFSET) )
         screen.blit(self.font.render(str(round(time / 1000.0,2)),0,self.value_color), (SPACING,SPACING * 4.5) )
 
-        #msg = str(frames / (pygame.time.get_ticks() / 1000) )
-        #msg = str(android.accelerometer_reading()[1])
-        msg = str(move)
-        screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )
+        #msg = "FPS: " + str(frames / (pygame.time.get_ticks() / 1000) )
+        #screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )
 
         # Skills
         x = 0
@@ -114,11 +133,10 @@ class Hud(object):
                             break
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # Quit button
+                # Back Button button
                 button_rect = pygame.Rect(size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0], SKILL_TILE_SIZE[1])
                 if button_rect.collidepoint(event.pos[0], event.pos[1]):
-                    pygame.quit()
-                    quit()
+                    self.doMapSelect = 1
 
                 # Other buttons
                 if self.skill_data:

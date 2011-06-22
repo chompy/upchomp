@@ -1,4 +1,4 @@
-import pygame, math, os, iniget, dialog, imagehelper
+import pygame, math, sys, os, iniget, dialog, imagehelper
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
@@ -303,15 +303,19 @@ class Menu(object):
             
  
             # If next clicked load selected level
-            if self.dialog.makeButton("Next", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, screen, events):
+            if self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, screen, events):
                 returnVal = mapList[map_selected][0]
                 done = 1
 
             # If back clicked
-            if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, screen, events):
-                returnVal = 0
-                done = 1
-             
+            #if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, screen, events):
+            #    returnVal = 0
+            #    done = 1
+            if self.dialog.makeButton("Quit", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, screen, events):
+                pygame.quit()
+                sys.exit()
+            
+            
             # Dialog Box
             self.dialog.drawBox(screen, size, events)
                            

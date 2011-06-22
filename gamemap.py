@@ -213,7 +213,6 @@ class Gamemap(object):
                             if self.collide_animation[y][0] == x and self.collide_animation[y][1] > math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate)):
                                 tile = tile + math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate))
                                 self.collide_animation[y][2] += 1
-                                break
 
                 tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
                 tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))

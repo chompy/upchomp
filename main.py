@@ -68,7 +68,7 @@ class Game(object):
         # Setup Transition
         self.transition = transition.Transition()
 
-        # Game State: 0-Playing, 1-Main Menu, 2-Pack Select
+        # Game State: 0-Playing, 1-Main Menu, 2-Pack Select, 3 - Load New Level
         self.state = 1
 
         # Init Game Map
@@ -84,7 +84,7 @@ class Game(object):
         self.gameLoop()
 
     def gameLoop(self):
-
+    
         # Options for each game state
         options = {
             0: self.startLevel,      # Playing
@@ -93,9 +93,13 @@ class Game(object):
         }
 
         done = False
+        
         while not done:
             # State -1 means quit.
             if self.state == -1: done = True
+            
+            # State 3 is just reloading state 0.
+            if self.state == 3: self.state = 0
             
             # Stop all sounds
             self.sound.stopAllSfx()
@@ -116,9 +120,9 @@ class Game(object):
     def mapSelect(self):
         self.level.current_map = 0
         self.map_file = self.menu.mapSelect(self.screen, self.clock)  
-        if self.map_file == 0: self.state = 1
-        elif self.map_file == -1: self.state = -1
-        else: self.state = 0     
+        if self.map_file == 0: self.setState(1)
+        elif self.map_file == -1: self.setState(-1)
+        else: self.setState(0)
 
     def nextLevel(self):
         self.level.current_map += 1
@@ -128,7 +132,10 @@ class Game(object):
         size = self.screen.get_size()
         self.transition.verticalSwipe(size)
         self.dlogbox.closeMessageBox()
-
+        
+    def setState(self, state = 2):
+        self.state = state
+        
     def startLevel(self):
 
         """Loads a level and begins gameplay."""
@@ -168,17 +175,14 @@ class Game(object):
         self.hud.loadSkills(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","))
 
         # Load Dialog box
-        self.dlogbox.setMessageBox(size,self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Quit',sys.exit]] )
-
-        #Loop until the user clicks the close button.
-        done=False
+        self.dlogbox.setMessageBox(size,self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Map Select', self.setState]] )
 
         # Stop all sounds
         self.sound.stopAllSfx()
 
         pygame.event.set_allowed((pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEMOTION, pygame.VIDEORESIZE, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP))
         # -------- Main Program Loop -----------
-        while not done:
+        while self.state == 0:
 
             # Set frame rate to 30.
             self.clock.tick(30)
@@ -189,8 +193,7 @@ class Game(object):
             events = pygame.event.get()
             for event in events: # User did something
                 if event.type == pygame.QUIT: # If user clicked close
-                    done=True # Flag that we are done so we exit this loop
-                    self.state = -1 # Set game state to -1(Quit)
+                    self.setState(-1) # Set game state to -1(Quit)
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     move = (event.pos[0] - (size[0] / 2.0)) / (size[0] / 8.0)
@@ -270,10 +273,10 @@ class Game(object):
                     self.chomp.falling = .1
                     self.chomp.moveok = 1
                     if self.transition.type == 0:
-                        self.dlogbox.setMessageBox(size,"Chompy didn't make it...", "Oh No!!", [['Retry',self.levelTransition],['Quit',sys.exit]] )
+                        self.dlogbox.setMessageBox(size,"Chompy didn't make it...", "Oh No!!", [['Retry',self.levelTransition],['Map Select', self.setState]] )
 
                 # Update Hud
-                self.hud.update(self.screen,size,time,self.frames,move)
+                self.hud.update(self.screen,size,time)
                 self.hud.checkSkillActivation(events, size, self.chomp, self.sound)
                 # Check level state
                 if self.level.state == 1:
@@ -284,8 +287,7 @@ class Game(object):
 
             # If closed by clicking X.
             elif dbox == -1: 
-                done = 1
-                self.state = 2
+                self.setState(2)
             # Reset time as long as dialog box is up
             else:
                 start_time = pygame.time.get_ticks()
@@ -297,8 +299,13 @@ class Game(object):
             if transition_status:
                 if transition_status < 1:
                     self.transition.type = 0
-                if transition_status and transition_status < 2 and self.level.state: done = True
+                if transition_status and transition_status < 2 and self.level.state: self.setState(3)
 
+            # If the back button was clicked in the hud...
+            if self.hud.doMapSelect:
+                self.setState(2)
+                self.hud.doMapSelect = 0
+                
             # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
 
