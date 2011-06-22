@@ -205,6 +205,9 @@ class Menu(object):
         btnsize = self.dialog.getButtonSize("Next")
         btnsize2 = self.dialog.getButtonSize("Back")
         
+        # Update BG Size
+        self.resizeTitle(size, screen)
+        
         while not done:
             # Set frame rate to 30.
             clock.tick(30)
