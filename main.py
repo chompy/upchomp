@@ -96,6 +96,9 @@ class Game(object):
         while not done:
             # State -1 means quit.
             if self.state == -1: done = True
+            
+            # Stop all sounds
+            self.sound.stopAllSfx()
 
             # Try to load a function for the current state
             try: options[self.state]()
