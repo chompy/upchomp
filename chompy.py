@@ -127,7 +127,7 @@ class Chompy(pygame.sprite.Sprite):
 
             
         # If Chompy goes up into the air reenable movement.
-        if self.falling < 0: self.moveok = 1
+        if self.falling < 0 or self.falling > 1: self.moveok = 1
 
         # Update position
         self.colliderect.x = self.pos[0]
