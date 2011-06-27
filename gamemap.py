@@ -207,11 +207,9 @@ class Gamemap(object):
                     if not i['collide'] or not i['ani_collide']:
                         tile = tile + (math.floor(self.animation / (1000 / self.ani_framerate) ) % (i['animation'] - tile))
                     else:
-
                         for y in range(len(self.collide_animation)):
-
-                            if self.collide_animation[y][0] == x and self.collide_animation[y][1] > math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate)):
-                                tile = tile + math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate))
+                            if self.collide_animation[y][0] == x and self.collide_animation[y][1] > math.floor( ((self.animation - self.collide_animation[y][3]) / (1000 / self.ani_framerate) ) / self.collide_animation[y][1]):
+                                tile = tile + math.floor( ((self.animation - self.collide_animation[y][3]) / (1000 / self.ani_framerate) ) / self.collide_animation[y][1])
                                 self.collide_animation[y][2] += 1
 
                 tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
@@ -236,13 +234,16 @@ class Gamemap(object):
 
                             # If queued already reset the animation frame back to 0.
                             if self.collide_animation[y][0] == x:
-                                if math.floor(self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate)) == self.collide_animation[y][1]: self.collide_animation[y][2] = 0
+                                if math.floor( ((self.animation - self.collide_animation[y][3]) / (1000 / self.ani_framerate) ) / self.collide_animation[y][1]) >= self.collide_animation[y][1]: 
+                                    self.collide_animation[y][2] = 0
+                                    self.collide_animation[y][3] = self.animation
                                 add_to_collide = 0
                                 break
 
                         # If not queued add it to the queue..
                         if add_to_collide:
-                            self.collide_animation.append( [x, i['animation'] - tile, 0] )
+                            self.collide_animation.append( [x, i['animation'] - tile, 0, self.animation] )
+
 
                     # If player hits a spring...
                     if tilename == "spring":

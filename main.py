@@ -42,7 +42,6 @@ class Game(object):
         self.screen=pygame.display.set_mode(size, pygame.RESIZABLE)
         pygame.display.set_caption("UpChomp")
 
-
         # Used to manage how fast the screen updates
         self.clock=pygame.time.Clock()
 
@@ -93,7 +92,7 @@ class Game(object):
         }
 
         done = False
-        
+
         while not done:
             # State -1 means quit.
             if self.state == -1: done = True
@@ -175,12 +174,13 @@ class Game(object):
         self.hud.loadSkills(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","))
 
         # Load Dialog box
-        self.dlogbox.setMessageBox(size,self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Map Select', self.setState]] )
+        self.dlogbox.setMessageBox(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Map Select', self.setState]] )
 
         # Stop all sounds
-        self.sound.stopAllSfx()
+        self.sound.stopAllSfx()              
 
         pygame.event.set_allowed((pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEMOTION, pygame.VIDEORESIZE, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP))
+        
         # -------- Main Program Loop -----------
         while self.state == 0:
 
@@ -283,7 +283,7 @@ class Game(object):
                     self.chomp.speed = 0
                     self.chomp.falling = 0
                     if self.transition.type == 0:
-                        self.dlogbox.setMessageBox(size,"SCORE: 4000 / TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
+                        self.dlogbox.setMessageBox(size,"TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
 
             # If closed by clicking X.
             elif dbox == -1: 
@@ -292,7 +292,6 @@ class Game(object):
             else:
                 start_time = pygame.time.get_ticks()
                 time = 0
-
 
             # If there is a transition playing
             transition_status = self.transition.update(self.screen)

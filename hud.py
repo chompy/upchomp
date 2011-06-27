@@ -60,12 +60,13 @@ class Hud(object):
             self.skill_data = []
         
             for i in self.skills:
-                self.skill_data.append([
-                  i,
-                  [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
-                  pygame.Rect(math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0] * 2, SKILL_TILE_SIZE[1])
-                ])
-                x += 1
+                if self.skills[i]:
+                    self.skill_data.append([
+                      i,
+                      [math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)],
+                      pygame.Rect(math.floor(SKILL_TILE_SIZE[0] / 2) + x * (SKILL_TILE_SIZE[0] * 2), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0] * 2, SKILL_TILE_SIZE[1])
+                    ])
+                    x += 1
         else:
             self.skill_data = 0
        
@@ -81,17 +82,17 @@ class Hud(object):
         """
 
         # Time and Score
-        screen.blit(self.font.render("SCORE:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,SPACING + SHADOW_OFFSET) )
-        screen.blit(self.font.render("SCORE:",0,self.object_color), (SPACING,SPACING) )
+        #screen.blit(self.font.render("SCORE:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,SPACING + SHADOW_OFFSET) )
+        #screen.blit(self.font.render("SCORE:",0,self.object_color), (SPACING,SPACING) )
 
-        screen.blit(self.font.render("999999999",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 2) + SHADOW_OFFSET) )
-        screen.blit(self.font.render("999999999",0,self.value_color), (SPACING,SPACING * 2) )
+        #screen.blit(self.font.render("999999999",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 2) + SHADOW_OFFSET) )
+        #screen.blit(self.font.render("999999999",0,self.value_color), (SPACING,SPACING * 2) )
 
-        screen.blit(self.font.render("TIME:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 3.5) + SHADOW_OFFSET) )
-        screen.blit(self.font.render("TIME:",0,self.object_color), (SPACING,SPACING * 3.5) )
+        screen.blit(self.font.render("TIME:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING) + SHADOW_OFFSET) )
+        screen.blit(self.font.render("TIME:",0,self.object_color), (SPACING,SPACING) )
 
-        screen.blit(self.font.render(str(round(time / 1000.0,2)) ,0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 4.5) + SHADOW_OFFSET) )
-        screen.blit(self.font.render(str(round(time / 1000.0,2)),0,self.value_color), (SPACING,SPACING * 4.5) )
+        screen.blit(self.font.render(str(round(time / 1000.0,2)) ,0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 2) + SHADOW_OFFSET) )
+        screen.blit(self.font.render(str(round(time / 1000.0,2)),0,self.value_color), (SPACING,SPACING * 2) )
 
         #msg = "FPS: " + str(frames / (pygame.time.get_ticks() / 1000) )
         #screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )
