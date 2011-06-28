@@ -285,7 +285,7 @@ class Game(object):
                     if self.transition.type == 0:
                         self.dlogbox.setMessageBox(size,"TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
 
-            # If closed by clicking X.
+            # If closed by clicking X return to map select.
             elif dbox == -1: 
                 self.setState(2)
             # Reset time as long as dialog box is up

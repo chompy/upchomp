@@ -167,11 +167,13 @@ class Gamemap(object):
         for i in self.map:
             self.tiles.append( {
                 'name'          :   self.themeparser.get(i, "name"),
+                'type'          :   self.themeparser.get(i, "type"),
                 'tile'          :   self.themeparser.getInt(i, "tile"),
                 'animation'     :   self.themeparser.getInt(i, "animation"),
                 'collide'       :   self.themeparser.getBool(i, "collide"),
                 'ani_collide'   :   self.themeparser.getBool(i, "animate_on_collide"),
-                'value'         :   self.themeparser.getInt(i, "value"),
+                'value'         :   self.themeparser.get(i, "value"),
+                'collide_sfx'   :   self.themeparser.get(i, "collide_sfx"),
                 'x'             :   ((x % self.mapwidth) * self.tilesize[0]),
                 'y'             :   (math.floor(x / self.mapwidth) * self.tilesize[1]),
             })
@@ -245,17 +247,32 @@ class Gamemap(object):
                             self.collide_animation.append( [x, i['animation'] - tile, 0, self.animation] )
 
 
-                    # If player hits a spring...
-                    if tilename == "spring":
-                        # Wait till first frame of animation is shown before springing.
-                        for y in range(len(self.collide_animation)):
-                            if self.collide_animation[y][0] == x:
-                                if self.ani_framerate > 0 and fps > 0 and self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate) > .3:
-                                    chomp.falling = i['value'] * -1
-                                    sound.playSfx("sfx/spring.wav", 0)
+                    # If player hits a pusher...push!
+                    if i['type'] == "pusher":
+                    
+                        if i['value']:
+                            value = i['value'].split(",")
+                        else: value = [0,0]
+                        
+                        # Wait till first frame of animation
+                        if i['ani_collide'] and i['animation']:
+                            for y in range(len(self.collide_animation)):
+                                if self.collide_animation[y][0] == x:
+                                    if self.ani_framerate > 0 and fps > 0 and self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate) > .3:
+                                        
+                                        if value[1]: chomp.falling = int(value[1]) * -1
+                                        if value[0] and chomp.speed < int(value[0]): chomp.speed = int(value[0])
+
+                                        # Play collision SFX if provided.
+                                        if i['collide_sfx']:
+                                            sound.playSfx("sfx/" + i['collide_sfx'], 0)
+                                            
+                        # Play collision SFX if provided[This one plays when there is no animation].
+                        elif i['collide_sfx']:
+                            sound.playSfx("sfx/" + i['collide_sfx'], 0)                                            
 
                     # If player hits the end of the level...
-                    elif tilename == "level_end":
+                    elif i['type'] == "goal":
                         self.state = 1     # Set level state to win.
 
                     # Any other collision should just be treated like a wall or floor collision...
