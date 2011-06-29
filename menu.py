@@ -60,7 +60,7 @@ class Menu(object):
         title_logo_offset_b = self.tl_rect_a.x + size[0]
  
         # Play Menu Music
-        self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1)
+        self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1, 1)
         
         while not done:
             # Set frame rate to 30.
@@ -215,7 +215,7 @@ class Menu(object):
         self.resizeTitle(size, screen)
         
         # Play Menu Music
-        self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1)
+        self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1, 1)
         
         while not done:
             # Set frame rate to 30.
@@ -330,6 +330,5 @@ class Menu(object):
                            
             # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()     
-        
-        self.sound.stopAllSfx()                
+                       
         return returnVal

@@ -42,7 +42,7 @@ class Gamemap(object):
         # Load Music
         music = self.themeparser.get("music","file")
         if music: 
-            self.sound.playSfx("sfx/" + music, 1)
+            self.sound.playSfx("sfx/" + music, 1, 1)
         
         # Get size of this maps tiles
         self.tilesize = [int(self.themeparser.get("tiles","tile_width")), int(self.themeparser.get("tiles","tile_height"))]
@@ -285,17 +285,19 @@ class Gamemap(object):
                             for y in range(len(self.collide_animation)):
                                 if self.collide_animation[y][0] == x:
 
-                                    if value[1]: chomp.falling = int(value[1]) * -1
-                                    if value[0] and chomp.speed < int(value[0]): chomp.speed = int(value[0])
-
                                     # Play collision SFX if provided.
                                     if i['collide_sfx']:
                                         sound.playSfx("sfx/" + i['collide_sfx'], 0)
                                             
-                        # Play collision SFX if provided[This one plays when there is no animation].
+                        # Play collision SFX if provided[This one plays when there is no collide animation].
                         elif i['collide_sfx']:
                             sound.playSfx("sfx/" + i['collide_sfx'], 0)                                            
 
+                        # Do the pushing.
+                        if value[1]: 
+                            if (value[1] * -1) > 0 and not chomp.falling < -5: chomp.falling = int(value[1]) * -1
+                        if value[0] and abs(chomp.speed) < abs(int(value[0])): chomp.speed = int(value[0])                            
+                            
                     # If player hits the end of the level...
                     elif i['type'] == "goal":
                         self.state = 1     # Set level state to win.

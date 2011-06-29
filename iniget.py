@@ -18,6 +18,13 @@ class iniGet(object):
         except:
             return 0
 
+    def getFloat(self, group, item):
+        try:
+            return self.parser.getFloat(group, item)
+        except:
+            return 0
+            
+            
     def getBool(self, group, item):
         try:
             return self.parser.getboolean(group, item)

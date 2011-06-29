@@ -101,7 +101,7 @@ class Game(object):
             if self.state == 3: self.state = 0
             
             # Stop all sounds
-            #self.sound.stopAllSfx()
+            self.sound.stopAllSfx()
 
             # Try to load a function for the current state
             try: options[self.state]()
@@ -146,7 +146,7 @@ class Game(object):
         size = self.screen.get_size()
 
         # Stop all sounds
-        #self.sound.stopAllSfx() 
+        self.sound.stopAllSfx() 
         
         # Load Level
         try:
@@ -253,8 +253,10 @@ class Game(object):
            
             if not dbox:
                 # If the game has displayed the "Get Ready!" - "Go!" message.            
-                if not transition_status: getready = self.hud.getReady(size, self.screen)
-                else: getready = 0
+                if not transition_status: 
+                    getready = self.hud.getReady(size, self.screen)
+                else: 
+                    getready = 0
 
                 if not getready:
                     # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
@@ -290,8 +292,19 @@ class Game(object):
                         self.chomp.speed = 0
                         self.chomp.falling = 0
                         if self.transition.type == 0:
-                            self.dlogbox.setMessageBox(size,"TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
+                            gametime = round( time / 1000.0,2 )
+                            aranktime = float(self.level.parser.get(self.level.packMaps[self.level.current_map], "arank"))
 
+                            if aranktime and gametime <= aranktime:
+                                self.dlogbox.setMessageBox(size,"A+! - TIME: " + str(round( time / 1000.0,2 )) , "Pwned!!!", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
+                            else:
+                                self.dlogbox.setMessageBox(size,"TIME: " + str(round( time / 1000.0,2 )) , "Winner!", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
+
+                # If get ready message still up reset timers.
+                else:
+                    start_time = pygame.time.get_ticks()                
+                    time = 0
+                                
             # If closed by clicking X return to map select.
             elif dbox == -1: 
                 self.setState(2)
