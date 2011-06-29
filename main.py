@@ -48,21 +48,21 @@ class Game(object):
         # Sprites
         self.all_sprites_list = pygame.sprite.RenderPlain()
 
+        # Initalize Sound
+        self.sound = sound.Sound()        
+        
         # Init da Chomp
-        self.chomp = chompy.Chompy()
+        self.chomp = chompy.Chompy(self.screen, self.sound)
         self.all_sprites_list.add(self.chomp)
         
-        # Initalize Sound
-        self.sound = sound.Sound()
-
         # Init Menu
-        self.menu = menu.Menu(self.sound)        
+        self.menu = menu.Menu(self.screen, self.sound, self.clock)        
         
         # Make a dialog object.
-        self.dlogbox = dialog.Dialog()
+        self.dlogbox = dialog.Dialog(self.screen)
 
         # Setup Hud
-        self.hud = hud.Hud()
+        self.hud = hud.Hud(self.screen)
 
         # Setup Transition
         self.transition = transition.Transition()
@@ -114,11 +114,11 @@ class Game(object):
         pygame.quit()
 
     def displayMenu(self):
-        self.state = self.menu.show(self.screen, self.clock)
+        self.state = self.menu.show()
         
     def mapSelect(self):
         self.level.current_map = 0
-        self.map_file = self.menu.mapSelect(self.screen, self.clock)  
+        self.map_file = self.menu.mapSelect()  
         if self.map_file == 0: self.setState(1)
         elif self.map_file == -1: self.setState(-1)
         else: self.setState(0)
@@ -249,18 +249,18 @@ class Game(object):
             if android: self.sound.update()
 
             # If a dialog box isn't up.
-            dbox = self.dlogbox.drawBox(self.screen, size, events)           
+            dbox = self.dlogbox.drawBox(size, events)           
            
             if not dbox:
                 # If the game has displayed the "Get Ready!" - "Go!" message.            
                 if not transition_status: 
-                    getready = self.hud.getReady(size, self.screen)
+                    getready = self.hud.getReady(size)
                 else: 
                     getready = 0
 
                 if not getready:
                     # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
-                    if not self.level.state: self.chomp.update(scroll, self.screen, move, size, self.sound)
+                    if not self.level.state: self.chomp.update(scroll, move, size)
                     # Draw Sprites
                     self.all_sprites_list.draw(self.screen)
                     
@@ -285,8 +285,8 @@ class Game(object):
                             self.dlogbox.setMessageBox(size,"Chompy didn't make it...", "Oh No!!", [['Retry',self.levelTransition],['Map Select', self.setState]] )
     
                     # Update Hud
-                    self.hud.update(self.screen,size,time)
-                    self.hud.checkSkillActivation(events, size, self.chomp, self.sound)
+                    self.hud.update(size,time)
+                    self.hud.checkSkillActivation(events, size, self.chomp)
                     # Check level state
                     if self.level.state == 1:
                         self.chomp.speed = 0

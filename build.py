@@ -51,7 +51,7 @@ class BuildExe:
         self.project_version = "0.1"
  
         #License of the program
-        self.license = "MyApps License"
+        self.license = "N/A - Belongs to Nathan Ogden - Do Not Redistrubute"
  
         #Auhor of program
         self.author_name = "Nathan Ogden"
@@ -59,13 +59,13 @@ class BuildExe:
         self.copyright = "Copyright (c) 2010 Nathan Ogden."
  
         #Description
-        self.project_description = "MyApps Description"
+        self.project_description = "A platformer/puzzle game that stars Chompy."
  
         #Icon file (None will use pygame default icon)
         self.icon_file = "icon.ico"
  
         #Extra files/dirs copied to game
-        self.extra_datas = ['gfx', 'sfx', 'tile', 'map', 'font', "SDL.dll", "SDL_ttf.dll"]
+        self.extra_datas = ['gfx', 'sfx', 'tile', 'map', 'font', "SDL.dll", "SDL_ttf.dll", "readme.txt"]
  
         #Extra/excludes python modules
         self.extra_modules = []

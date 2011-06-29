@@ -8,7 +8,7 @@ TILE_SIZE = [32,32]
 
 class Dialog(object):
     
-    def __init__(self):
+    def __init__(self, screen):
     
         # Load the dialog tiles...             
         image = pygame.image.load("gfx/dialog_box.png").convert_alpha()
@@ -25,6 +25,9 @@ class Dialog(object):
         # Box vars
         self.showbox = 0
         self.buttonstate = { 'close_over' : 0 }
+        
+        # Get Screen Object
+        self.screen = screen
                 
     def setMessageBox(self, size, message, title="", buttons=[]):
 
@@ -101,7 +104,7 @@ class Dialog(object):
             self.boxsize[0] = button_width
             self.boxrange[0] = math.floor(button_width / TILE_SIZE[0]) + 2
                             
-    def drawBox(self, screen, size, events):
+    def drawBox(self, size, events):
         if not self.showbox: return 0
         
         for y in range(0, int(self.boxrange[1])):
@@ -111,47 +114,47 @@ class Dialog(object):
                 
                 # Top left corner.
                 if y == 0 and x == 0:
-                    screen.blit(self.tile_table[0][0], (pos[0],pos[1]) )
+                    self.screen.blit(self.tile_table[0][0], (pos[0],pos[1]) )
                 # Top Middle
                 elif y == 0 and x > 0 and x < self.boxrange[0] - 1:
-                    screen.blit(self.tile_table[1][0], (pos[0],pos[1]) )
+                    self.screen.blit(self.tile_table[1][0], (pos[0],pos[1]) )
                 # Top Right corner
                 elif y == 0 and x == self.boxrange[0] - 1:
                     close_btn = pygame.Rect(pos[0],pos[1], TILE_SIZE[0], TILE_SIZE[1])
                     if not self.buttonstate['close_over']:
-                        screen.blit(self.tile_table[2][0], (pos[0],pos[1]) )
+                        self.screen.blit(self.tile_table[2][0], (pos[0],pos[1]) )
                     else:
-                        screen.blit(self.tile_table[3][2], (pos[0],pos[1]) )
+                        self.screen.blit(self.tile_table[3][2], (pos[0],pos[1]) )
                         
                 # Bottom left corner.
                 elif y == self.boxrange[1] - 1 and x == 0:
-                    screen.blit(self.tile_table[0][2], (pos[0],pos[1]) )
+                    self.screen.blit(self.tile_table[0][2], (pos[0],pos[1]) )
                 # Bottom Middle
                 elif y == self.boxrange[1] - 1 and x > 0 and x < self.boxrange[0] - 1:
-                    screen.blit(self.tile_table[1][2], (pos[0],pos[1]) )
+                    self.screen.blit(self.tile_table[1][2], (pos[0],pos[1]) )
                 # Bottom Right corner
                 elif y == self.boxrange[1] - 1 and x == self.boxrange[0] - 1:
-                    screen.blit(self.tile_table[2][2], (pos[0],pos[1]) )
+                    self.screen.blit(self.tile_table[2][2], (pos[0],pos[1]) )
                 # Center left corner.
                 elif y < self.boxrange[1] - 1 and x == 0:
-                    screen.blit(self.tile_table[0][1], (pos[0],pos[1]) )
+                    self.screen.blit(self.tile_table[0][1], (pos[0],pos[1]) )
                 # Center Right corner
                 elif y < self.boxrange[1] - 1 and x == self.boxrange[0] - 1:
-                    screen.blit(self.tile_table[2][1], (pos[0],pos[1]) )                    
+                    self.screen.blit(self.tile_table[2][1], (pos[0],pos[1]) )                    
                 # Center Middle
                 else:
-                    screen.blit(self.tile_table[1][1], (pos[0],pos[1]) )    
+                    self.screen.blit(self.tile_table[1][1], (pos[0],pos[1]) )    
                     
         # Display Text
         if self.title:
             #self.font.set_bold(1)
             self.font.set_underline(1)
-            screen.blit(self.font.render(self.title, 0, self.title_color), ( ((size[0] - self.boxsize[0]) / 2), ((size[1] - self.boxsize[1]) / 2) + TILE_SIZE[1] / 2 ))
+            self.screen.blit(self.font.render(self.title, 0, self.title_color), ( ((size[0] - self.boxsize[0]) / 2), ((size[1] - self.boxsize[1]) / 2) + TILE_SIZE[1] / 2 ))
         
         self.font.set_bold(0)
         self.font.set_underline(0)
         for i in range(len(self.final_text)):
-            screen.blit(self.font.render(self.final_text[i], 0, self.text_color), ( ((size[0] - self.boxsize[0]) / 2), ((size[1] - self.boxsize[1]) / 2) + (i * self.font.get_linesize()) + TILE_SIZE[1] * self.text_push))
+            self.screen.blit(self.font.render(self.final_text[i], 0, self.text_color), ( ((size[0] - self.boxsize[0]) / 2), ((size[1] - self.boxsize[1]) / 2) + (i * self.font.get_linesize()) + TILE_SIZE[1] * self.text_push))
                    
         # Display Buttons
         button_start_x = 0
@@ -161,19 +164,19 @@ class Dialog(object):
             button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
             
             for x in range(0, button_tile_width):
-                pos = [button_start_x + ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) + (TILE_SIZE[0] / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (self.font.get_linesize() * len(self.final_text)) + TILE_SIZE[1] ]
+                pos = [button_start_x + ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) , ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (self.font.get_linesize() * len(self.final_text)) + TILE_SIZE[1] ]
                
                 if x == 0:
                     button_positions.append(pos) # Button position array for button rect
-                    screen.blit(self.tile_table[3][self.buttonstate[i]], (pos[0],pos[1]) )
+                    self.screen.blit(self.tile_table[3][self.buttonstate[i]], (pos[0],pos[1]) )
                 elif x > 0 and x < button_tile_width - 1:
-                    screen.blit(self.tile_table[4][self.buttonstate[i]], (pos[0],pos[1]) )     
+                    self.screen.blit(self.tile_table[4][self.buttonstate[i]], (pos[0],pos[1]) )     
                 elif x == button_tile_width - 1:                           
-                    screen.blit(self.tile_table[5][self.buttonstate[i]], (pos[0],pos[1]) )     
+                    self.screen.blit(self.tile_table[5][self.buttonstate[i]], (pos[0],pos[1]) )     
                    
             # Display Button Text
             #self.font.set_bold(1)                   
-            screen.blit(self.font.render(self.button[i][0],0,self.title_color), ( button_start_x + ((size[0] - self.boxsize[0]) / 2) + TILE_SIZE[0] + (button_tile_width / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (len(self.final_text) * self.font.get_linesize())  + TILE_SIZE[1] + (TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2) ))
+            self.screen.blit(self.font.render(self.button[i][0],0,self.title_color), ( button_start_x + ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] / 2) + (button_tile_width / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (len(self.final_text) * self.font.get_linesize())  + TILE_SIZE[1] + (TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2) ))
             
             button_start_x = (int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2) * TILE_SIZE[0]
                
@@ -208,13 +211,13 @@ class Dialog(object):
                     if button_rect.collidepoint(event.pos[0], event.pos[1]):
                         self.buttonstate[i] = 1
                         
-            # If screen size changes
+            # If self.screen size changes
             elif event.type == pygame.VIDEORESIZE:
                 self.calculateSize(event.size)
                                
         return 1
         
-    def makeButton(self, text, btnpos, size, screen, events):
+    def makeButton(self, text, btnpos, size, events):
 
         """
         Makes a button that can be placed anywhere.
@@ -240,15 +243,15 @@ class Dialog(object):
             pos = [btnpos[0] + (x * TILE_SIZE[0]) + (TILE_SIZE[0] / 2), btnpos[1]]
            
             if x == 0:
-                screen.blit(self.tile_table[3][btn_state], (pos[0],pos[1]) )
+                self.screen.blit(self.tile_table[3][btn_state], (pos[0],pos[1]) )
             elif x > 0 and x < button_tile_width - 1:
-                screen.blit(self.tile_table[4][btn_state], (pos[0],pos[1]) )     
+                self.screen.blit(self.tile_table[4][btn_state], (pos[0],pos[1]) )     
             elif x == button_tile_width - 1:                           
-                screen.blit(self.tile_table[5][btn_state], (pos[0],pos[1]) )     
+                self.screen.blit(self.tile_table[5][btn_state], (pos[0],pos[1]) )     
                
         # Display Button Text
         #self.font.set_bold(1)                   
-        screen.blit(self.font.render(text, 0, self.title_color), ( btnpos[0] + TILE_SIZE[0] + (button_tile_width / 2), btnpos[1] + ((TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2)) ))
+        self.screen.blit(self.font.render(text, 0, self.title_color), ( btnpos[0] + TILE_SIZE[0] + (button_tile_width / 2), btnpos[1] + ((TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2)) ))
         
         return btn_click
         

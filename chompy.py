@@ -12,9 +12,12 @@ speed_rate = max_speed / 10
 TILE_SIZE = [32,32]
 
 class Chompy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, screen, sound):
 
         """Load a Chompy sprite."""
+        
+        self.screen = screen
+        self.sound = sound
 
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("gfx/chompy.png").convert_alpha()
@@ -52,7 +55,7 @@ class Chompy(pygame.sprite.Sprite):
         }
 
 
-    def activateSkill(self, name, sound = ""):
+    def activateSkill(self, name):
         """
         Activates a Chompy skill!
 
@@ -65,21 +68,20 @@ class Chompy(pygame.sprite.Sprite):
             self.progress_max = 90
             self.falling = -1
 
-            if sound: sound.playSfx("sfx/heli.wav", -1)
+            if self.sound: self.sound.playSfx("sfx/heli.wav", -1)
             return 1
         elif name == "up":
-            if sound: sound.playSfx("sfx/up.wav", 0)
+            if self.sound: self.sound.playSfx("sfx/up.wav", 0)
             self.falling = -10
         else:
             return 0
 
-    def update(self, scroll, screen, move, size, sound):
+    def update(self, scroll, move, size):
 
         """
         Updates Chompy's position.
 
         @param array scroll Screen scroll position.
-        @param pygame.display.set_mode screen
         @param double move Direction player is attempt to make Chompy move in.
         @param array size Current screen size.
         """
@@ -91,11 +93,11 @@ class Chompy(pygame.sprite.Sprite):
             self.skills['heli'] -= 1
             ani = pygame.time.get_ticks() % 4
 
-            screen.blit(self.heli_tiles[ani][0], (self.rect.x, self.rect.y - TILE_SIZE[1]))
+            self.screen.blit(self.heli_tiles[ani][0], (self.rect.x, self.rect.y - TILE_SIZE[1]))
 
             if self.falling > 0: self.falling = 0
 
-        if self.skills['heli'] == 1: sound.stopSfxFile("sfx/heli.wav")
+        if self.skills['heli'] == 1: self.sound.stopSfxFile("sfx/heli.wav")
 
         # Start the clock when Chompy is not moving...if it hits 0 game over.
         if self.stopclock > 0:

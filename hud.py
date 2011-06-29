@@ -10,7 +10,7 @@ SKILL_TILE_SIZE = [32,32]
 
 class Hud(object):
 
-    def __init__(self):
+    def __init__(self, screen):
     
         """ Inits the Hud """
     
@@ -38,17 +38,20 @@ class Hud(object):
         
         # Go back to map select if this var is true...
         self.doMapSelect = 0
+        
+        # Get Screen object
+        self.screen = screen
 
     def loadSkills(self, size, skills = 0):
         
         """
         Loads up skills on the hud.
         
-        @param array size - Size of screen.
+        @param array size - Size of self.screen.
         @param array skills - Array containing names of all the skills to be used.
         """
     
-        # If skills is provided then load them in, otherwise we're just resizing the screen.      
+        # If skills is provided then load them in, otherwise we're just resizing the self.screen.      
         if not skills or skills[0] == '': skills = 0
         
         if skills:
@@ -75,31 +78,31 @@ class Hud(object):
             self.skill_data = 0
        
 
-    def update(self, screen, size, time):
+    def update(self, size, time):
     
         """
-        Updates the hud on the screen.
+        Updates the hud on the self.screen.
         
-        @param pygame.screen screen - Pygame screen object.
-        @param array size - Size of screen.
+        @param pygame.self.screen self.screen - Pygame self.screen object.
+        @param array size - Size of self.screen.
         @param int time - Ticks the level as been running.
         """
 
         # Time and Score
-        #screen.blit(self.font.render("SCORE:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,SPACING + SHADOW_OFFSET) )
-        #screen.blit(self.font.render("SCORE:",0,self.object_color), (SPACING,SPACING) )
+        #self.screen.blit(self.font.render("SCORE:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,SPACING + SHADOW_OFFSET) )
+        #self.screen.blit(self.font.render("SCORE:",0,self.object_color), (SPACING,SPACING) )
 
-        #screen.blit(self.font.render("999999999",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 2) + SHADOW_OFFSET) )
-        #screen.blit(self.font.render("999999999",0,self.value_color), (SPACING,SPACING * 2) )
+        #self.screen.blit(self.font.render("999999999",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 2) + SHADOW_OFFSET) )
+        #self.screen.blit(self.font.render("999999999",0,self.value_color), (SPACING,SPACING * 2) )
 
-        screen.blit(self.font.render("TIME:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING) + SHADOW_OFFSET) )
-        screen.blit(self.font.render("TIME:",0,self.object_color), (SPACING,SPACING) )
+        self.screen.blit(self.font.render("TIME:",0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING) + SHADOW_OFFSET) )
+        self.screen.blit(self.font.render("TIME:",0,self.object_color), (SPACING,SPACING) )
 
-        screen.blit(self.font.render(str(round(time / 1000.0,2)) ,0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 2) + SHADOW_OFFSET) )
-        screen.blit(self.font.render(str(round(time / 1000.0,2)),0,self.value_color), (SPACING,SPACING * 2) )
+        self.screen.blit(self.font.render(str(round(time / 1000.0,2)) ,0,self.dropshadow_color), (SPACING + SHADOW_OFFSET,(SPACING * 2) + SHADOW_OFFSET) )
+        self.screen.blit(self.font.render(str(round(time / 1000.0,2)),0,self.value_color), (SPACING,SPACING * 2) )
 
         #msg = "FPS: " + str(frames / (pygame.time.get_ticks() / 1000) )
-        #screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )
+        #self.screen.blit(self.font.render(msg,0,self.value_color), (size[0] - self.font.size(msg)[0] - (SPACING / 2) ,SPACING * 1.5) )
 
         # Skills
         x = 0
@@ -108,18 +111,18 @@ class Hud(object):
                 if self.skills[i[0]] > 0:
                     pos = i[1]
                     # Render skill icon
-                    screen.blit(self.tile_table[self.skilltiles[i[0]][0]][self.skilltiles[i[0]][1]], (pos[0],pos[1]) )
+                    self.screen.blit(self.tile_table[self.skilltiles[i[0]][0]][self.skilltiles[i[0]][1]], (pos[0],pos[1]) )
                     # Render skill amount text
-                    screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.dropshadow_color), (  pos[0] + SKILL_TILE_SIZE[0] + SHADOW_OFFSET , pos[1] + SHADOW_OFFSET) )
-                    screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.object_color), (  pos[0] + SKILL_TILE_SIZE[0] , pos[1]) )
+                    self.screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.dropshadow_color), (  pos[0] + SKILL_TILE_SIZE[0] + SHADOW_OFFSET , pos[1] + SHADOW_OFFSET) )
+                    self.screen.blit(self.font.render("x" + str(self.skills[i[0]]) ,0,self.object_color), (  pos[0] + SKILL_TILE_SIZE[0] , pos[1]) )
     
                     x += 1
 
         # Quit button
-        screen.blit(self.tile_table[2][2], ( size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)) )
+        self.screen.blit(self.tile_table[2][2], ( size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5)) )
 
 
-    def checkSkillActivation(self, events, size, chomp, sound = ""):
+    def checkSkillActivation(self, events, size, chomp):
 
         for event in events:
 
@@ -133,7 +136,7 @@ class Hud(object):
                             if int(key) == i + 1:
                                 if self.skills[ self.skill_data[i][0] ] > 0:
                                     self.skills[ self.skill_data[i][0] ] -= 1
-                                    chomp.activateSkill( self.skill_data[i][0], sound )
+                                    chomp.activateSkill( self.skill_data[i][0] )
                         except ValueError:
                             break
 
@@ -150,10 +153,10 @@ class Hud(object):
                         if button_rect.collidepoint(event.pos[0], event.pos[1]):
                             if self.skills[i[0]] > 0:
                                 self.skills[i[0]] -= 1
-                                chomp.activateSkill(i[0], sound)
+                                chomp.activateSkill(i[0])
 
                                 
-    def getReady(self, size, screen):
+    def getReady(self, size):
         
         """Displays 'Get Ready', 'Go!' message."""
         rect = pygame.Rect(0, 0, size[0], size[1])
@@ -161,10 +164,10 @@ class Hud(object):
         ready_rect = ready_rect.fit(rect)
         
         if pygame.time.get_ticks() - self.ready_time < 2000:
-            screen.blit( pygame.transform.scale(self.ready[0], (ready_rect.w, ready_rect.h)), ( (size[0] / 2) - (ready_rect.w / 2), (size[1] / 2) - (ready_rect.h / 2)))
+            self.screen.blit( pygame.transform.scale(self.ready[0], (ready_rect.w, ready_rect.h)), ( (size[0] / 2) - (ready_rect.w / 2), (size[1] / 2) - (ready_rect.h / 2)))
             return 1
         elif pygame.time.get_ticks() - self.ready_time >= 2000 and pygame.time.get_ticks() - self.ready_time < 3000:
-            screen.blit( pygame.transform.scale(self.ready[1], (ready_rect.w, ready_rect.h)), ( (size[0] / 2) - (ready_rect.w / 2), (size[1] / 2) - (ready_rect.h / 2)))               
+            self.screen.blit( pygame.transform.scale(self.ready[1], (ready_rect.w, ready_rect.h)), ( (size[0] / 2) - (ready_rect.w / 2), (size[1] / 2) - (ready_rect.h / 2)))               
             return 1
         else:
             return 0
