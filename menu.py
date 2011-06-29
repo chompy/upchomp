@@ -12,7 +12,7 @@ except ImportError:
 TILE_SIZE = [32,32]    
 
 class Menu(object):
-    def __init__(self):
+    def __init__(self, sound):
 
         # Dialog
         self.dialog = dialog.Dialog()
@@ -30,7 +30,10 @@ class Menu(object):
         # Load background
         self.background = pygame.image.load("gfx/menu_bg.png").convert()
         self.bg_rect = self.background.get_rect()  
-        self.bgoffset = 0     
+        self.bgoffset = 0  
+        
+        # Get Sound Object
+        self.sound = sound  
     
     def show(self, screen, clock):
         done = 0
@@ -56,6 +59,9 @@ class Menu(object):
         title_logo_offset_a = self.tl_rect_a.x - size[0]
         title_logo_offset_b = self.tl_rect_a.x + size[0]
  
+        # Play Menu Music
+        self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1)
+        
         while not done:
             # Set frame rate to 30.
             clock.tick(30)
@@ -208,6 +214,9 @@ class Menu(object):
         # Update BG Size
         self.resizeTitle(size, screen)
         
+        # Play Menu Music
+        self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1)
+        
         while not done:
             # Set frame rate to 30.
             clock.tick(30)
@@ -321,5 +330,6 @@ class Menu(object):
                            
             # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()     
-            
+        
+        self.sound.stopAllSfx()                
         return returnVal

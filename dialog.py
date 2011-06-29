@@ -146,12 +146,12 @@ class Dialog(object):
         if self.title:
             #self.font.set_bold(1)
             self.font.set_underline(1)
-            screen.blit(self.font.render(self.title, 0, self.title_color), ( ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] / 2), ((size[1] - self.boxsize[1]) / 2) + TILE_SIZE[1] / 2 ))
+            screen.blit(self.font.render(self.title, 0, self.title_color), ( ((size[0] - self.boxsize[0]) / 2), ((size[1] - self.boxsize[1]) / 2) + TILE_SIZE[1] / 2 ))
         
         self.font.set_bold(0)
         self.font.set_underline(0)
         for i in range(len(self.final_text)):
-            screen.blit(self.font.render(self.final_text[i], 0, self.text_color), ( ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] / 2), ((size[1] - self.boxsize[1]) / 2) + (i * self.font.get_linesize()) + TILE_SIZE[1] * self.text_push))
+            screen.blit(self.font.render(self.final_text[i], 0, self.text_color), ( ((size[0] - self.boxsize[0]) / 2), ((size[1] - self.boxsize[1]) / 2) + (i * self.font.get_linesize()) + TILE_SIZE[1] * self.text_push))
                    
         # Display Buttons
         button_start_x = 0

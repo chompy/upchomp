@@ -5,7 +5,7 @@ imghelp = imagehelper.imageHelper()
 
 class Gamemap(object):
 
-    def __init__(self):
+    def __init__(self, sound):
 
         """
         Inits the gamemap module, allows maps to be loaded and rendered.
@@ -19,6 +19,9 @@ class Gamemap(object):
         self.state = 0
 
         self.current_map = 0
+        
+        # Load Sound Object
+        self.sound = sound
 
     def loadLevel(self, map="map1.map"):
 
@@ -36,6 +39,11 @@ class Gamemap(object):
         # Load theme
         self.themeparser = iniget.iniGet("tile/" + self.parser.get(self.packMaps[self.current_map],"theme") + ".ini")
 
+        # Load Music
+        music = self.themeparser.get("music","file")
+        if music: 
+            self.sound.playSfx("sfx/" + music, 1)
+        
         # Get size of this maps tiles
         self.tilesize = [int(self.themeparser.get("tiles","tile_width")), int(self.themeparser.get("tiles","tile_height"))]
 
@@ -61,7 +69,22 @@ class Gamemap(object):
         image = pygame.image.load("gfx/" + self.themeparser.get("tiles","tileset")).convert_alpha()
         image_width, image_height = image.get_size()
         self.tile_image_size = [image_width,image_height]
-        self.tile_table = imghelp.makeTiles(image, self.tilesize)
+        tile_table = imghelp.makeTiles(image, self.tilesize)
+
+        self.tile_table = []
+        for x in range(len(tile_table)):
+            self.tile_table.append([])
+            for y in range(len(tile_table[x])):
+                self.tile_table[x].append({
+                    'original'          :   tile_table[x][y],
+                    'v-flip'            :   pygame.transform.flip(tile_table[x][y], 0, 1),
+                    '90deg'             :   pygame.transform.rotate(tile_table[x][y], 90),
+                    '90deg_v-flip'      :   pygame.transform.flip(pygame.transform.rotate(tile_table[x][y], 90), 0, 1),
+                    '180deg'            :   pygame.transform.rotate(tile_table[x][y], 180),
+                    '180deg_v-flip'     :   pygame.transform.flip(pygame.transform.rotate(tile_table[x][y], 180), 0, 1),
+                    '270deg'            :   pygame.transform.rotate(tile_table[x][y], 270),
+                    '270deg_v-flip'     :   pygame.transform.flip(pygame.transform.rotate(tile_table[x][y], 270), 0, 1)
+                })
 
         screensize = pygame.display.get_surface()
         screensize = screensize.get_size()
@@ -176,20 +199,22 @@ class Gamemap(object):
                 'collide_sfx'   :   self.themeparser.get(i, "collide_sfx"),
                 'x'             :   ((x % self.mapwidth) * self.tilesize[0]),
                 'y'             :   (math.floor(x / self.mapwidth) * self.tilesize[1]),
+                'orientation'   :   self.themeparser.get(i, "orientation")
             })
 
             x += 1
 
 
-    def updateTiles(self, screen, scroll, size, fps, chomp, sound):
+    def updateTiles(self, screen, scroll, size, chomp, sound):
 
         """
         Draws all tiles to the screen.
 
-        @param pygame.display.set_mode screen - Screen object used to render items to the screen.
+        @param pygame.display screen - Screen object used to render items to the screen.
         @param array scroll - X and Y offset of current map scroll.
-        @param pygame.time.Clock clock - Pygame clock object.
+        @param array size - Width and Height of screen.
         @param pygame.sprite chomp - Pygame sprite object, player character.
+        @param object sound - Sound Object for playing sfx.
         """
 
         # Animation clock
@@ -217,7 +242,8 @@ class Gamemap(object):
                 tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
                 tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))
 
-                screen.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)], (i['x'] + scroll[0], i['y'] + scroll[1] ) )
+                if not i['orientation']: i['orientation'] = "original"
+                screen.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)][i['orientation']], (i['x'] + scroll[0], i['y'] + scroll[1] ) )
 
             # Collision with a tile
             if i['collide']:
@@ -258,14 +284,13 @@ class Gamemap(object):
                         if i['ani_collide'] and i['animation']:
                             for y in range(len(self.collide_animation)):
                                 if self.collide_animation[y][0] == x:
-                                    if self.ani_framerate > 0 and fps > 0 and self.collide_animation[y][2] / (math.floor(fps) / self.ani_framerate) > .3:
-                                        
-                                        if value[1]: chomp.falling = int(value[1]) * -1
-                                        if value[0] and chomp.speed < int(value[0]): chomp.speed = int(value[0])
 
-                                        # Play collision SFX if provided.
-                                        if i['collide_sfx']:
-                                            sound.playSfx("sfx/" + i['collide_sfx'], 0)
+                                    if value[1]: chomp.falling = int(value[1]) * -1
+                                    if value[0] and chomp.speed < int(value[0]): chomp.speed = int(value[0])
+
+                                    # Play collision SFX if provided.
+                                    if i['collide_sfx']:
+                                        sound.playSfx("sfx/" + i['collide_sfx'], 0)
                                             
                         # Play collision SFX if provided[This one plays when there is no animation].
                         elif i['collide_sfx']:

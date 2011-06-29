@@ -51,13 +51,13 @@ class Game(object):
         # Init da Chomp
         self.chomp = chompy.Chompy()
         self.all_sprites_list.add(self.chomp)
-
-        # Init Menu
-        self.menu = menu.Menu()
         
         # Initalize Sound
         self.sound = sound.Sound()
 
+        # Init Menu
+        self.menu = menu.Menu(self.sound)        
+        
         # Make a dialog object.
         self.dlogbox = dialog.Dialog()
 
@@ -71,7 +71,7 @@ class Game(object):
         self.state = 1
 
         # Init Game Map
-        self.level = gamemap.Gamemap()
+        self.level = gamemap.Gamemap(self.sound)
 
         # Frame rate
         self.frames = 1
@@ -101,7 +101,7 @@ class Game(object):
             if self.state == 3: self.state = 0
             
             # Stop all sounds
-            self.sound.stopAllSfx()
+            #self.sound.stopAllSfx()
 
             # Try to load a function for the current state
             try: options[self.state]()
@@ -145,6 +145,9 @@ class Game(object):
         # Screen size
         size = self.screen.get_size()
 
+        # Stop all sounds
+        #self.sound.stopAllSfx() 
+        
         # Load Level
         try:
             self.level.loadLevel(self.map_file)
@@ -169,16 +172,14 @@ class Game(object):
         # Level time
         start_time = pygame.time.get_ticks()
         time = 0
+        self.hud.ready_time = pygame.time.get_ticks()
 
         # Load skills into the Hud
         self.hud.loadSkills(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","))
 
         # Load Dialog box
         self.dlogbox.setMessageBox(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Map Select', self.setState]] )
-
-        # Stop all sounds
-        self.sound.stopAllSfx()              
-
+        
         pygame.event.set_allowed((pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEMOTION, pygame.VIDEORESIZE, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP))
         
         # -------- Main Program Loop -----------
@@ -239,7 +240,7 @@ class Game(object):
             self.level.drawBackground(self.screen, scroll, size)
 
             # Draw tiles and handle tile collision with player
-            self.level.updateTiles(self.screen,scroll,size,(self.frames / ((pygame.time.get_ticks() / 1000) + 1) ) ,self.chomp, self.sound)
+            self.level.updateTiles(self.screen, scroll, size, self.chomp, self.sound)
 
             # Update time
             time = pygame.time.get_ticks() - start_time
@@ -247,51 +248,58 @@ class Game(object):
             # Android Sound Loops
             if android: self.sound.update()
 
-            # If a dialog box isn't up...
-            dbox = self.dlogbox.drawBox(self.screen, size, events)
+            # If a dialog box isn't up.
+            dbox = self.dlogbox.drawBox(self.screen, size, events)           
+           
             if not dbox:
-                # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
-                if not self.level.state: self.chomp.update(scroll, self.screen, move, size, self.sound)
-                # Draw Sprites
-                self.all_sprites_list.draw(self.screen)
-                
-                # If Chompy can't move it's game over...
-                if not self.chomp.moveok and self.chomp.speed == 0:
-                    if self.chomp.stopclock < 0: self.chomp.stopclock = 30
-                else: self.chomp.stopclock = -1
+                # If the game has displayed the "Get Ready!" - "Go!" message.            
+                if not transition_status: getready = self.hud.getReady(size, self.screen)
+                else: getready = 0
 
-                if self.chomp.stopclock == 0:
-                    self.level.state = 2
-
-                # If Chompy falls below the level...
-                if self.chomp.colliderect.y > self.level.mapheight * self.level.tilesize[1]:
-                    self.level.state = 2
-
-                # Game over level state...
-                if self.level.state == 2:
-                    self.chomp.speed = .1
-                    self.chomp.falling = .1
-                    self.chomp.moveok = 1
-                    if self.transition.type == 0:
-                        self.dlogbox.setMessageBox(size,"Chompy didn't make it...", "Oh No!!", [['Retry',self.levelTransition],['Map Select', self.setState]] )
-
-                # Update Hud
-                self.hud.update(self.screen,size,time)
-                self.hud.checkSkillActivation(events, size, self.chomp, self.sound)
-                # Check level state
-                if self.level.state == 1:
-                    self.chomp.speed = 0
-                    self.chomp.falling = 0
-                    if self.transition.type == 0:
-                        self.dlogbox.setMessageBox(size,"TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
+                if not getready:
+                    # Update Chomp Movement...only when level is playable(i.e. not beaten or lost)
+                    if not self.level.state: self.chomp.update(scroll, self.screen, move, size, self.sound)
+                    # Draw Sprites
+                    self.all_sprites_list.draw(self.screen)
+                    
+                    # If Chompy can't move it's game over...
+                    if not self.chomp.moveok and self.chomp.speed == 0:
+                        if self.chomp.stopclock < 0: self.chomp.stopclock = 30
+                    else: self.chomp.stopclock = -1
+    
+                    if self.chomp.stopclock == 0:
+                        self.level.state = 2
+    
+                    # If Chompy falls below the level...
+                    if self.chomp.colliderect.y > self.level.mapheight * self.level.tilesize[1]:
+                        self.level.state = 2
+    
+                    # Game over level state...
+                    if self.level.state == 2:
+                        self.chomp.speed = .1
+                        self.chomp.falling = .1
+                        self.chomp.moveok = 1
+                        if self.transition.type == 0:
+                            self.dlogbox.setMessageBox(size,"Chompy didn't make it...", "Oh No!!", [['Retry',self.levelTransition],['Map Select', self.setState]] )
+    
+                    # Update Hud
+                    self.hud.update(self.screen,size,time)
+                    self.hud.checkSkillActivation(events, size, self.chomp, self.sound)
+                    # Check level state
+                    if self.level.state == 1:
+                        self.chomp.speed = 0
+                        self.chomp.falling = 0
+                        if self.transition.type == 0:
+                            self.dlogbox.setMessageBox(size,"TIME: " + str(round( time / 1000.0,2 )) , "Pwned", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
 
             # If closed by clicking X return to map select.
             elif dbox == -1: 
                 self.setState(2)
             # Reset time as long as dialog box is up
             else:
-                start_time = pygame.time.get_ticks()
+                start_time = pygame.time.get_ticks()                
                 time = 0
+                self.hud.ready_time = pygame.time.get_ticks() # As long as dialog box is up reset "Get Ready!" - "Go!" message.
 
             # If there is a transition playing
             transition_status = self.transition.update(self.screen)

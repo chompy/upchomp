@@ -32,6 +32,10 @@ class Hud(object):
         self.tile_image_size = [image_width,image_height]
         self.tile_table = imghelp.makeTiles(image, SKILL_TILE_SIZE)
         
+        # Get Ready, Go, message.
+        self.ready = [pygame.image.load("gfx/get_ready.png").convert_alpha(), pygame.image.load("gfx/go.png").convert_alpha()]
+        self.ready_time = 0
+        
         # Go back to map select if this var is true...
         self.doMapSelect = 0
 
@@ -147,3 +151,21 @@ class Hud(object):
                             if self.skills[i[0]] > 0:
                                 self.skills[i[0]] -= 1
                                 chomp.activateSkill(i[0], sound)
+
+                                
+    def getReady(self, size, screen):
+        
+        """Displays 'Get Ready', 'Go!' message."""
+        rect = pygame.Rect(0, 0, size[0], size[1])
+        ready_rect = self.ready[0].get_rect()
+        ready_rect = ready_rect.fit(rect)
+        
+        if pygame.time.get_ticks() - self.ready_time < 2000:
+            screen.blit( pygame.transform.scale(self.ready[0], (ready_rect.w, ready_rect.h)), ( (size[0] / 2) - (ready_rect.w / 2), (size[1] / 2) - (ready_rect.h / 2)))
+            return 1
+        elif pygame.time.get_ticks() - self.ready_time >= 2000 and pygame.time.get_ticks() - self.ready_time < 3000:
+            screen.blit( pygame.transform.scale(self.ready[1], (ready_rect.w, ready_rect.h)), ( (size[0] / 2) - (ready_rect.w / 2), (size[1] / 2) - (ready_rect.h / 2)))               
+            return 1
+        else:
+            return 0
+        
