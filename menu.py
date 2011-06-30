@@ -1,4 +1,4 @@
-import pygame, math, sys, os, iniget, dialog, imagehelper, time
+import pygame, math, sys, os, iniget, dialog, imagehelper, time, hashlib
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
@@ -372,6 +372,9 @@ class Menu(object):
         pack = iniget.iniGet("map/" + mappack)
         maplist = pack.get("pack","order").split(",")
         
+        maphash = hashlib.sha224(open("map/"+mappack).read()).hexdigest()
+        current_selection = self.save.getInt(maphash, "progress")
+       
         map = []
         for i in maplist:
             cmap = pack.get(i, "map").replace(" ", "").split("\n")
@@ -406,6 +409,9 @@ class Menu(object):
                 'height'    :   height
             })
 
+        # Upon completing the last map the current selection will become one higher, fix it!
+        if current_selection > len(map) - 1: current_selection = len(map) - 1
+            
         draw_map = 1  
         
         while not selected_stage:
