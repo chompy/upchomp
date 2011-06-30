@@ -343,7 +343,7 @@ class Menu(object):
                            
             # Go ahead and update the self.screen with what we've drawn.
             pygame.display.flip()     
-        return [returnVal, stage_selected]
+        return [returnVal, stage_selected - 1]
     
     def stageSelect(self, mappack):
         
@@ -484,7 +484,7 @@ class Menu(object):
             
             # Buttons
             if self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5)  , size[1] - (LIST_SPACING * 1.5) ], size, events):
-                selected_stage = current_selection
+                selected_stage = current_selection + 1
                             
             if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events):
                 selected_stage = -1
