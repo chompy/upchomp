@@ -8,7 +8,7 @@ TILE_SIZE = [32,32]
 
 class Dialog(object):
     
-    def __init__(self, screen):
+    def __init__(self, screen, sound):
     
         # Load the dialog tiles...             
         image = pygame.image.load("gfx/dialog_box.png").convert_alpha()
@@ -28,6 +28,9 @@ class Dialog(object):
         
         # Get Screen Object
         self.screen = screen
+        
+        # Get Sound Object
+        self.sound = sound
                 
     def setMessageBox(self, size, message, title="", buttons=[]):
 
@@ -187,7 +190,8 @@ class Dialog(object):
                 self.buttonstate[i] = 0
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if close_btn.collidepoint(event.pos[0], event.pos[1]):
-                    self.closeMessageBox()
+                    self.sound.playSfx("sfx/button.wav",0)
+                    self.closeMessageBox()                    
                     return -1 
                 for i in range(len(self.button)):
                     button_text_size = self.font.size(self.button[i][0])
@@ -196,6 +200,7 @@ class Dialog(object):
 
                     # If button click initiate passed function
                     if button_rect.collidepoint(event.pos[0], event.pos[1]):
+                        self.sound.playSfx("sfx/button.wav",0)
                         self.button[i][1]()
                         self.closeMessageBox() 
                                             
@@ -237,7 +242,9 @@ class Dialog(object):
                        
             # See if mouse button was clicked
             for event in events:
-                if event.type == pygame.MOUSEBUTTONDOWN: btn_click = 1
+                if event.type == pygame.MOUSEBUTTONDOWN: 
+                    btn_click = 1
+                    self.sound.playSfx("sfx/button.wav",0)
         
         for x in range(0, button_tile_width):
             pos = [btnpos[0] + (x * TILE_SIZE[0]) + (TILE_SIZE[0] / 2), btnpos[1]]

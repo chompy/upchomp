@@ -10,7 +10,7 @@ SKILL_TILE_SIZE = [32,32]
 
 class Hud(object):
 
-    def __init__(self, screen):
+    def __init__(self, screen, sound):
     
         """ Inits the Hud """
     
@@ -41,6 +41,9 @@ class Hud(object):
         
         # Get Screen object
         self.screen = screen
+        
+        # Get Sound Object
+        self.sound = sound
 
     def loadSkills(self, size, skills = 0):
         
@@ -145,6 +148,7 @@ class Hud(object):
                 button_rect = pygame.Rect(size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0], SKILL_TILE_SIZE[1])
                 if button_rect.collidepoint(event.pos[0], event.pos[1]):
                     self.doMapSelect = 1
+                    self.sound.playSfx("sfx/button.wav", 0)
 
                 # Other buttons
                 if self.skill_data:

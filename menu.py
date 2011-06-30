@@ -15,7 +15,7 @@ class Menu(object):
     def __init__(self, screen, sound, clock):
 
         # Dialog
-        self.dialog = dialog.Dialog(screen)
+        self.dialog = dialog.Dialog(screen, sound)
         
         # Scroll Arrows
         scrollarrows = pygame.image.load("gfx/scroll_arrows.png").convert_alpha()
@@ -93,7 +93,8 @@ class Menu(object):
                     title_logo_pos_a = self.tl_rect_a.x - size[0]
                     title_logo_pos_b = self.tl_rect_b.x + size[0]       
                     title_logo_offset_a = self.tl_rect_a.x 
-                    title_logo_offset_b = self.tl_rect_a.x              
+                    title_logo_offset_b = self.tl_rect_a.x   
+                    self.sound.playSfx("sfx/button.wav",0)           
 
 
             self.renderBg(size)
@@ -250,6 +251,7 @@ class Menu(object):
                         rect = pygame.Rect(64, x * LIST_SPACING + LIST_START_POS - (map_list_scroll * LIST_SPACING), fontSize[0], fontSize[1])
                         if rect.collidepoint(event.pos[0], event.pos[1]):
                             map_selected = x
+                            self.sound.playSfx("sfx/beep.wav", 0)
                         x += 1 
                         
                     if scroll_down_collide and scroll_down:

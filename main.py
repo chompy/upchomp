@@ -59,10 +59,10 @@ class Game(object):
         self.menu = menu.Menu(self.screen, self.sound, self.clock)        
         
         # Make a dialog object.
-        self.dlogbox = dialog.Dialog(self.screen)
+        self.dlogbox = dialog.Dialog(self.screen, self.sound)
 
         # Setup Hud
-        self.hud = hud.Hud(self.screen)
+        self.hud = hud.Hud(self.screen, self.sound)
 
         # Setup Transition
         self.transition = transition.Transition()
@@ -101,7 +101,7 @@ class Game(object):
             if self.state == 3: self.state = 0
             
             # Stop all sounds
-            self.sound.stopAllSfx()
+            self.sound.stopAllSfx(1, 1)
 
             # Try to load a function for the current state
             try: options[self.state]()
@@ -146,7 +146,7 @@ class Game(object):
         size = self.screen.get_size()
 
         # Stop all sounds
-        self.sound.stopAllSfx() 
+        self.sound.stopAllSfx(1, 1) 
         
         # Load Level
         try:

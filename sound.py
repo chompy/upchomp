@@ -57,12 +57,13 @@ class Sound(object):
     def stopSfx(self, channel):
         self.sfx[channel][1].stop()
 
-    def stopAllSfx(self, exceptMusic = 1):
+    def stopAllSfx(self, exceptMusic = 1, onlyLoops = 0):
         for i in range(len(self.sfx)):
             if self.sfx[i][1].get_busy() and ((self.sfx[i][4] and not exceptMusic) or (exceptMusic and not self.sfx[i][4])):
-                self.sfx[i][1].stop()
-                self.sfx[i][0] = ""
-                self.sfx[i][3] = 0
+                if (onlyLoops and self.sfx[i][3]) or not onlyLoops:
+                    self.sfx[i][1].stop()
+                    self.sfx[i][0] = ""
+                    self.sfx[i][3] = 0
 
     def stopSfxFile(self, file):
         for i in range(len(self.sfx)):
