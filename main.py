@@ -10,9 +10,6 @@ except ImportError:
 settings = iniget.iniGet("settings.ini")
 error_log = open('error.log', 'w')
 
-# Define some colors
-white    = ( 255, 255, 255)
-
 class Game(object):
 
     def __init__(self):
@@ -77,7 +74,7 @@ class Game(object):
         self.frames = 1
 
         # Set Current Map
-        self.map_file = ""
+        self.map_file = []
 
         # Enter game loop
         self.gameLoop()
@@ -118,12 +115,14 @@ class Game(object):
         
     def mapSelect(self):
         self.level.current_map = 0
-        self.map_file = self.menu.mapSelect()  
-        if self.map_file == 0: self.setState(1)
-        elif self.map_file == -1: self.setState(-1)
+        self.map_file = self.menu.mapSelect() 
+ 
+        if self.map_file[0] == 0: self.setState(1)
+        elif self.map_file[0] == -1: self.setState(-1)
         else: self.setState(0)
 
     def nextLevel(self):
+        self.map_file[1] = -1
         self.level.current_map += 1
         self.levelTransition()
 
@@ -150,7 +149,7 @@ class Game(object):
         
         # Load Level
         try:
-            self.level.loadLevel(self.map_file)
+            self.level.loadLevel(self.map_file[0], self.map_file[1])
             self.level.state = 0
         except:
             traceback.print_exc(5, error_log)
@@ -236,7 +235,7 @@ class Game(object):
             scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]
 
             # Draw the background
-            self.screen.fill(white)
+            self.screen.fill([255, 255, 255])
             self.level.drawBackground(self.screen, scroll, size)
 
             # Draw tiles and handle tile collision with player

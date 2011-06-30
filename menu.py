@@ -1,4 +1,4 @@
-import pygame, math, sys, os, iniget, dialog, imagehelper
+import pygame, math, sys, os, iniget, dialog, imagehelper, time
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
@@ -21,8 +21,14 @@ class Menu(object):
         scrollarrows = pygame.image.load("gfx/scroll_arrows.png").convert_alpha()
         image_width, image_height = scrollarrows.get_size()
         tile_image_size = [image_width,image_height]
-        self.scrollarrows = imghelp.makeTiles(scrollarrows, TILE_SIZE)    
-        
+        self.scrollarrows_vertical = imghelp.makeTiles(scrollarrows, TILE_SIZE)    
+        self.scrollarrows_horizontal = imghelp.makeTiles(scrollarrows, TILE_SIZE) 
+
+        # Scroll Arrows [Rotate 90 degrees]
+        for x in range(len(self.scrollarrows_horizontal)):
+            for y in range(len(self.scrollarrows_horizontal[x])):
+                self.scrollarrows_horizontal[x][y] = pygame.transform.rotate(self.scrollarrows_horizontal[x][y], 90)        
+                
         # Load font
         self.font = pygame.font.Font("font/volter.ttf",18)
         self.titlefont = pygame.font.Font("font/volter2.ttf",28)
@@ -194,6 +200,7 @@ class Menu(object):
         bgoffset = 0
         map_list_scroll = 0
         map_selected = 0
+        stage_selected = 0
         
         # Static Vars
         LIST_SPACING = 32
@@ -217,6 +224,7 @@ class Menu(object):
         # Get Sizes of Buttons...
         btnsize = self.dialog.getButtonSize("Next")
         btnsize2 = self.dialog.getButtonSize("Back")
+        mouse = [0, 0]
         
         # Update BG Size
         self.resizeTitle(size)
@@ -234,6 +242,7 @@ class Menu(object):
                 if android.check_pause():
                     android.wait_for_resume()
 
+            mouse_click = [0, 0]
             for event in events: # User did something
                 if event.type == pygame.QUIT: # If user clicked close
                     done=True # Flag that we are done so we exit this loop
@@ -243,8 +252,12 @@ class Menu(object):
                     size = event.size
                     map_list_scroll = 0
                     map_selected = 0                    
+                    
+                elif event.type == pygame.MOUSEMOTION:
+                    mouse = event.pos
 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_click = event.pos
                     x = 0
                     for i in mapList:
                         fontSize = self.font.size(i[1])
@@ -253,22 +266,15 @@ class Menu(object):
                             map_selected = x
                             self.sound.playSfx("sfx/beep.wav", 0)
                         x += 1 
-                        
-                    if scroll_down_collide and scroll_down:
-                        map_list_scroll += 1  
-                        if map_list_scroll > cut_off: map_list_scroll = cut_off
-
-                    if scroll_up_collide and map_list_scroll > 0:
-                        map_list_scroll -= 1
- 
+                         
                    
             # Render the background
             self.renderBg(size)
             
             # Title Text
             
-            self.screen.blit( self.titlefont.render("Map Select", 0, [0,0,0]), (34,34) )
-            self.screen.blit( self.titlefont.render("Map Select", 0, [255,179,0]), (32,32) )
+            self.screen.blit( self.titlefont.render("Pack Select", 0, [0,0,0]), (34,34) )
+            self.screen.blit( self.titlefont.render("Pack Select", 0, [255,179,0]), (32,32) )
             
             # Map List
             
@@ -291,54 +297,229 @@ class Menu(object):
             if scroll_down and not map_list_scroll >= cut_off:
                 pos = [max_text_width + 78, size[1] - 92]
                 rect = pygame.Rect(pos[0], pos[1], TILE_SIZE[0], TILE_SIZE[1])
-                mouse = pygame.mouse.get_pos()
                 if not rect.collidepoint(mouse[0], mouse[1]):
-                    self.screen.blit( self.scrollarrows[0][0], (pos[0], pos[1]) )
-                    scroll_down_collide = 0
+                    self.screen.blit( self.scrollarrows_vertical[0][0], (pos[0], pos[1]) )
                 else: 
-                    self.screen.blit( self.scrollarrows[1][0], (pos[0], pos[1]) )
-                    scroll_down_collide = 1
-            else: scroll_down_collide = 0
+                    self.screen.blit( self.scrollarrows_vertical[1][0], (pos[0], pos[1]) )
+                    if rect.collidepoint(mouse_click[0], mouse_click[1]):
+                        map_list_scroll += 1  
+                        if map_list_scroll > cut_off: map_list_scroll = cut_off
                                 
             # Render scroll up arrow
             if map_list_scroll > 0:
                 pos = [max_text_width + 78, 64]
                 rect = pygame.Rect(pos[0], pos[1], TILE_SIZE[0], TILE_SIZE[1])
-                mouse = pygame.mouse.get_pos()
                 if not rect.collidepoint(mouse[0], mouse[1]):
-                    self.screen.blit( self.scrollarrows[0][1], (pos[0], pos[1]) )
-                    scroll_up_collide = 0
+                    self.screen.blit( self.scrollarrows_vertical[0][1], (pos[0], pos[1]) )
                 else: 
-                    self.screen.blit( self.scrollarrows[1][1], (pos[0], pos[1]) )
-                    scroll_up_collide = 1
-            else: scroll_up_collide = 0
+                    self.screen.blit( self.scrollarrows_vertical[1][1], (pos[0], pos[1]) )
+                    if rect.collidepoint(mouse_click[0], mouse_click[1]) and map_list_scroll > 0:
+                        map_list_scroll -= 1
             
                         
             # Map Selected Arrow
             if map_selected < map_list_scroll: map_selected = map_list_scroll
             self.screen.blit(maparrow, ( 32, LIST_START_POS + (LIST_SPACING * map_selected) - (LIST_SPACING * map_list_scroll)   ) )
             
- 
             # If next clicked load selected level
             if self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events):
-                returnVal = mapList[map_selected][0]
-                done = 1
+                stage_selected = self.stageSelect(mapList[map_selected][0])
 
-            # If back clicked
-            #if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, self.screen, events):
-            #    returnVal = 0
-            #    done = 1
-            if self.dialog.makeButton("Quit", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events):
+                if stage_selected > 0:
+                    returnVal = mapList[map_selected][0]
+                    done = 1
+                else:
+                    size = self.screen.get_size()
+                    self.resizeTitle(size)
+
+            elif not stage_selected and self.dialog.makeButton("Quit", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events):
                 pygame.quit()
                 sys.exit()
-            
+                
+            else: stage_selected = 0          
             
             # Dialog Box
             self.dialog.drawBox(size, events)
                            
             # Go ahead and update the self.screen with what we've drawn.
             pygame.display.flip()     
-                       
-        return returnVal
+        return [returnVal, stage_selected]
     
-    #def stageSelect(self):
+    def stageSelect(self, mappack):
+        
+        selected_stage = 0
+        current_selection = 0
+        
+        # self.screen size
+        size = self.screen.get_size()
+
+        # Get Sizes of Buttons...
+        btnsize = self.dialog.getButtonSize("Play")
+        btnsize2 = self.dialog.getButtonSize("Back")  
+ 
+        scroll_right_collide = 0
+        scroll_left_collide = 0
+        mouse = [0, 0]
+        
+        # Static Vars
+        LIST_SPACING = 32
+        LIST_START_POS = 92         
+                                
+        # Get map pack info
+        pack = iniget.iniGet("map/" + mappack)
+        maplist = pack.get("pack","order").split(",")
+        
+        map = []
+        for i in maplist:
+            cmap = pack.get(i, "map").replace(" ", "").split("\n")
+            
+            width = 0
+            height = len(cmap)
+            
+            tiles = []
+            for x in cmap:
+                if len(x) > width: width = len(x)
+                for y in range(len(x)):
+                    tiles.append(x[y])    
+                    
+            theme = iniget.iniGet("tile/" + pack.get(i, "theme") + ".ini")
+            tile_draw = []
+            for x in tiles:
+                if theme.getBool(x, "collide") and not theme.get(x, "type"):
+                    # Floor/Wall Block
+                    tile_draw.append(1)
+                elif theme.get(x, "type") == "goal":
+                    # Goal Block
+                    tile_draw.append(2)
+                else:
+                    # Air
+                    tile_draw.append(0)                                    
+        
+            map.append({
+                'tiles'     :   tile_draw,
+                'name'      :   pack.get(i, "name"),
+                'startpos'  :   pack.get(i, "startpos").split(","),
+                'width'     :   width,
+                'height'    :   height
+            })
+
+        draw_map = 1  
+        
+        while not selected_stage:
+           # Set frame rate to 30.
+            self.clock.tick(30)
+            events = pygame.event.get()
+
+            # Android events
+            if android:
+                if android.check_pause():
+                    android.wait_for_resume()
+
+            mouse_click = [0, 0]                    
+            for event in events: # User did something
+                if event.type == pygame.QUIT: # If user clicked close
+                    pygame.quit()
+                    sys.exit()
+
+                elif event.type == pygame.VIDEORESIZE:
+                    self.resizeTitle(event.size)
+                    size = event.size
+                    draw_map = 1
+                    
+                elif event.type == pygame.MOUSEMOTION:
+                    mouse = event.pos                
+                    
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_click = event.pos
+                
+            if draw_map:
+                map_render_size = 20
+                map_w, map_h = [9999, 9999]
+                
+                while map_w > size[0] - (TILE_SIZE[0] * 4) or map_h > size[1] - 256:
+                    map_render_size -= 1
+                    if map_render_size <= 1: break
+                    map_w = map[current_selection]['width'] * map_render_size + (map_render_size * 2)
+                    map_h = map[current_selection]['height'] * map_render_size + (map_render_size * 2)                 
+                
+                map_surface = pygame.Surface((map_w, map_h))
+                    
+                x = 0
+                y = 0            
+                     
+                for i in map[current_selection]['tiles']:
+                    
+                    # Draw Floor/Wall
+                    if i == 1:
+                        pygame.draw.rect(map_surface, [255, 255, 255], pygame.Rect((x * map_render_size) + map_render_size, (y * map_render_size) + map_render_size, map_render_size, map_render_size))
+                    # Draw Goal
+                    elif i == 2:
+                        pygame.draw.rect(map_surface, [0, 0, 255], pygame.Rect((x * map_render_size) + map_render_size, (y * map_render_size) + map_render_size, map_render_size, map_render_size))
+                    # Draw Start Pos                
+                    elif x == int(map[current_selection]['startpos'][0]) and y == int(map[current_selection]['startpos'][1]):
+                        pygame.draw.rect(map_surface, [255, 0, 0], pygame.Rect((x * map_render_size) + map_render_size, (y * map_render_size) + map_render_size, map_render_size, map_render_size))    
+                    
+                    x += 1
+                    if x >= map[current_selection]['width']:
+                        x = 0
+                        y += 1  
+                        
+                draw_map = 0                            
+                                                                         
+            # Render the background
+            self.renderBg(size)
+            
+            # Title Text            
+            self.screen.blit( self.titlefont.render("Stage Select", 0, [0,0,0]), (34,34) )
+            self.screen.blit( self.titlefont.render("Stage Select", 0, [255,179,0]), (32,32) )
+            
+            # Render Map Preview                    
+            self.screen.blit(map_surface, ( (size[0] / 2) - ((((map[current_selection]['width'] * map_render_size) / 2) + (map_render_size)  ) ) , (size[1] / 2) - ((map[current_selection]['height'] * map_render_size) / 2)))
+            
+            # Render Map Name
+            mapnamesize = self.font.size(map[current_selection]['name'])
+            map_title_pos = [(size[0] / 2) - (mapnamesize[0] / 2), (size[1] / 2) - ((map[current_selection]['height'] * map_render_size) / 2) - mapnamesize[1] * 1.5 ]
+            self.screen.blit( self.font.render(map[current_selection]['name'], 0, [0,0,0]), ( map_title_pos[0] + 1, map_title_pos[1] + 1 ) )
+            self.screen.blit( self.font.render(map[current_selection]['name'], 0, [255,179,0]), ( map_title_pos[0], map_title_pos[1]))
+            
+            # Buttons
+            if self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5)  , size[1] - (LIST_SPACING * 1.5) ], size, events):
+                selected_stage = current_selection
+                            
+            if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events):
+                selected_stage = -1
+
+            # Render scroll right arrow
+            if current_selection < len(map) - 1:
+                pos = [size[0] - (TILE_SIZE[0] * 2), (size[1] / 2) - (TILE_SIZE[1] / 2) ]
+                rect = pygame.Rect(pos[0] - TILE_SIZE[0], pos[1] - TILE_SIZE[1], TILE_SIZE[0] * 4, TILE_SIZE[1] * 4)
+                
+                if not rect.collidepoint(mouse[0], mouse[1]):
+                    self.screen.blit( self.scrollarrows_horizontal[0][0], (pos[0], pos[1]) )
+                else: 
+                    self.screen.blit( self.scrollarrows_horizontal[1][0], (pos[0], pos[1]) )
+                    if rect.collidepoint(mouse_click[0], mouse_click[1]):
+                        if current_selection < len(map) - 1:
+                            current_selection += 1
+                            draw_map = 1
+
+                                
+            # Render scroll up arrow
+            if current_selection > 0:
+                pos = [TILE_SIZE[0], (size[1] / 2) - (TILE_SIZE[1] / 2)]
+                rect = pygame.Rect(pos[0] - TILE_SIZE[0], pos[1] - TILE_SIZE[1], TILE_SIZE[0] * 4, TILE_SIZE[1] * 4)
+
+                if not rect.collidepoint(mouse[0], mouse[1]):
+                    self.screen.blit( self.scrollarrows_horizontal[0][1], (pos[0], pos[1]) )
+                else: 
+                    self.screen.blit( self.scrollarrows_horizontal[1][1], (pos[0], pos[1]) )
+                    if rect.collidepoint(mouse_click[0], mouse_click[1]):
+                        if current_selection > 0:
+                            current_selection -= 1                            
+                            draw_map = 1
+                                                              
+                                        
+            # Go ahead and update the self.screen with what we've drawn.
+            pygame.display.flip()                
+            
+        return selected_stage            

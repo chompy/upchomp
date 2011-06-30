@@ -23,15 +23,18 @@ class Gamemap(object):
         # Load Sound Object
         self.sound = sound
 
-    def loadLevel(self, map="map1.map"):
+    def loadLevel(self, map="map1.map", stage = -1):
 
         """
         Loads current map which is specified by the self.current_map var.
-        @param string map - Map Filename
+        @param string map - Map Pack Filename
+        @param int stage - Map Pack Stage
         """
-
         # Load current map
         self.parser = iniget.iniGet("map/"+map)
+        
+        # Get selected stage.
+        if stage > 0: self.current_map = stage
 
         # Current map
         self.packMaps = self.parser.get("pack","order").split(",")
