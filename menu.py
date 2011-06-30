@@ -12,7 +12,7 @@ except ImportError:
 TILE_SIZE = [32,32]    
 
 class Menu(object):
-    def __init__(self, screen, sound, clock):
+    def __init__(self, screen, sound, clock, save):
 
         # Dialog
         self.dialog = dialog.Dialog(screen, sound)
@@ -46,6 +46,9 @@ class Menu(object):
         
         # Get Clock Object
         self.clock = clock
+        
+        # Load Save Ini
+        self.save = save
     
     def show(self):
         done = 0

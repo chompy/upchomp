@@ -1,11 +1,11 @@
-import pygame, math, iniget, imagehelper
+import pygame, math, iniget, imagehelper, hashlib
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
 
 class Gamemap(object):
 
-    def __init__(self, sound):
+    def __init__(self, sound, save):
 
         """
         Inits the gamemap module, allows maps to be loaded and rendered.
@@ -22,6 +22,9 @@ class Gamemap(object):
         
         # Load Sound Object
         self.sound = sound
+        
+        # Load Save Ini
+        self.save = save
 
     def loadLevel(self, map="map1.map", stage = -1):
 
@@ -35,6 +38,9 @@ class Gamemap(object):
         
         # Get selected stage.
         if stage > 0: self.current_map = stage
+        
+        # Get map hash (Used in save file)
+        self.maphash = hashlib.sha224(open("map/"+map).read()).hexdigest()
 
         # Current map
         self.packMaps = self.parser.get("pack","order").split(",")

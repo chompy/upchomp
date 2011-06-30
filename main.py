@@ -42,6 +42,9 @@ class Game(object):
         # Used to manage how fast the screen updates
         self.clock=pygame.time.Clock()
 
+        # Game Save
+        self.save = iniget.iniGet("game.sav")
+        
         # Sprites
         self.all_sprites_list = pygame.sprite.RenderPlain()
 
@@ -53,7 +56,7 @@ class Game(object):
         self.all_sprites_list.add(self.chomp)
         
         # Init Menu
-        self.menu = menu.Menu(self.screen, self.sound, self.clock)        
+        self.menu = menu.Menu(self.screen, self.sound, self.clock, self.save)        
         
         # Make a dialog object.
         self.dlogbox = dialog.Dialog(self.screen, self.sound)
@@ -68,7 +71,7 @@ class Game(object):
         self.state = 1
 
         # Init Game Map
-        self.level = gamemap.Gamemap(self.sound)
+        self.level = gamemap.Gamemap(self.sound, self.save)
 
         # Frame rate
         self.frames = 1
@@ -294,10 +297,26 @@ class Game(object):
                             gametime = round( time / 1000.0,2 )
                             aranktime = float(self.level.parser.get(self.level.packMaps[self.level.current_map], "arank"))
 
+                            # Save Progress
+                            progress = self.save.getInt(self.level.maphash, "progress")
+                            besttime = self.save.getFloat(self.level.maphash, self.level.packMaps[self.level.current_map] )
+                            if not besttime: besttime = 9999.99
+                            
+                            if progress < self.level.current_map + 1:
+                                self.save.set(self.level.maphash, "progress", self.level.current_map + 1)
+                            
+                            if besttime and gametime < besttime:
+                                self.save.set(self.level.maphash, self.level.packMaps[self.level.current_map], gametime)
+                                newrecord = " - New Record!"
+                                
+                            else: newrecord = ""
+                                
+                            self.save.parser.read("game.sav")                                
+                                
                             if aranktime and gametime <= aranktime:
-                                self.dlogbox.setMessageBox(size,"A+! - TIME: " + str(round( time / 1000.0,2 )) , "Pwned!!!", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
+                                self.dlogbox.setMessageBox(size,"A+! - TIME: " + str(round( time / 1000.0,2 )) + newrecord , "Pwned!!!", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
                             else:
-                                self.dlogbox.setMessageBox(size,"TIME: " + str(round( time / 1000.0,2 )) , "Winner!", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
+                                self.dlogbox.setMessageBox(size,"TIME: " + str(round( time / 1000.0,2 )) + newrecord , "Winner!", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )
 
                 # If get ready message still up reset timers.
                 else:
