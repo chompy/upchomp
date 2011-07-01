@@ -25,6 +25,8 @@ class Gamemap(object):
         
         # Load Save Ini
         self.save = save
+        
+        self.packMaps = []
 
     def loadLevel(self, map="map1.map", stage = -1):
 

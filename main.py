@@ -151,6 +151,12 @@ class Game(object):
         self.sound.stopAllSfx(1, 1) 
         
         # Load Level
+        
+        if self.level.packMaps and self.level.current_map > len(self.level.packMaps) - 1:
+            self.menu.dialog.setMessageBox(size, "You've completed " + self.level.parser.get("pack", "name") + "!", "Complete!", [['OK',self.menu.dialog.closeMessageBox]] )  
+            self.state = 2
+            return 0
+            
         try:
             self.level.loadLevel(self.map_file[0], self.map_file[1])
             self.level.state = 0

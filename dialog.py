@@ -113,7 +113,7 @@ class Dialog(object):
         for y in range(0, int(self.boxrange[1])):
             for x in range(0, int(self.boxrange[0])):
                 # Determine which block to use...
-                pos = [ ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) - TILE_SIZE[0] , ((size[1] - self.boxsize[1]) / 2) + (y * TILE_SIZE[1])  ]
+                pos = [ ((size[0] / 2) - (self.boxsize[0] / 2)) + (x * TILE_SIZE[0]) - TILE_SIZE[0] , ((size[1] - self.boxsize[1]) / 2) + (y * TILE_SIZE[1])  ]
                 
                 # Top left corner.
                 if y == 0 and x == 0:
