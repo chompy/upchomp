@@ -9,7 +9,7 @@ grav_rate = GRAVITY / 20
 max_speed = 6.0
 speed_rate = max_speed / 10
 
-TILE_SIZE = [32,32]
+TILE_SIZE = [256,256]
 
 class Chompy(pygame.sprite.Sprite):
     def __init__(self, screen, sound):
@@ -23,12 +23,6 @@ class Chompy(pygame.sprite.Sprite):
         self.image = pygame.image.load("gfx/chompy.png").convert_alpha()
         self.image2 = self.image
         
-        # Heli Skill tiles
-        self.heli = pygame.image.load("gfx/heli.png").convert_alpha()
-        self.heli_tiles = imghelp.makeTiles(self.heli, TILE_SIZE)
-
-        self.progress = pygame.Surface((TILE_SIZE[0], 1))
-
         self.rect = self.image.get_rect()
         self.colliderect = pygame.Rect(self.rect.x, self.rect.x, self.rect.w, self.rect.h)
 
@@ -39,7 +33,27 @@ class Chompy(pygame.sprite.Sprite):
             'heli'    : 0,
             'up'      : 0
         }
+        
+        self.tile_size  = 32
 
+    def resize(self, size):
+        # Heli Skill tiles
+        self.heli = pygame.image.load("gfx/heli.png").convert_alpha()
+        heli_size = self.heli.get_size()
+        heli_tile = [heli_size[0] / 256, heli_size[1] / 256]
+        self.heli = pygame.transform.smoothscale(self.heli, (int(heli_tile[0] * size), int(heli_tile[1] * size)))
+        self.heli_tiles = imghelp.makeTiles(self.heli, [int(size), int(size)])
+            
+        self.image = pygame.transform.smoothscale(self.image2, (int(size), int(size)))   
+        self.rect = self.image.get_rect()
+        self.colliderect = pygame.Rect(self.rect.x, self.rect.x, self.rect.w, self.rect.h)
+        
+        old_tile_size = self.tile_size        
+        self.tile_size = size         
+        
+        self.pos[0] = self.pos[0] * (self.tile_size / old_tile_size)
+        self.pos[1] = self.pos[1] * (self.tile_size / old_tile_size)
+        
     def reset(self):
 
         """Resets Chompy back to his default state."""
@@ -93,7 +107,7 @@ class Chompy(pygame.sprite.Sprite):
             self.skills['heli'] -= 1
             ani = pygame.time.get_ticks() % 4
 
-            self.screen.blit(self.heli_tiles[ani][0], (self.rect.x, self.rect.y - TILE_SIZE[1]))
+            self.screen.blit(self.heli_tiles[ani][0], (self.rect.x, self.rect.y - self.tile_size))
 
             if self.falling > 0: self.falling = 0
 
@@ -107,7 +121,7 @@ class Chompy(pygame.sprite.Sprite):
         if not self.skills['heli'] or self.falling < 0:
             self.falling += (grav_rate) * -1
             if self.falling > GRAVITY * -1: self.falling = (GRAVITY * -1)
-            self.pos[1] += self.falling
+            self.pos[1] += self.falling / (32 / self.tile_size)
 
         # Movement
         if move and self.moveok:
@@ -117,12 +131,12 @@ class Chompy(pygame.sprite.Sprite):
             if move > 0 and move < .5: move = .5
             elif move < 0 and move > -.5: move = -.5
 
-            self.pos[0] += math.floor(self.speed)
+            self.pos[0] += math.floor(self.speed) / (32 / self.tile_size)
             if move > 0 and self.speed < max_speed: self.speed += speed_rate
             if move < 0 and self.speed > max_speed * -1: self.speed -= speed_rate
  
         else:
-            self.pos[0] += math.floor(self.speed)
+            self.pos[0] += math.floor(self.speed) / (32 / self.tile_size)
             if abs(self.speed) < 1: self.speed = 0
             elif self.speed > 0: self.speed -= speed_rate / 4
             elif self.speed < 0: self.speed += speed_rate / 4

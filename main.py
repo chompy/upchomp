@@ -166,6 +166,11 @@ class Game(object):
             self.state = 2
             return 0
 
+        # Resize Chompy
+        chomp_size = size[0]
+        if size[1] > chomp_size: chomp_size = screensize[1]
+        self.chomp.resize( math.ceil(chomp_size / 16) )
+            
         # Place character in level
         pos = self.level.parser.get(self.level.packMaps[self.level.current_map],"startpos").split(",")
         self.chomp.pos[0] = int(pos[0]) * self.level.tilesize[0]
@@ -229,6 +234,11 @@ class Game(object):
                     self.screen=pygame.display.set_mode(event.size, pygame.RESIZABLE)
                     size = event.size
                     self.hud.loadSkills(size)
+                    
+                    new_tile_size = size[0]
+                    if size[1] > new_tile_size: new_tile_size = screensize[1]
+                    self.chomp.resize( math.ceil(new_tile_size / 16) )
+                    self.level.resizeTiles( math.ceil(new_tile_size / 16))
 
             # Android events
             if android:
@@ -244,7 +254,6 @@ class Game(object):
             scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]
 
             # Draw the background
-            self.screen.fill([255, 255, 255])
             self.level.drawBackground(self.screen, scroll, size)
 
             # Draw tiles and handle tile collision with player

@@ -4,7 +4,7 @@ desc =
 order = map1,map2,map3,map4
 
 [map1]
-theme = wood
+theme = chomp
 startpos = 2,5
 name = Cookies! Nom Nom
 desc = Chompy can only move when he's in the air, however if he touches the ground his momentum will carry. Try jumping from spring to spring, you might not be able to land on the next but if done right Chompy's momentum will carry him.
@@ -13,14 +13,14 @@ arank = 10.0
 map = .......................................................
       |......................................................
       |..................................................C..L
-      |........^...R.....^.....R....^..........^............|
+      |.....*..^...*..O..^..O..*.O..^...*..O...^..*.........|
       |.....=========================================.......|
       |.....................................................|
-      |.^.U............................................^....|
-      =======================================================
+      |.^.U..*..*......................................^....|
+      |=====================================================|
       
 [map2]
-theme = wood
+theme = chomp
 startpos = 2,3
 name = Meet the Heli-Chomp
 desc = Use the Heli powerup to get Chompy safely across. Press '1' or click the skill icon at the bottom corner of the screen to use it. 
@@ -37,7 +37,7 @@ map = ..................................................
       ..................................................  
       
 [map3]
-theme = wood
+theme = chomp
 startpos = 5,21
 name = One Uping the Chomp
 desc = Here's another skill to try, it allows Chompy to jump up in the air. Use it when you can't get to a spring.

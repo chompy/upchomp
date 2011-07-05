@@ -55,6 +55,14 @@ class Gamemap(object):
         if music: 
             self.sound.playSfx("sfx/" + music, 1, 1)
         
+
+        screensize = pygame.display.get_surface()
+        screensize = screensize.get_size()
+        size = screensize[0]
+        if screensize[1] > size: size = screensize[1]
+        self.resizeTiles( math.ceil(size / 16) )
+ 
+    def resizeTiles(self, tile_size):
         # Get size of this maps tiles
         self.tilesize = [int(self.themeparser.get("tiles","tile_width")), int(self.themeparser.get("tiles","tile_height"))]
 
@@ -79,13 +87,24 @@ class Gamemap(object):
         # Load the tile images and begin placing them...
         image = pygame.image.load("gfx/" + self.themeparser.get("tiles","tileset")).convert_alpha()
         image_width, image_height = image.get_size()
-        self.tile_image_size = [image_width,image_height]
+        
+        # Resize image to better fit screen
+        tiles_x = image_width / self.tilesize[0]
+        tiles_y = image_height / self.tilesize[1]
+        
+        image = pygame.transform.smoothscale(image, ( int(math.floor(tiles_x * tile_size)), int(math.floor(tiles_y * tile_size))))
+        image_width, image_height = image.get_size()
+        self.tile_image_size = [image_width, image_height]       
+        self.tilesize = [tile_size, tile_size]
+        
         tile_table = imghelp.makeTiles(image, self.tilesize)
 
+              
         self.tile_table = []
         for x in range(len(tile_table)):
             self.tile_table.append([])
             for y in range(len(tile_table[x])):
+                tile_table[x][y] = pygame.transform.smoothscale(tile_table[x][y], (int(self.tilesize[0]), int(self.tilesize[1])))
                 self.tile_table[x].append({
                     'original'          :   tile_table[x][y],
                     'v-flip'            :   pygame.transform.flip(tile_table[x][y], 0, 1),
@@ -105,6 +124,13 @@ class Gamemap(object):
         bg_paralax = self.themeparser.get("background","paralax")
         bg_paralax = str(bg_paralax).split(",")
         if not bg_paralax: bg_paralax = 8
+        
+        # BG Color
+        if self.themeparser.get("background","color"):
+            self.bgcolor = self.themeparser.get("background","color").split(",")
+        else:
+            self.bgcolor = [255,255,255]
+        
         
         self.background = []
         if bg_list:
@@ -143,7 +169,7 @@ class Gamemap(object):
                 })
                 
         # Calculate Map stuff
-        self.calcMap(screensize)
+        self.calcMap(screensize)    
 
 
     def collision(self,rect,tileno):
@@ -171,6 +197,8 @@ class Gamemap(object):
         @param array scroll - X and Y offset of current map scroll.
         """
 
+        screen.fill([int(self.bgcolor[0]), int(self.bgcolor[1]), int(self.bgcolor[2])])
+        
         for i in self.background:            
             i['rect'].x -= i['rect'].x - (scroll[0] / i['paralax']) + size[0]
             i['rect'].y -= i['rect'].y - (scroll[1] / i['paralax']) + size[1]
@@ -306,8 +334,8 @@ class Gamemap(object):
 
                         # Do the pushing.
                         if value[1]: 
-                            if (value[1] * -1) > 0 and not chomp.falling < -5: chomp.falling = int(value[1]) * -1
-                        if value[0] and abs(chomp.speed) < abs(int(value[0])): chomp.speed = int(value[0])                            
+                            if (value[1] * -1) > 0 and not chomp.falling < -5: chomp.falling = (int(value[1]) * -1)
+                        if value[0] and abs(chomp.speed) < abs(int(value[0])): chomp.speed = int(value[0]) * self.tilesize[0]
                             
                     # If player hits the end of the level...
                     elif i['type'] == "goal":

@@ -17,11 +17,11 @@ class imageHelper(object):
     
         image_width, image_height = surface.get_size()       
         tile_table = []
-        for tile_x in range(0, image_width/tilesize[0]):
+        for tile_x in range(0, int(image_width/tilesize[0])):
             line = []
             tile_table.append(line)
-            for tile_y in range(0, image_height/tilesize[1]):
-                rect = (tile_x * tilesize[0], tile_y * tilesize[1], tilesize[0], tilesize[1])
+            for tile_y in range(0, int(image_height/tilesize[1])):
+                rect = (tile_x * tilesize[0], tile_y * tilesize[1], int(tilesize[0]), int(tilesize[1]))
                 line.append(surface.subsurface(rect))       
         return tile_table
         
