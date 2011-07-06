@@ -340,6 +340,14 @@ class Gamemap(object):
                     # If player hits the end of the level...
                     elif i['type'] == "goal":
                         self.state = 1     # Set level state to win.
+                        
+                    # HAZARDS
+                    
+                    # Water
+                    elif i['type'] == "water":
+                        chomp.speed = 0
+                        chomp.moveok = 0
+                        chomp.falling = 2
 
                     # Any other collision should just be treated like a wall or floor collision...
                     else:
