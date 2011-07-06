@@ -31,6 +31,10 @@ class Dialog(object):
         
         # Get Sound Object
         self.sound = sound
+        
+        self.kb_select = -1
+        self.kb_mb_select = -1
+        self.mb_total = 0
                 
     def setMessageBox(self, size, message, title="", buttons=[]):
 
@@ -47,6 +51,7 @@ class Dialog(object):
         if self.title: self.text_push = 1.5
         
         self.showbox = 1
+        self.kb_select = -1
         
         self.calculateSize(size)
 
@@ -205,6 +210,8 @@ class Dialog(object):
                         self.closeMessageBox() 
                                             
             elif event.type == pygame.MOUSEMOTION:
+                # Unset keyboard input if mouse is moved.
+                self.kb_select = -1
                 # Change rollover state when mousing over the buttons
                 if close_btn.collidepoint(event.pos[0], event.pos[1]): 
                     self.buttonstate['close_over'] = 1
@@ -219,10 +226,38 @@ class Dialog(object):
             # If self.screen size changes
             elif event.type == pygame.VIDEORESIZE:
                 self.calculateSize(event.size)
-                               
+                
+                
+            elif event.type == pygame.KEYDOWN:
+                # Select with keyboard
+                if event.key == pygame.K_LEFT:
+                    if self.kb_select < 0: self.kb_select = 0
+                    else: self.kb_select -= 1 
+                elif event.key == pygame.K_RIGHT:
+                    if self.kb_select < 0: self.kb_select = 0
+                    else: self.kb_select += 1        
+                    if self.kb_select > len(self.button) - 1: self.kb_select = len(self.button) - 1         
+                    
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                    if self.kb_select < 0: self.kb_select = 0
+                    self.sound.playSfx("sfx/button.wav",0)
+                    self.button[self.kb_select][1]()
+                    self.closeMessageBox()
+                    
+                elif event.key == pygame.K_ESCAPE:
+                    self.sound.playSfx("sfx/button.wav",0)
+                    self.closeMessageBox()                    
+                    return -1 
+                                    
+            # Keyboard button select
+            if self.kb_select > -1:
+                for i in range(len(self.button)):
+                    if i == self.kb_select: self.buttonstate[i] = 1
+                    else: self.buttonstate[i] = 0             
+            
         return 1
         
-    def makeButton(self, text, btnpos, size, events):
+    def makeButton(self, text, btnpos, size, events, id):
 
         """
         Makes a button that can be placed anywhere.
@@ -235,6 +270,8 @@ class Dialog(object):
         btn_state = 0
         btn_click = 0
         
+        if self.mb_total < id: self.mb_total = id
+        
         # Get mouse pos to see if roll over
         mouse_pos = pygame.mouse.get_pos()
         if rect.collidepoint(mouse_pos[0], mouse_pos[1]): 
@@ -245,7 +282,28 @@ class Dialog(object):
                 if event.type == pygame.MOUSEBUTTONDOWN: 
                     btn_click = 1
                     self.sound.playSfx("sfx/button.wav",0)
-        
+                            
+        # Highlight if selected with keyboard
+        if self.kb_mb_select == id: 
+            btn_state = 1     
+            
+        if self.kb_mb_select == id or self.kb_mb_select < 0:  
+            for event in events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        self.kb_mb_select -= 1
+                        if self.kb_mb_select < 0: self.kb_mb_select = 0
+                    elif event.key == pygame.K_RIGHT:
+                        self.kb_mb_select += 1
+                        if self.kb_mb_select > self.mb_total: self.kb_mb_select = self.mb_total
+                    elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                        if self.kb_mb_select < 0: self.kb_mb_select = 0
+                        btn_click = 1
+                        
+                if event.type == pygame.MOUSEMOTION:
+                    self.kb_mb_select = -1
+
+                    
         for x in range(0, button_tile_width):
             pos = [btnpos[0] + (x * TILE_SIZE[0]) + (TILE_SIZE[0] / 2), btnpos[1]]
            
@@ -260,6 +318,9 @@ class Dialog(object):
         #self.font.set_bold(1)                   
         self.screen.blit(self.font.render(text, 0, self.title_color), ( btnpos[0] + TILE_SIZE[0] + (button_tile_width / 2), btnpos[1] + ((TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2)) ))
         
+        if btn_click:
+            self.kb_mb_select = -1
+            self.mb_total = 0
         return btn_click
         
     def getButtonSize(self, text):

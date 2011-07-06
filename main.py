@@ -253,10 +253,11 @@ class Game(object):
             lscroll = scroll
             scroll = [(size[0] / 2) - self.chomp.pos[0] , (size[1] / 2) - self.chomp.pos[1] ]
             
-            # Lock scrolling to edge of levels
+            # Lock scrolling to edge of level
             if scroll[1] < size[1] - (self.level.mapheight * self.level.tilesize[1]): scroll[1] = size[1] - (self.level.mapheight * self.level.tilesize[1])
             if scroll[0] > 0: scroll[0] = 0
             if scroll[0] < size[0] - (self.level.mapwidth * self.level.tilesize[0]): scroll[0] = size[0] - (self.level.mapwidth * self.level.tilesize[0])
+
 
             # Draw the background
             self.level.drawBackground(self.screen, scroll, size)

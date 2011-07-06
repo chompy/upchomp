@@ -269,7 +269,17 @@ class Menu(object):
                             map_selected = x
                             self.sound.playSfx("sfx/beep.wav", 0)
                         x += 1 
-                         
+                        
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        map_selected -= 1
+                        if map_selected < 0: map_selected = 0
+                        if scroll_down and map_selected < map_list_scroll: map_list_scroll = map_selected
+                    elif event.key == pygame.K_DOWN:
+                        map_selected += 1
+                        if map_selected > len(mapList) - 1: map_selected = len(mapList) - 1                       
+                        if scroll_down and map_selected > map_list_scroll: map_list_scroll = map_selected
+
                    
             # Render the background
             self.renderBg(size)
@@ -318,32 +328,31 @@ class Menu(object):
                     self.screen.blit( self.scrollarrows_vertical[1][1], (pos[0], pos[1]) )
                     if rect.collidepoint(mouse_click[0], mouse_click[1]) and map_list_scroll > 0:
                         map_list_scroll -= 1
-            
                         
             # Map Selected Arrow
             if map_selected < map_list_scroll: map_selected = map_list_scroll
             self.screen.blit(maparrow, ( 32, LIST_START_POS + (LIST_SPACING * map_selected) - (LIST_SPACING * map_list_scroll)   ) )
-            
-            # If next clicked load selected level
-            if self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events):
-                stage_selected = self.stageSelect(mapList[map_selected][0])
-
-                if stage_selected > 0:
-                    returnVal = mapList[map_selected][0]
-                    done = 1
-                else:
-                    size = self.screen.get_size()
-                    self.resizeTitle(size)
-
-            elif not stage_selected and self.dialog.makeButton("Quit", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events):
-                pygame.quit()
-                sys.exit()
-                
-            else: stage_selected = 0          
-            
+ 
             # Dialog Box
-            self.dialog.drawBox(size, events)
-                           
+            if not self.dialog.drawBox(size, events):
+                       
+                # If next clicked load selected level
+                if self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events, 1):
+                    stage_selected = self.stageSelect(mapList[map_selected][0])
+    
+                    if stage_selected > 0:
+                        returnVal = mapList[map_selected][0]
+                        done = 1
+                    else:
+                        size = self.screen.get_size()
+                        self.resizeTitle(size)
+    
+                elif not stage_selected and self.dialog.makeButton("Quit", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events, 0):
+                    pygame.quit()
+                    sys.exit()
+                    
+                else: stage_selected = 0          
+                                       
             # Go ahead and update the self.screen with what we've drawn.
             pygame.display.flip()     
         return [returnVal, stage_selected - 1]
@@ -440,6 +449,16 @@ class Menu(object):
                     
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_click = event.pos
+                    
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        current_selection += 1
+                        if current_selection > len(map) - 1: current_selection = len(map) - 1
+                        draw_map = 1
+                    elif event.key == pygame.K_DOWN:
+                        current_selection -= 1
+                        if current_selection < 0: current_selection = 0
+                        draw_map = 1
                 
             if draw_map:
                 map_render_size = 20
@@ -491,12 +510,12 @@ class Menu(object):
             self.screen.blit( self.font.render(map[current_selection]['name'], 0, [0,0,0]), ( map_title_pos[0] + 1, map_title_pos[1] + 1 ) )
             self.screen.blit( self.font.render(map[current_selection]['name'], 0, [255,179,0]), ( map_title_pos[0], map_title_pos[1]))
             
-            # Buttons
-            if self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5)  , size[1] - (LIST_SPACING * 1.5) ], size, events):
-                selected_stage = current_selection + 1
-                            
-            if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events):
+            # Buttons                           
+            if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events, 0):
                 selected_stage = -1
+
+            elif self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5)  , size[1] - (LIST_SPACING * 1.5) ], size, events, 1):
+                selected_stage = current_selection + 1                                
 
             # Render scroll right arrow
             if current_selection < len(map) - 1:
@@ -511,9 +530,8 @@ class Menu(object):
                         if current_selection < len(map) - 1:
                             current_selection += 1
                             draw_map = 1
-
-                                
-            # Render scroll up arrow
+          
+            # Render scroll left arrow
             if current_selection > 0:
                 pos = [TILE_SIZE[0], (size[1] / 2) - (TILE_SIZE[1] / 2)]
                 rect = pygame.Rect(pos[0] - TILE_SIZE[0], pos[1] - TILE_SIZE[1], TILE_SIZE[0] * 4, TILE_SIZE[1] * 4)

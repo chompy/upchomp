@@ -142,6 +142,10 @@ class Hud(object):
                                     chomp.activateSkill( self.skill_data[i][0] )
                         except ValueError:
                             break
+                            
+                if event.key == pygame.K_ESCAPE:
+                    self.doMapSelect = 1
+                    self.sound.playSfx("sfx/button.wav", 0)                                                
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # Back Button button
