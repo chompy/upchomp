@@ -335,7 +335,7 @@ class Gamemap(object):
                         # Do the pushing.
                         if value[1]: 
                             if (value[1] * -1) > 0 and not chomp.falling < -5: chomp.falling = (int(value[1]) * -1)
-                        if value[0] and abs(chomp.speed) < abs(int(value[0])): chomp.speed = int(value[0]) * self.tilesize[0]
+                        if value[0] and abs(chomp.speed) < abs(int(value[0])): chomp.speed = int(value[0])
                             
                     # If player hits the end of the level...
                     elif i['type'] == "goal":
