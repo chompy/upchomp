@@ -50,7 +50,7 @@ class Menu(object):
         # Load Save Ini
         self.save = save
     
-    def show(self):
+    def titleScreen(self):
         done = 0
         menu_end_state = 0
         
@@ -97,7 +97,7 @@ class Menu(object):
                 elif event.type == pygame.VIDEORESIZE:
                     self.resizeTitle(event.size)
 
-                elif event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                elif (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN) and not ((title_logo_offset_a < title_logo_pos_a and not menu_end_state) or (title_logo_offset_a > title_logo_pos_a and menu_end_state)) :
                     menu_end_state = 1
                     title_logo_pos_a = self.tl_rect_a.x - size[0]
                     title_logo_pos_b = self.tl_rect_b.x + size[0]       

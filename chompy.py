@@ -22,7 +22,7 @@ class Chompy(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("gfx/chompy.png").convert_alpha()
         self.image2 = self.image
-        
+               
         self.rect = self.image.get_rect()
         self.colliderect = pygame.Rect(self.rect.x, self.rect.x, self.rect.w, self.rect.h)
 
@@ -35,10 +35,16 @@ class Chompy(pygame.sprite.Sprite):
         }
         
         self.tile_size  = 32
+        
+        self.splashTimer = 0
+        self.splashPos = [0,0]
+        self.hasSplashed = 0
 
     def resize(self, size):
         # Heli Skill tiles
         self.heli = pygame.image.load("gfx/heli.png").convert_alpha()
+        self.splash = pygame.image.load("gfx/splash.png").convert_alpha()
+        
         heli_size = self.heli.get_size()
         heli_tile = [heli_size[0] / 256, heli_size[1] / 256]
         self.heli = pygame.transform.smoothscale(self.heli, (int(heli_tile[0] * size), int(heli_tile[1] * size)))
@@ -47,6 +53,8 @@ class Chompy(pygame.sprite.Sprite):
         self.image = pygame.transform.smoothscale(self.image2, (int(size), int(size)))   
         self.rect = self.image.get_rect()
         self.colliderect = pygame.Rect(self.rect.x, self.rect.x, self.rect.w, self.rect.h)
+        
+        self.splash = pygame.transform.smoothscale(self.splash, (int(size), int(size)))   
         
         old_tile_size = self.tile_size        
         self.tile_size = size         
@@ -62,13 +70,23 @@ class Chompy(pygame.sprite.Sprite):
         self.falling = 0
         self.pos = [self.rect.x, self.rect.y]
         self.moveok = 1
+        
+        self.splashTimer = 0
+        self.splashPos = [0,0]
+        self.hasSplashed = 0        
 
         self.skills = {
             'heli'    : 0,
             'up'      : 0
         }
 
-
+    def setSplash(self, pos):
+        if self.splashTimer <= 0:
+            self.splashPos = pos
+            self.splashTimer = 40
+            self.hasSplashed = 1  
+            self.sound.playSfx("sfx/splash.wav", 0) 
+                    
     def activateSkill(self, name):
         """
         Activates a Chompy skill!
@@ -89,7 +107,7 @@ class Chompy(pygame.sprite.Sprite):
             self.falling = -10
         else:
             return 0
-
+            
     def update(self, scroll, move, size):
 
         """
@@ -140,7 +158,11 @@ class Chompy(pygame.sprite.Sprite):
             if abs(self.speed) < 1: self.speed = 0
             elif self.speed > 0: self.speed -= speed_rate / 4
             elif self.speed < 0: self.speed += speed_rate / 4
-
+           
+        # Water Splash
+        if self.splashTimer > 0:
+            self.splashTimer -= 1
+            self.screen.blit(self.splash, (self.splashPos[0], self.splashPos[1]))
             
         # If Chompy goes up into the air reenable movement.
         if self.falling < 0 or self.falling > 1: self.moveok = 1

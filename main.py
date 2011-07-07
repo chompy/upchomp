@@ -114,7 +114,7 @@ class Game(object):
         pygame.quit()
 
     def displayMenu(self):
-        self.state = self.menu.show()
+        self.state = self.menu.titleScreen()
         
     def mapSelect(self):
         self.level.current_map = 0

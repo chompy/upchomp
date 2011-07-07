@@ -348,6 +348,8 @@ class Gamemap(object):
                         chomp.speed = 0
                         chomp.moveok = 0
                         chomp.falling = 2
+                        if not chomp.hasSplashed: 
+                            chomp.setSplash([chomp.pos[0] + scroll[0] + 16, chomp.pos[1] + scroll[1] + 16] )
 
                     # Any other collision should just be treated like a wall or floor collision...
                     else:
