@@ -1,4 +1,4 @@
-import pygame, math, menu, chompy, sound, gamemap, dialog, hud, transition, sys, iniget, traceback
+import pygame, math, menu, chompy, sound, gamemap, dialog, hud, transition, sys, os, iniget, traceback
 
 try:
     import android, android_mixer
@@ -78,6 +78,46 @@ class Game(object):
 
         # Set Current Map
         self.map_file = []
+
+        # Opening a map... install it.
+        if len(sys.argv) > 1:
+          size = self.screen.get_size()
+          mappack = iniget.iniGet(sys.argv[1])
+          if mappack.get("pack","name") and mappack.get("pack", "order"):         
+              
+              if os.path.isfile("map/" + mappack.get("pack","name").replace(" ", "_") + ".map"):
+                  print "Failed to install new map pack."
+                  self.dlogbox.setMessageBox(size, "The map you are trying to install appears to already be installed.", "Already Installed!", [['OK',self.menu.dialog.closeMessageBox]] )                  
+              else:
+                  import shutil   
+                  shutil.copy (sys.argv[1], "map/" + mappack.get("pack","name").replace(" ", "_") + ".map")
+                  
+                  if os.path.isfile("map/" + mappack.get("pack","name").replace(" ", "_") + ".map"):
+                      print "Installed map pack '"+ str(mappack.get("pack","name").replace(" ", "_")) + ".map'."
+                      self.dlogbox.setMessageBox(size, "New map pack has been installed!", "New Map Pack!", [['OK',self.menu.dialog.closeMessageBox]] )  
+                  else:
+                      print "Failed to install new map pack."
+                      self.dlogbox.setMessageBox(size, "Unable to install map pack.", "Error", [['OK',self.menu.dialog.closeMessageBox]] )  
+                  
+              events = pygame.event.get() 
+              while self.dlogbox.drawBox(size, events):
+                events = pygame.event.get()
+                
+                for event in events:
+                    if event.type == pygame.QUIT: # If user clicked close
+                        pygame.quit()
+                        sys.exit()
+                        
+                    elif event.type == pygame.VIDEORESIZE:
+                        size = event.size
+                        
+                # Android events
+                if android:
+
+                    if android.check_pause():
+                        android.wait_for_resume()          
+                                  
+                pygame.display.flip()
 
         # Enter game loop
         self.gameLoop()
