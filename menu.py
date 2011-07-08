@@ -38,6 +38,12 @@ class Menu(object):
         self.bg_rect = self.background.get_rect()  
         self.bgoffset = 0  
         
+        # Check mark image
+        self.checkmark = pygame.image.load("gfx/packcomplete.png").convert_alpha()
+        
+        # High Rank Image
+        self.highrank = pygame.image.load("gfx/toprank.png").convert_alpha()
+        
         # Get Sound Object
         self.sound = sound  
         
@@ -220,7 +226,19 @@ class Menu(object):
             ext = i.split(".")
             if ext[len(ext) - 1] == "map":
                 ini = iniget.iniGet("./map/" + i)
-                mapList.append([i, ini.get("pack", "name")])
+                totalmaps = len(ini.get("pack","order").split(","))
+                maphash = hashlib.sha224(open("map/" + i).read()).hexdigest()
+                
+                highrank = 1
+                for x in ini.get("pack","order").split(","):
+                    record = self.save.getFloat(maphash, x)
+                    ranktime = ini.getFloat(x, "arank")
+                    if not record <= ranktime: highrank = 0
+                
+                if self.save.getInt(maphash, "progress") == totalmaps: complete = 1
+                else: complete = 0
+                                  
+                mapList.append([i, ini.get("pack", "name"), complete, highrank])
                 
         returnVal = -1
         
@@ -301,6 +319,17 @@ class Menu(object):
                 if not pos[1] > size[1] - 64 and not pos[1] < 64:                    
                     self.screen.blit( self.font.render(i[1], 0, [0,0,0]), (pos[0] + 2, pos[1] + 2) )
                     self.screen.blit( self.font.render(i[1], 0, [255,255,255]), (pos[0], pos[1]) )
+                    
+                    # If map pack completed, display emblem
+                    if i[2]:
+                        textsize = self.font.size(i[1])
+                        self.screen.blit( self.checkmark, (pos[0] + textsize[0] + (TILE_SIZE[0] / 4), pos[1]) )
+                        
+                        # If all maps completed with high rank, display emblem
+                        if i[3]:
+                            self.screen.blit( self.highrank, (pos[0] + textsize[0] + 16 + (TILE_SIZE[0] / 2), pos[1]) )
+                       
+                        
                 else: 
                     scroll_down = 1
                     cut_off += 1
@@ -383,6 +412,7 @@ class Menu(object):
         
         maphash = hashlib.sha224(open("map/"+mappack).read()).hexdigest()
         current_selection = self.save.getInt(maphash, "progress")
+        progress = current_selection
        
         map = []
         for i in maplist:
@@ -415,7 +445,9 @@ class Menu(object):
                 'name'      :   pack.get(i, "name"),
                 'startpos'  :   pack.get(i, "startpos").split(","),
                 'width'     :   width,
-                'height'    :   height
+                'height'    :   height,
+                'record'    :   self.save.getFloat(maphash, i),
+                'toprank'   :   pack.getFloat(i, "arank")
             })
 
         # Upon completing the last map the current selection will become one higher, fix it!
@@ -454,6 +486,9 @@ class Menu(object):
                     if event.key == pygame.K_UP:
                         current_selection += 1
                         if current_selection > len(map) - 1: current_selection = len(map) - 1
+                        
+                        # Can't go past maps you haven't completed.
+                        if current_selection > progress: current_selection = progress
                         draw_map = 1
                     elif event.key == pygame.K_DOWN:
                         current_selection -= 1
@@ -510,15 +545,25 @@ class Menu(object):
             self.screen.blit( self.font.render(map[current_selection]['name'], 0, [0,0,0]), ( map_title_pos[0] + 1, map_title_pos[1] + 1 ) )
             self.screen.blit( self.font.render(map[current_selection]['name'], 0, [255,179,0]), ( map_title_pos[0], map_title_pos[1]))
             
+            # Render Stats
+            if map[current_selection]['record']:
+                timesize = self.font.size("Best Time: " + str(map[current_selection]['record']))
+                timepos = [(size[0] / 2) - (timesize[0] / 2), (size[1] / 2) - ((map[current_selection]['height'] * map_render_size) / 2) + map_h + 16 ]
+                self.screen.blit( self.font.render("Best Time: " + str(map[current_selection]['record']), 0, [0,0,0]), ( timepos[0] + 1, timepos[1] + 1 ))
+                self.screen.blit( self.font.render("Best Time: " + str(map[current_selection]['record']), 0, [255,179,0]), ( timepos[0], timepos[1]))          
+                
+                if map[current_selection]['record'] <= map[current_selection]['toprank']:
+                    self.screen.blit(self.highrank, (timepos[0] + timesize[0] + (TILE_SIZE[0] / 4), timepos[1] ) )
+            
             # Buttons                           
             if self.dialog.makeButton("Back", [ size[0] - btnsize2[0] - btnsize[0] - (LIST_SPACING * 1.5) , size[1] - (LIST_SPACING * 1.5) ], size, events, 0):
                 selected_stage = -1
 
             elif self.dialog.makeButton("Play", [ size[0] - btnsize[0] - (LIST_SPACING * 1.5)  , size[1] - (LIST_SPACING * 1.5) ], size, events, 1):
-                selected_stage = current_selection + 1                                
+                selected_stage = current_selection + 1
 
             # Render scroll right arrow
-            if current_selection < len(map) - 1:
+            if current_selection < len(map) - 1 and current_selection < progress:
                 pos = [size[0] - (TILE_SIZE[0] * 2), (size[1] / 2) - (TILE_SIZE[1] / 2) ]
                 rect = pygame.Rect(pos[0] - TILE_SIZE[0], pos[1] - TILE_SIZE[1], TILE_SIZE[0] * 4, TILE_SIZE[1] * 4)
                 
