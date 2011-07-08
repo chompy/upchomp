@@ -291,10 +291,12 @@ class Menu(object):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         map_selected -= 1
+                        self.sound.playSfx("sfx/beep.wav", 0)
                         if map_selected < 0: map_selected = 0
                         if scroll_down and map_selected < map_list_scroll: map_list_scroll = map_selected
                     elif event.key == pygame.K_DOWN:
                         map_selected += 1
+                        self.sound.playSfx("sfx/beep.wav", 0)
                         if map_selected > len(mapList) - 1: map_selected = len(mapList) - 1                       
                         if scroll_down and map_selected > map_list_scroll: map_list_scroll = map_selected
 

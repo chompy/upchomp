@@ -242,6 +242,25 @@ class Gamemap(object):
             })
 
             x += 1
+            
+        self.levelSurface = pygame.Surface(( self.tiles[len(self.tiles) - 1]['x'] + self.tilesize[0],self.tiles[len(self.tiles) - 1]['y'] + self.tilesize[1])).convert_alpha()
+        self.levelSurface.fill([255,255,255,0])
+        self.animation = pygame.time.get_ticks()
+
+        # Draw the level
+        x = 0
+        i = 0
+        for i in self.tiles:
+
+            if i['tile']:
+                tile = i['tile'] - 1
+
+                if not i['animation']:
+                    tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
+                    tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))
+
+                    if not i['orientation']: i['orientation'] = "original"
+                    self.levelSurface.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)][i['orientation']], (i['x'], i['y'] ) )            
 
 
     def updateTiles(self, screen, scroll, size, chomp, sound):
@@ -262,13 +281,16 @@ class Gamemap(object):
         # Draw the level
         x = 0
         i = 0
+        
+        # Draw non animated tiles.
+        screen.blit(self.levelSurface, (scroll[0], scroll[1]))
+        
         for i in self.tiles:
-
 
             if i['tile']:
                 tile = i['tile'] - 1
 
-                # Tiles with animation
+                # Process and draw animated tiles.
                 if i['animation']:
                     if not i['collide'] or not i['ani_collide']:
                         tile = tile + (math.floor(self.animation / (1000 / self.ani_framerate) ) % (i['animation'] - tile))
@@ -277,12 +299,12 @@ class Gamemap(object):
                             if self.collide_animation[y][0] == x and self.collide_animation[y][1] > math.floor( ((self.animation - self.collide_animation[y][3]) / (1000 / self.ani_framerate) ) / self.collide_animation[y][1]):
                                 tile = tile + math.floor( ((self.animation - self.collide_animation[y][3]) / (1000 / self.ani_framerate) ) / self.collide_animation[y][1])
                                 self.collide_animation[y][2] += 1
+                                
+                    tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
+                    tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))
 
-                tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
-                tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))
-
-                if not i['orientation']: i['orientation'] = "original"
-                screen.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)][i['orientation']], (i['x'] + scroll[0], i['y'] + scroll[1] ) )
+                    if not i['orientation']: i['orientation'] = "original"
+                    screen.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)][i['orientation']], (i['x'] + scroll[0], i['y'] + scroll[1]) )                                   
 
             # Collision with a tile
             if i['collide']:
@@ -310,7 +332,6 @@ class Gamemap(object):
                         # If not queued add it to the queue..
                         if add_to_collide:
                             self.collide_animation.append( [x, i['animation'] - tile, 0, self.animation] )
-
 
                     # If player hits a pusher...push!
                     if i['type'] == "pusher":

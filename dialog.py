@@ -95,11 +95,12 @@ class Dialog(object):
         box_text_size[1] = len(self.final_text) * self.font.get_linesize()     
 
         # Size of box with text and padding.
-        if self.button: btn_space_add = 2
+        if self.button: btn_space_add = 1
         else: btn_space_add = 0
                 
         self.boxsize = [box_text_size[0] + TILE_SIZE[0], box_text_size[1] + (TILE_SIZE[1] * self.text_push) + (TILE_SIZE[1] * btn_space_add)]
-        self.boxrange = [math.floor(self.boxsize[0] / TILE_SIZE[0]) + 2, math.floor(self.boxsize[1] / TILE_SIZE[1]) + 1]   
+        self.boxrange = [math.ceil(self.boxsize[0] / TILE_SIZE[0]) + 2, math.ceil(self.boxsize[1] / TILE_SIZE[1]) + 1]   
+        self.boxsize = [self.boxrange[0] * TILE_SIZE[0], self.boxrange[1] * TILE_SIZE[1]]
                
         # Get Button Size
         button_width = 0
@@ -110,15 +111,16 @@ class Dialog(object):
             
         if button_width > self.boxsize[0]: 
             self.boxsize[0] = button_width
-            self.boxrange[0] = math.floor(button_width / TILE_SIZE[0]) + 2
-                            
+            self.boxrange[0] = math.ceil(button_width / TILE_SIZE[0]) + 2
+            self.boxsize[0] = self.boxrange[0] * TILE_SIZE[0]
+                                        
     def drawBox(self, size, events):
         if not self.showbox: return 0
         
         for y in range(0, int(self.boxrange[1])):
             for x in range(0, int(self.boxrange[0])):
                 # Determine which block to use...
-                pos = [ ((size[0] / 2) - (self.boxsize[0] / 2)) + (x * TILE_SIZE[0]) - TILE_SIZE[0] , ((size[1] - self.boxsize[1]) / 2) + (y * TILE_SIZE[1])  ]
+                pos = [ ((size[0] / 2) - (self.boxsize[0] / 2)) + (x * TILE_SIZE[0]) , ((size[1] - self.boxsize[1]) / 2) + (y * TILE_SIZE[1])  ]
                 
                 # Top left corner.
                 if y == 0 and x == 0:
@@ -157,12 +159,12 @@ class Dialog(object):
         if self.title:
             #self.font.set_bold(1)
             self.font.set_underline(1)
-            self.screen.blit(self.font.render(self.title, 0, self.title_color), ( ((size[0] - self.boxsize[0]) / 2), ((size[1] - self.boxsize[1]) / 2) + TILE_SIZE[1] / 2 ))
+            self.screen.blit(self.font.render(self.title, 0, self.title_color), ( ((size[0] - self.boxsize[0]) / 2) + TILE_SIZE[0], ((size[1] - self.boxsize[1]) / 2) + TILE_SIZE[1] / 2 ))
         
         self.font.set_bold(0)
         self.font.set_underline(0)
         for i in range(len(self.final_text)):
-            self.screen.blit(self.font.render(self.final_text[i], 0, self.text_color), ( ((size[0] - self.boxsize[0]) / 2), ((size[1] - self.boxsize[1]) / 2) + (i * self.font.get_linesize()) + TILE_SIZE[1] * self.text_push))
+            self.screen.blit(self.font.render(self.final_text[i], 0, self.text_color), ( ((size[0] - self.boxsize[0]) / 2) + + TILE_SIZE[0], ((size[1] - self.boxsize[1]) / 2) + (i * self.font.get_linesize()) + TILE_SIZE[1] * self.text_push))
                    
         # Display Buttons
         button_start_x = 0
@@ -172,7 +174,7 @@ class Dialog(object):
             button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
             
             for x in range(0, button_tile_width):
-                pos = [button_start_x + ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) , ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (self.font.get_linesize() * len(self.final_text)) + TILE_SIZE[1] ]
+                pos = [button_start_x + ((size[0] - self.boxsize[0]) / 2) + (x * TILE_SIZE[0]) + TILE_SIZE[0], ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (self.font.get_linesize() * len(self.final_text)) + TILE_SIZE[1] ]
                
                 if x == 0:
                     button_positions.append(pos) # Button position array for button rect
@@ -184,7 +186,7 @@ class Dialog(object):
                    
             # Display Button Text
             #self.font.set_bold(1)                   
-            self.screen.blit(self.font.render(self.button[i][0],0,self.title_color), ( button_start_x + ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] / 2) + (button_tile_width / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (len(self.final_text) * self.font.get_linesize())  + TILE_SIZE[1] + (TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2) ))
+            self.screen.blit(self.font.render(self.button[i][0],0,self.title_color), ( button_start_x + ((size[0] - self.boxsize[0]) / 2) + (TILE_SIZE[0] * 1.5) + (button_tile_width / 2), ((size[1] - self.boxsize[1]) / 2) + ((self.text_push / 1.5) * TILE_SIZE[1]) + (len(self.final_text) * self.font.get_linesize())  + TILE_SIZE[1] + (TILE_SIZE[1] / 2) - (self.font.get_linesize() / 2) ))
             
             button_start_x = (int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2) * TILE_SIZE[0]
                
@@ -298,6 +300,7 @@ class Dialog(object):
                         if self.kb_mb_select > self.mb_total: self.kb_mb_select = self.mb_total
                     elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                         if self.kb_mb_select < 0: self.kb_mb_select = 0
+                        self.sound.playSfx("sfx/button.wav",0)                        
                         btn_click = 1
                         
                 if event.type == pygame.MOUSEMOTION:

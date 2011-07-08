@@ -19,13 +19,7 @@ class Sound(object):
                 if self.sfx[i][3] > 0 or self.sfx[i][3] == -1:
                     self.sfx[i][1].stop()
                     self.sfx[i][1].play(self.sfx[i][2], self.sfx[i][3])
-                if self.sfx[i][3] > 0: self.sfx[i][3] -= 1
-
-            if not self.sfx[i][1].get_busy():
-                if self.sfx[i][3] > 0 or self.sfx[i][3] == -1:
-                    self.sfx[i][1].stop()
-                    self.sfx[i][1].play(self.sfx[i][2], self.sfx[i][3])
-                if self.sfx[i][3] > 0: self.sfx[i][3] -= 1                                
+                if self.sfx[i][3] > 0: self.sfx[i][3] -= 1            
           
                 
     def playSfx(self, file, loop, isMusic = 0):
