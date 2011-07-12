@@ -70,6 +70,7 @@ SOUND:
   "Helicopter" Skill - Free Sound Project : Robinhood76 
   "Up" Skill         - Free Sound Project : dreamoron
   Water Splash       - Free Sound Project : petenice
+  Key Unlock	     - Free Sound Project : skyumori
 
 MUSIC:
 

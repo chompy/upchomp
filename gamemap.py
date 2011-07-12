@@ -255,7 +255,7 @@ class Gamemap(object):
             if i['tile']:
                 tile = i['tile'] - 1
 
-                if not i['animation']:
+                if not i['animation'] and not i['type'] == "lock" and not i['type'] == "key":
                     tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
                     tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))
 
@@ -300,9 +300,9 @@ class Gamemap(object):
                                 tile = tile + math.floor( ((self.animation - self.collide_animation[y][3]) / (1000 / self.ani_framerate) ) / self.collide_animation[y][1])
                                 self.collide_animation[y][2] += 1
                                 
+                if i['animation'] or i['type'] == "lock" or i['type'] == "key":
                     tile_frame_x = tile % (self.tile_image_size[0] / self.tilesize[0])
                     tile_frame_y = math.floor(tile / (self.tile_image_size[0] / self.tilesize[0]))
-
                     if not i['orientation']: i['orientation'] = "original"
                     screen.blit(self.tile_table[int(tile_frame_x)][int(tile_frame_y)][i['orientation']], (i['x'] + scroll[0], i['y'] + scroll[1]) )                                   
 
@@ -361,7 +361,20 @@ class Gamemap(object):
                     # If player hits the end of the level...
                     elif i['type'] == "goal":
                         self.state = 1     # Set level state to win.
-                        
+                      
+                    
+                    # Get Key, unlock locks.
+                    elif i['type'] == "key":
+                        sound.playSfx("sfx/" + i['collide_sfx'], 0)
+                        i['tile'] = 0
+                        i['collide'] = 0
+                        i['type'] = 0
+                        for z in self.tiles:
+                            if z['type'] == "lock" and z['value'] == i['value']:
+                                z['tile'] = 0
+                                z['collide'] = 0
+                                z['type'] = 0
+                          
                     # HAZARDS
                     
                     # Water
