@@ -1,7 +1,21 @@
 ********************************************************************************
-* UP CHOMP [v1]			                                               *
-* Copyright 2011 Nathan Ogden                                                  *
+* UP CHOMP [Offical Release v1]                                                *
+* Copyright (C) 2011 Nathan Ogden                                              *
 ********************************************************************************
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
                ==================================================
                ================= MAP MAKER GUIDE ================
@@ -28,21 +42,21 @@ settings and the tile information.
 
 Bellow is an example of how the theme settings should look like...
 
-	[tiles]
-	tileset = mytiles.png
-	tile_width = 256
-	tile_height = 256
-	animation_framerate = 45
+    [tiles]
+    tileset = mytiles.png
+    tile_width = 256
+    tile_height = 256
+    animation_framerate = 45
 
-	[background]
-	images = background1.png,background2.png
-	paralax = 16,8
-	no_repeat_y = 0
-	fit_to_window = 0
-	color = 255,255,255
+    [background]
+    images = background1.png,background2.png
+    paralax = 16,8
+    no_repeat_y = 0
+    fit_to_window = 0
+    color = 255,255,255
 
-	[music]
-	file = mymusic.ogg
+    [music]
+    file = mymusic.ogg
 
 
 First off the theme settings are split into three groups. Bellow is a description 
@@ -50,35 +64,36 @@ of each item in each group.
 
 [tiles]
 
-tileset =		Image file containing all the tiles.
+tileset =       Image file containing all the tiles.
 
-tile_width =		The width of each tile.
+tile_width =    The width of each tile.
 
-tile_height = 		The height of each tile.
+tile_height =   The height of each tile.
 
-animation_framerate =	Frame rate to play tile animation at.
+animation_
+framerate =     Frame rate to play tile animation at.
 
 
 [background]
 
-images =		Images to use in the background. You may define as many
-			layers as you want, seperate them with a comma. The top
-			layer is the first one and goes down from there.
+images =        Images to use in the background. You may define as many
+                layers as you want, seperate them with a comma. The top
+                layer is the first one and goes down from there.
 
-paralax =		The distance each background should move when the screen
-			scrolls. Also seperated by commas and should be in the
-			same order as the images above.
+paralax =       The distance each background should move when the screen
+                scrolls. Also seperated by commas and should be in the
+                same order as the images above.
 
-no_repeat_y =		If true then the backgrounds won't repeat vertically.
+no_repeat_y =   If true then the backgrounds won't repeat vertically.
 
-fit_to_window =		If true the background images are resized to fit the window.
+fit_to_window =	If true the background images are resized to fit the window.
 
-color =			Defines the color to use on the background. Displays as the
-			bottom most layer. It's should be setup as Red,Green,Blue.
+color =         Defines the color to use on the background. Displays as the
+                bottom most layer. It's should be setup as Red,Green,Blue.
 
 [music]
 
-file = 			Music file to play.
+file =          Music file to play.
 
 
 === Tile Settings ===
@@ -89,82 +104,83 @@ file to represent the defined tile.
 
 Here is an example of a tile...
 
-	[>]
-	name = right spring
-	collide = true
-	tile = 4
-	animation = 7
-	animate_on_collide = true
-	type = pusher
-	value = 11,0
-	collide_sfx = spring.wav
-	orientation = 270deg
+    [>]
+    name = right spring
+    collide = true
+    tile = 4
+    animation = 7
+    animate_on_collide = true
+    type = pusher
+    value = 11,0
+    collide_sfx = spring.wav
+    orientation = 270deg
 
 The above is a side ways spring. Here is what everything does...
 
-[>] =		This represents the group. This is the group for the ">" character. That 
-		character represents the sideways spring tile and will be used in the map 
-		file.
+[>] =       This represents the group. This is the group for the ">" character. That 
+            character represents the sideways spring tile and will be used in the map 
+            file.
 
-name =	 	Not really important, there to keep the tile maker organized for easy
-		reference, might be used later if a map maker is made.
+name =      Not really important, there to keep the tile maker organized for easy
+            reference, might be used later if a map maker is made.
 
-collide =	Determines rather or not the game should check this tile for collisions.
-		The action executed when the collision occurs depends of the 
-		type(see below). If no type is defined then it becomes a wall/floor that 
-		cannot be passed.
+collide =   Determines rather or not the game should check this tile for collisions.
+            The action executed when the collision occurs depends of the 
+            type(see below). If no type is defined then it becomes a wall/floor that 
+            cannot be passed.
 
 tile =		The tile number in the tileset file. The top left tile is one and it counts
-		up from left to right.
+            up from left to right.
 
 animation =	The tile number that the animation ends on, 'tile' is assumed to be the
-		starting frame. If this is left blank then this tile is assumed to have no
-		animation.
+            starting frame. If this is left blank then this tile is assumed to have no
+            animation.
 
 animate_on_
 collide	=	Determines if the animation should continually loop or only play when Chompy
-		collides with this tile.
+            collides with this tile.
 
-type =		Determines what the tile does. The various types include...
+type =      Determines what the tile does. The various types include...
 
-		pusher: 	Pushes Chompy in a direct specified by the value.
+                pusher:     Pushes Chompy in a direct specified by the value.
 
-		lock:		Impassible tile until unlocked with a 'key' object.
-				The value determines what key it will accept.
+                lock:       Impassible tile until unlocked with a 'key' object.
+				            The value determines what key it will accept.
 
-		key:		Unlocks a 'lock' type object. The value determines
-				what locks it will open.
+                key:        Unlocks a 'lock' type object. The value determines
+                            what locks it will open.
 
-		water:		Stops all of Chompy's horizontal movement and slows
-				his vertical movement.
+                water:      Stops all of Chompy's horizontal movement and slows
+				            his vertical movement.
 	
-		goal:		The end point of the level, the goal!
+                goal:       The end point of the level, the goal!
 
 
-value =		Certain tile types need this bellow describes what the values should be for
-		certain types...
+value =     Certain tile types need this bellow describes what the values should be for
+            certain types...
 
-		pusher:		The X and Y ammount to push Chompy. Seperate X and Y with a
-				comma in that order. Negatives push Chompy to the left and 
-				up respectively.
+                pusher:     The X and Y ammount to push Chompy. Seperate X and Y with a
+                            comma in that order. Negatives push Chompy to the left and 
+                            up respectively.
 
-		key/lock:	An interger that determines which locks are opened with which
-				key. Basically if you want to open all lock tiles with a value
-				of 1, set the key's value to 1 as well.
+                key/lock:   An interger that determines which locks are opened with which
+                            key. Basically if you want to open all lock tiles with a value
+                            of 1, set the key's value to 1 as well.
 
 
-collide_sfx =	A sound file to play when Chompy collides with this tile. Only works if
-		collide is true.
+collide_
+sfx =       A sound file to play when Chompy collides with this tile. Only works if
+		    collide is true.
 
-orientation =	Direction to rotate tile in . Possible values are as follows...
+orient... = Direction to rotate tile in . Possible values are as follows...
 
-		v-flip:		Flips the tile vertically.
-		90deg:		Rotates 90 degrees.
-		90deg_v-flip:	Rotates 90 degrees and flips vertically.
-		180deg:		Rotates 180 degrees.
-		180deg_v-flip:	Rotates 180 degrees and flips vertically.
-		270deg:		Rotates 270 degrees.
-		270deg_v-flip:	Rotates 180 degrees and flips vertically.
+                v-flip:         Flips the tile vertically.
+                90deg:          Rotates 90 degrees.
+                90deg_v-flip:   Rotates 90 degrees and flips vertically.
+                180deg:         Rotates 180 degrees.
+                180deg_v-flip:  Rotates 180 degrees and flips vertically.
+                270deg:         Rotates 270 degrees.
+                270deg_v-flip:  Rotates 180 degrees and flips vertically.
 
 
 =======================
@@ -176,69 +192,69 @@ have one group of settings and the rest of the groups are for the maps.
 
 The first group called "pack" looks like this...
 
-	[pack]
-	name = My Awesome Map
-	desc = My Awesome Description
-	order = map1,map2,map3
+    [pack]
+    name = My Awesome Map
+    desc = My Awesome Description
+    order = map1,map2,map3
 
 
 And here is what everything does...
 
 [pack]
 
-name =		Name of the map pack that is displayed on the map pack screen.
+name =      Name of the map pack that is displayed on the map pack screen.
 
-desc =		Description of the map... not yet implemented in the game.
+desc =      Description of the map... not yet implemented in the game.
 
-order =		Order each map should appear in. Players cannot player subsuquient maps
-		until they beat the prior one. Each map name should be split by commas.
-		The map name is the group the map is placed in.
+order =     Order each map should appear in. Players cannot player subsuquient maps
+            until they beat the prior one. Each map name should be split by commas.
+            The map name is the group the map is placed in.
 
 
 Follow the map pack details are the maps, here is an example of a map...
 
-	[map1]
-	theme = mytheme
-	startpos = 2,5
-	name = My Map Name
-	desc = My Map Description
-	skills = up,heli
-	arank = 10.0
-	map = =......................................................
-	      |......................................................
-	      |..................................................C..L
-	      |.....*..^...*..O..^..O..*.O..^...*..O...^..*.........=
-	      |.....=========================================.......|
-	      |.....|||||||||||||||||||||||||||||||||||||||||.......|
-	      |.^.U.|||||||||||||||||||||||||||||||||||||||||..^..*.|
-	      |=====|||||||||||||||||||||||||||||||||||||||||=======|
+    [map1]
+    theme = mytheme
+    startpos = 2,5
+    name = My Map Name
+    desc = My Map Description
+    skills = up,heli
+    arank = 10.0
+    map = =......................................................
+          |......................................................
+          |..................................................C..L
+          |.....*..^...*..O..^..O..*.O..^...*..O...^..*.........=
+          |.....=========================================.......|
+          |.....|||||||||||||||||||||||||||||||||||||||||.......|
+          |.^.U.|||||||||||||||||||||||||||||||||||||||||..^..*.|
+          |=====|||||||||||||||||||||||||||||||||||||||||=======|
 
 
 And a description of what everything does...
 
 [map1]
 
-theme =		The filename of the tile file to use without the ".ini"
+theme =     The filename of the tile file to use without the ".ini"
 
-startpos =	The position Chompy starts in, X and Y seperated by a comma. It represents
-		the tile Chompy will start on with 0,0 being the top left.
+startpos =  The position Chompy starts in, X and Y seperated by a comma. It represents
+            the tile Chompy will start on with 0,0 being the top left.
 
-name =		Name of map displayed on the map select screen and start dialog.
+name =      Name of map displayed on the map select screen and start dialog.
 
-desc =		Map description displayed on the start dialog.
+desc =      Map description displayed on the start dialog.
 
-skills =	Skills Chompy can use on this map. Each skill should be seperated with
-		a comma. To have more then one of the same skill simply put it in multiple
-		times like "up,up."
+skills =    Skills Chompy can use on this map. Each skill should be seperated with
+            a comma. To have more then one of the same skill simply put it in multiple
+            times like "up,up."
 
-		SKILLS:
+            SKILLS:
 
-		up:	Allows Chompy to bounce up as if on a spring.
-		heli:	Allows Chompy to hover in the air for a short period.
+            up:	    Allows Chompy to bounce up as if on a spring.
+            heli:   Allows Chompy to hover in the air for a short period.
 
 
-arank =		The time in seconds required to beat the map with an "A-Rank" rating.
+arank =     The time in seconds required to beat the map with an "A-Rank" rating.
 
-map = 		The map, a long string of characters from the tile file where each represents
-		a tile. Each line should be the exact same number of character, spaces are 
-		ignored.
+map =       The map, a long string of characters from the tile file where each represents
+            a tile. Each line should be the exact same number of character, spaces are 
+            ignored.

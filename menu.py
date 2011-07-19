@@ -1,3 +1,20 @@
+"""
+    UpChomp - A momentum game staring Chompy
+    Copyright (C) 2011 Nathan Ogden
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import pygame, math, sys, os, iniget, dialog, imagehelper, time, hashlib
 
 # Image Helper Object
@@ -13,6 +30,16 @@ TILE_SIZE = [32,32]
 
 class Menu(object):
     def __init__(self, screen, sound, clock, save):
+    
+        """
+        Inits the menu object for handling the title screen
+        and map pack select.
+        
+        @param pygame.screen screen - Pygame screen object.
+        @param object sound - Sound handler object.
+        @param pygame.time - Pygame time object.
+        @param object save - Ini Object for saving game data.
+        """    
 
         # Dialog
         self.dialog = dialog.Dialog(screen, sound)
@@ -57,6 +84,11 @@ class Menu(object):
         self.save = save
     
     def titleScreen(self):
+    
+        """
+        Title screen state, renders title screen.
+        """
+    
         done = 0
         menu_end_state = 0
         
@@ -145,6 +177,13 @@ class Menu(object):
         return rState
             
     def resizeTitle(self, size):
+    
+        """
+        Resizes title screen logo.
+        
+        @param array size - Width and height of game window.
+        """
+    
         self.screen = pygame.display.set_mode(size, pygame.RESIZABLE)
         tl_rect_big = self.title_logo_a.get_rect()
 
@@ -175,6 +214,13 @@ class Menu(object):
         self.font_data[2] = [ (size[0] / 2) - (self.font_data[1][0] / 2), size[1] - (self.font_data[1][1] * 1.5) ]
         
     def renderBg(self, size):
+        
+        """
+        Renders the menu background.
+        
+        @param array size - Width and height of game window.
+        """
+    
         # Background
         self.bg_rect.x -= self.bg_rect.w - self.bgoffset
         self.bg_rect.y -= self.bg_rect.h - self.bgoffset
@@ -200,6 +246,13 @@ class Menu(object):
         if self.bgoffset < -20: self.bgoffset = 0           
 
     def mapSelect(self):
+        
+        """
+        Map pack select state.
+        
+        @return int - Next game state.
+        """
+    
         done = 0
            
         # self.screen size
@@ -389,6 +442,13 @@ class Menu(object):
         return [returnVal, stage_selected - 1]
     
     def stageSelect(self, mappack):
+    
+        """
+        Map pack stage select state.
+        
+        @param string mappack - Map pack file.
+        @return int - Selected stage.
+        """
         
         selected_stage = 0
         current_selection = 0

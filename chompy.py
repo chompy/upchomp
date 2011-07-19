@@ -1,3 +1,20 @@
+"""
+    UpChomp - A momentum game staring Chompy
+    Copyright (C) 2011 Nathan Ogden
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import pygame, math, imagehelper
 
 # Image Helper Object
@@ -14,7 +31,12 @@ TILE_SIZE = [256,256]
 class Chompy(pygame.sprite.Sprite):
     def __init__(self, screen, sound):
 
-        """Load a Chompy sprite."""
+        """
+        Load a Chompy sprite.
+        
+        @param pygame.screen - Screen rendering object.
+        @param sound object - Sound handler class.        
+        """
         
         self.screen = screen
         self.sound = sound
@@ -41,6 +63,14 @@ class Chompy(pygame.sprite.Sprite):
         self.hasSplashed = 0
 
     def resize(self, size):
+    
+        """
+        Resizes Chompy and objects related to Chompy
+        to the current screen size.
+        
+        @param array size - Width and Height of current screen.
+        """
+    
         # Heli Skill tiles
         self.heli = pygame.image.load("gfx/heli.png").convert_alpha()
         self.splash = pygame.image.load("gfx/splash.png").convert_alpha()
@@ -81,6 +111,13 @@ class Chompy(pygame.sprite.Sprite):
         }
 
     def setSplash(self, pos):
+    
+        """
+        Make Chompy splash in water.
+        
+        @param array pos - X and Y pos of where the splash should occur.
+        """
+    
         if self.splashTimer <= 0:
             self.splashPos = pos
             self.splashTimer = 40
@@ -95,13 +132,16 @@ class Chompy(pygame.sprite.Sprite):
         @return bool - True if skill was activated.
         """
 
+        # Heli Skill - Chompy floats in mid air for ~3 seconds.
         if name == "heli":
-            self.skills['heli'] = 90
+            self.skills['heli'] = 90 # Ticks down every frame, 30 FPS = 3 seconds.
             self.progress_max = 90
             self.falling = -1
 
             if self.sound: self.sound.playSfx("sfx/heli.wav", -1)
             return 1
+            
+        # Up Skill - Makes Chompy shoot up.
         elif name == "up":
             if self.sound: self.sound.playSfx("sfx/up.wav", 0)
             self.falling = -10
@@ -118,7 +158,7 @@ class Chompy(pygame.sprite.Sprite):
         @param array size Current screen size.
         """
 
-        # Skills
+        # === Skills ===
 
         # Heli
         if self.skills['heli'] > 0:

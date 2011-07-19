@@ -1,3 +1,20 @@
+"""
+    UpChomp - A momentum game staring Chompy
+    Copyright (C) 2011 Nathan Ogden
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import pygame, math, imagehelper
 
 # Image Helper Object
@@ -126,6 +143,15 @@ class Hud(object):
 
 
     def checkSkillActivation(self, events, size, chomp):
+    
+        """
+        Check for mouse/keyboard events for activating skills. Sends
+        activate command to Chompy object if true.
+        
+        @param pygame.event event - Pygame event array.
+        @param array size - Width and Height of game window.
+        @param object chomp - Chompy character object.
+        """
 
         for event in events:
 
@@ -164,9 +190,15 @@ class Hud(object):
                                 chomp.activateSkill(i[0])
 
                                 
-    def getReady(self, size):
+    def getReady(self, size):   
         
-        """Displays 'Get Ready', 'Go!' message."""
+        """
+        Displays 'Get Ready', 'Go!' message.
+        
+        @param array size - Width and height of game window.
+        @return bool - True if still display message.
+        """
+        
         rect = pygame.Rect(0, 0, size[0], size[1])
         ready_rect = self.ready[0].get_rect()
         ready_rect = ready_rect.fit(rect)

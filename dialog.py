@@ -1,3 +1,20 @@
+"""
+    UpChomp - A momentum game staring Chompy
+    Copyright (C) 2011 Nathan Ogden
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import pygame, math, imagehelper
 
 # Image Helper Object
@@ -8,7 +25,32 @@ TILE_SIZE = [32,32]
 
 class Dialog(object):
     
+    """
+    Chompy's Pygame Dialog Class
+    
+    This class should be able to work standalone of
+    UpChomp. Feel free to tweak it and use it in your
+    own game!
+    
+    Depends on: 
+        pygame
+        math
+        imagehelper(Also included with UpChomp)
+        
+    Todos:
+        - Make button events accept params. OR
+          Make buttons return an ID corresponding
+          to which button was clicked when clicked.
+    """
+
     def __init__(self, screen, sound):
+    
+        """
+        Inits the dialog box object.
+        
+        @param pygame.screen screen - Pygame screen object.
+        @param object sound - Sound handler object.
+        """
     
         # Load the dialog tiles...             
         image = pygame.image.load("gfx/dialog_box.png").convert_alpha()
@@ -38,6 +80,15 @@ class Dialog(object):
                 
     def setMessageBox(self, size, message, title="", buttons=[]):
 
+        """
+        Sets a message box.
+        
+        @param array size - Width and height of game window.
+        @param string message - Message to put in dialog box.
+        @param string title - Title of dialog box.
+        @param array buttons - Buttons to go in dialog box. EXAMPLE: [['OK', method], ['Cancel', cancelMethod]]
+        """
+
         self.text = message
         self.title = title
         self.button = buttons
@@ -57,9 +108,18 @@ class Dialog(object):
 
 
     def closeMessageBox(self):
+    
+        """ Closes the message box. """
+    
         self.showbox = 0
         
     def calculateSize(self,size):
+    
+        """
+        Calculate the size of the message box based on window size.
+        
+        @param array size - Width and height of the game window.
+        """
         
         # Variables to save calculations to...
         self.text_lines = []
@@ -115,6 +175,16 @@ class Dialog(object):
             self.boxsize[0] = self.boxrange[0] * TILE_SIZE[0]
                                         
     def drawBox(self, size, events):
+    
+        """
+        Draw the dialog box.
+        
+        @param array size - Width and height of the game window.
+        @param pygame.event events - Pygame events array.
+        @return bool - True if dialog is still to be rendered, 
+                       false if not rendered.
+        """
+    
         if not self.showbox: return 0
         
         for y in range(0, int(self.boxrange[1])):
@@ -263,6 +333,12 @@ class Dialog(object):
 
         """
         Makes a button that can be placed anywhere.
+        
+        @param string text - Text to display in button.
+        @param array btnpos - Position to render the button at.
+        @param array size - Width and height of game window.
+        @param int id - Button ID, used for keyboard selecting.
+        @return bool - True if button was clicked.
         """
     
         button_text_size = self.font.size(text)
@@ -327,6 +403,13 @@ class Dialog(object):
         return btn_click
         
     def getButtonSize(self, text):
+        """
+        Get the size of a button.
+        
+        @param string text - Text button would have in it.
+        @return array - Width and height of button.
+        """
+    
         button_text_size = self.font.size(text)
         button_tile_width = int(math.floor(button_text_size[0] / TILE_SIZE[0])) + 2
         return [button_tile_width * TILE_SIZE[0], TILE_SIZE[1]]

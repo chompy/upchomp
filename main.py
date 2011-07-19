@@ -1,3 +1,20 @@
+"""
+    UpChomp - A momentum game staring Chompy
+    Copyright (C) 2011 Nathan Ogden
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import pygame, math, menu, chompy, sound, gamemap, dialog, hud, transition, sys, os, iniget, traceback
 
 try:
@@ -124,6 +141,8 @@ class Game(object):
 
     def gameLoop(self):
     
+        """ Main game loop. """
+    
         # Options for each game state
         options = {
             0: self.startLevel,      # Playing
@@ -154,9 +173,15 @@ class Game(object):
         pygame.quit()
 
     def displayMenu(self):
+        
+        """ Sets game state to title screen. """
+    
         self.state = self.menu.titleScreen()
         
     def mapSelect(self):
+    
+        """ Sets game state to map pack select. """    
+    
         self.level.current_map = 0
         self.map_file = self.menu.mapSelect() 
  
@@ -165,16 +190,29 @@ class Game(object):
         else: self.setState(0)
 
     def nextLevel(self):
+    
+        """ Loads the next level in a map pack. """
+    
         self.map_file[1] = -1
         self.level.current_map += 1
         self.levelTransition()
 
     def levelTransition(self):
+    
+        """ Initates a level transition. """
+    
         size = self.screen.get_size()
         self.transition.verticalSwipe(size)
         self.dlogbox.closeMessageBox()
         
     def setState(self, state = 2):
+    
+        """ 
+        Sets the game state. 
+        
+        @param int state - The state to set the game to, described in a comment above.
+        """
+    
         self.state = state
         
     def startLevel(self):

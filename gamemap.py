@@ -1,3 +1,20 @@
+"""
+    UpChomp - A momentum game staring Chompy
+    Copyright (C) 2011 Nathan Ogden
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import pygame, math, iniget, imagehelper, hashlib
 
 # Image Helper Object
@@ -32,9 +49,11 @@ class Gamemap(object):
 
         """
         Loads current map which is specified by the self.current_map var.
+        
         @param string map - Map Pack Filename
         @param int stage - Map Pack Stage
         """
+        
         # Load current map
         self.parser = iniget.iniGet("map/"+map)
         
@@ -63,6 +82,13 @@ class Gamemap(object):
         self.resizeTiles( math.ceil(size / 16) )
  
     def resizeTiles(self, tile_size):
+    
+        """
+        Rerenders tiles for new screen size.
+        
+        @param int tile_size - The width and height of new tiles, assumes tiles are 1:1 aspect.
+        """
+            
         # Get size of this maps tiles
         self.tilesize = [int(self.themeparser.get("tiles","tile_width")), int(self.themeparser.get("tiles","tile_height"))]
 
@@ -221,6 +247,14 @@ class Gamemap(object):
             i['rect'].y = 0
 
     def calcMap(self, size):
+        
+        """
+        Makes an array of tiles for a particular level and
+        renders static(non animated) tiles to a surface.
+        
+        @param array size - Width and height of game window.
+        """
+    
         self.tiles = []
 
         self.ani_framerate = float(self.themeparser.getInt("tiles", "animation_framerate"))
@@ -266,7 +300,8 @@ class Gamemap(object):
     def updateTiles(self, screen, scroll, size, chomp, sound):
 
         """
-        Draws all tiles to the screen.
+        Draws all tiles to the screen. Checks for collisions with each tile
+        and sends events to Chompy object if needed.
 
         @param pygame.display screen - Screen object used to render items to the screen.
         @param array scroll - X and Y offset of current map scroll.
