@@ -183,6 +183,7 @@ class Game(object):
         """ Sets game state to map pack select. """    
     
         self.level.current_map = 0
+        self.level.displayDialog = 1
         self.map_file = self.menu.mapSelect() 
  
         if self.map_file[0] == 0: self.setState(1)
@@ -195,6 +196,7 @@ class Game(object):
     
         self.map_file[1] = -1
         self.level.current_map += 1
+        self.level.displayDialog = 1
         self.levelTransition()
 
     def levelTransition(self):
@@ -269,7 +271,14 @@ class Game(object):
         self.hud.loadSkills(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"skills").split(","))
 
         # Load Dialog box
-        self.dlogbox.setMessageBox(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Map Select', self.setState]] )
+
+        if self.level.displayDialog:
+          self.dlogbox.setMessageBox(size, self.level.parser.get(self.level.packMaps[self.level.current_map],"desc"), self.level.parser.get(self.level.packMaps[self.level.current_map],"name"), [['Play!',self.dlogbox.closeMessageBox],['Map Select', self.setState]] )
+          self.level.displayDialog = 0
+          no_dialog = 0
+        else: 
+          transition_status = 0
+          no_dialog = 1
         
         pygame.event.set_allowed((pygame.KEYDOWN, pygame.QUIT, pygame.MOUSEMOTION, pygame.VIDEORESIZE, pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP))
         
@@ -303,6 +312,11 @@ class Game(object):
 
                     # Toogle Fullscreen
                     elif event.key == 292: pygame.display.toggle_fullscreen()
+
+                    # Retry Level
+                    elif event.key == pygame.K_TAB: 
+                      self.level.state = 2
+                      self.levelTransition()
 
                 elif event.type == pygame.KEYUP:
                     # Move with keyboard
@@ -354,7 +368,7 @@ class Game(object):
            
             if not dbox:
                 # If the game has displayed the "Get Ready!" - "Go!" message.            
-                if not transition_status: 
+                if not transition_status or no_dialog: 
                     getready = self.hud.getReady(size)
                 else: 
                     getready = 0

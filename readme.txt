@@ -1,5 +1,5 @@
 ********************************************************************************
-* UP CHOMP [Offical Release v1]                                                *
+* UP CHOMP [Offical Release v1.01]                                             *
 * Copyright (C) 2011 Nathan Ogden                                              *
 ********************************************************************************
 
@@ -44,13 +44,13 @@ MOUSE:
 MOUSE + KEYBOARD:
 
   * Move by clicking and holding on the left or right side of the screen.
-  * Use skills by pressing 1-9 on the keyboard where the farest left skill is 1.
+  * Use skills by pressing 1-9 on the keyboard where the farthest left skill is 1.
   * Best for playing on a standard PC.
 
 KEYBOARD:
 
   * Move with the left and right arrow keys.
-  * Use skills by pressing 1-9 on the keyboard where the farest left skill is 1.
+  * Use skills by pressing 1-9 on the keyboard where the farthest left skill is 1.
   * Good alternative to the above...however menus doesn't yet support the 
     keyboard.
 
@@ -66,9 +66,24 @@ ACCELEROMETER + TOUCHSCREEN:
 =======================
 
 It is possible to make custom maps! See 'mapguide.txt' for information on how todo so.    
-    
+ 
 =======================
-4 > Credits           |
+4 > What's New?       |
+=======================
+
+ * v1.00 "First!"
+
+   - First official release!
+
+ * v1.01 "The Retrying Takes to Long Release" - Thanks Faime!
+
+   - Game immediately starts after 'Retrying' a level. The dialog menu with "Play" 
+     and "Map Select" are no longer present after the inital load of the level.
+
+   - You can now press "TAB" on the keyboard to immediately restart a level.
+
+=======================
+5 > Credits           |
 =======================
 
 PROGRAMING:
