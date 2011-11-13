@@ -274,4 +274,7 @@ Map packs are zip files with ".UCM" extensions. To pack up your map you should d
     install the map file. (In most cases dragging and dropping the map file on the executable
     will work too.)
 
-Unfortunately at this time there is no way to test maps without first going through this process.
+Ziping your map makes it easier to share it with other people, however when testing your map you
+may follow the above instructions but instead of zipping up the files simply make a new directory
+inside the "maps" folder and put the files that would have been placed in the zip file inside
+the folder.

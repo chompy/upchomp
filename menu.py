@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, math, sys, os, iniget, dialog, imagehelper, time, hashlib, zipfile, os, shutil, time
+import pygame, math, sys, os, iniget, dialog, imagehelper, time, levelLoader, hashlib
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
@@ -327,41 +327,26 @@ class Menu(object):
         maparrow = pygame.image.load("gfx/map_select_arrow.png").convert_alpha()
         
         # Load Map List
-        map_path = "./maps"
-        mapFiles = os.listdir(map_path)
-        mapList = []        
+        maps = levelLoader.levelList()     
+        mapList = []
         
-        for i in mapFiles:
-            ext = i.split(".")
-            if ext[len(ext) - 1] == "ucm":
-
-                # Unzip Map
-                if not zipfile.is_zipfile(map_path + "/" + i): continue
-
-                # Make Temporary Storage Directory
-                if os.path.exists("temp"): 
-                  shutil.rmtree("temp")
-                  time.sleep(.25)
-                os.mkdir("temp")
-
-                zip_file = zipfile.ZipFile(map_path + "/" + i)
-                zip_file.extract("maps","temp/")
-                zip_file.close()
-            
-                ini = iniget.iniGet("./temp/maps")
-                totalmaps = len(str(ini.get("pack","order")).split(","))
-                maphash = hashlib.sha224(open("temp/maps").read()).hexdigest()
-                
-                highrank = 1
-                for x in ini.get("pack","order").split(","):
-                    record = self.save.getFloat(maphash, x)
-                    ranktime = ini.getFloat(x, "arank")
-                    if not record <= ranktime: highrank = 0
-                
-                if self.save.getInt(maphash, "progress") == totalmaps: complete = 1
-                else: complete = 0
-                                  
-                mapList.append([i, ini.get("pack", "name"), complete, highrank])
+        for i in maps:
+          map_dir = levelLoader.load(i, ['maps'])
+          
+          ini = iniget.iniGet(map_dir + "maps")
+          totalmaps = len(str(ini.get("pack","order")).split(","))
+          maphash = hashlib.sha224(open(map_dir + "maps").read()).hexdigest()
+          
+          highrank = 1
+          for x in ini.get("pack","order").split(","):
+              record = self.save.getFloat(maphash, x)
+              ranktime = ini.getFloat(x, "arank")
+              if not record <= ranktime: highrank = 0
+          
+          if self.save.getInt(maphash, "progress") == totalmaps: complete = 1
+          else: complete = 0
+                            
+          mapList.append([str(i), ini.get("pack", "name"), complete, highrank])
                 
         returnVal = -1
         
@@ -538,28 +523,14 @@ class Menu(object):
         LIST_SPACING = 32
         LIST_START_POS = 92        
 
-        # Find Map Pack File
-        if not os.path.exists(mappack):
-          mappack = "maps/" + mappack
-
         # Unzip Map
-        if not zipfile.is_zipfile(mappack): return None
-
-        # Make Temporary Storage Directory
-        if os.path.exists("temp"): 
-          shutil.rmtree("temp")
-          time.sleep(.25)
-        os.mkdir("temp")
-
-        zip_file = zipfile.ZipFile(mappack)
-        zip_file.extract("maps","temp/")    
-
+        map_dir = levelLoader.load(mappack, ["maps"])
                                 
         # Get map pack info
-        pack = iniget.iniGet("temp/maps")
+        pack = iniget.iniGet(map_dir + "maps")
         maplist = pack.get("pack","order").split(",")
         
-        maphash = hashlib.sha224(open("temp/maps").read()).hexdigest()
+        maphash = hashlib.sha224(open(map_dir + "maps").read()).hexdigest()
         current_selection = self.save.getInt(maphash, "progress")
         progress = current_selection
        
@@ -577,10 +548,10 @@ class Menu(object):
                     tiles.append(x[y])    
 
             # Unzip Theme
-            zip_file.extract(pack.get(i, "theme"),"temp/")
+            map_dir = levelLoader.load(mappack, ["maps", pack.get(i, "theme").strip()])
 
             # Get Theme Date
-            theme = iniget.iniGet("temp/" + pack.get(i, "theme"))
+            theme = iniget.iniGet(map_dir + pack.get(i, "theme"))
             tile_draw = []
             for x in tiles:
                 if theme.getBool(x, "collide") and not theme.get(x, "type"):
@@ -607,8 +578,6 @@ class Menu(object):
         if current_selection > len(map) - 1: current_selection = len(map) - 1
             
         draw_map = 1  
-
-        zip_file.close()
         
         while not selected_stage:
            # Set frame rate to 30.

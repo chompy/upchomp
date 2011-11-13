@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, math, iniget, imagehelper, hashlib, zipfile, os, shutil, time
+import pygame, math, iniget, imagehelper, hashlib, zipfile, os, shutil, time, levelLoader
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
 
@@ -54,41 +54,27 @@ class Gamemap(object):
         """
 
         # Find Map File
-        if not os.path.exists(map):
-          map = "maps/" + map
-
-        # Unzip Map
-        if not zipfile.is_zipfile(map): return None
-
-        # Make Temporary Storage Directory
-        if os.path.exists("temp"): 
-          shutil.rmtree("temp")
-          time.sleep(.25)
-        os.mkdir("temp")        
-
-        zip_file = zipfile.ZipFile(map)
-        zip_file.extractall("temp/")
-        zip_file.close()
+        self.map_dir = levelLoader.load(map)
         
         # Load current map
-        self.parser = iniget.iniGet("temp/maps")
+        self.parser = iniget.iniGet(self.map_dir + "maps")
         
         # Get selected stage.
         if stage > 0: self.current_map = stage
         
         # Get map hash (Used in save file)
-        self.maphash = hashlib.sha224(open("temp/maps").read()).hexdigest()
+        self.maphash = hashlib.sha224(open(self.map_dir + "maps").read()).hexdigest()
 
         # Current map
         self.packMaps = self.parser.get("pack","order").split(",")
 
         # Load theme
-        self.themeparser = iniget.iniGet("temp/" + self.parser.get(self.packMaps[self.current_map],"theme"))
+        self.themeparser = iniget.iniGet(self.map_dir + self.parser.get(self.packMaps[self.current_map],"theme"))
 
         # Load Music
         music = self.themeparser.get("music","file")
         if music: 
-            self.sound.playSfx("temp/" + music, 1, 1)
+            self.sound.playSfx(self.map_dir + music, 1, 1)
         
 
         screensize = pygame.display.get_surface()
@@ -127,7 +113,7 @@ class Gamemap(object):
                 self.map.append(i[x])
 
         # Load the tile images and begin placing them...
-        image = pygame.image.load("temp/" + self.themeparser.get("tiles","tileset")).convert_alpha()
+        image = pygame.image.load(self.map_dir + self.themeparser.get("tiles","tileset")).convert_alpha()
         image_width, image_height = image.get_size()
         
         # Resize image to better fit screen
@@ -179,7 +165,7 @@ class Gamemap(object):
             bg_list = bg_list.split(",")
            
             for i in range(len(bg_list)):
-                image = pygame.image.load("temp/" + bg_list[i]).convert_alpha()
+                image = pygame.image.load(self.map_dir + bg_list[i]).convert_alpha()
                 rect = image.get_rect()
             
                 if self.themeparser.getBool("background","fit_to_window"):
@@ -398,16 +384,16 @@ class Gamemap(object):
 
                                     # Play collision SFX if provided.
                                     if i['collide_sfx']:
-                                        if os.path.exists("temp/" + i['collide_sfx']):
-                                            sound.playSfx("temp/" + i['collide_sfx'], 0)
+                                        if os.path.exists(self.map_dir + i['collide_sfx']):
+                                            sound.playSfx(self.map_dir + i['collide_sfx'], 0)
                                         elif os.path.exists("sfx/" + i['collide_sfx']):
                                             sound.playSfx("sfx/" + i['collide_sfx'], 0)
                                             
                         # Play collision SFX if provided[This one plays when there is no collide animation].
                         elif i['collide_sfx']:
                           
-                          if os.path.exists("temp/" + i['collide_sfx']):
-                              sound.playSfx("temp/" + i['collide_sfx'], 0)
+                          if os.path.exists(self.map_dir + i['collide_sfx']):
+                              sound.playSfx(self.map_dir + i['collide_sfx'], 0)
                           elif os.path.exists("sfx/" + i['collide_sfx']):
                               sound.playSfx("sfx/" + i['collide_sfx'], 0)                                        
 
@@ -423,8 +409,8 @@ class Gamemap(object):
                     
                     # Get Key, unlock locks.
                     elif i['type'] == "key":
-                        if os.path.exists("temp/" + i['collide_sfx']):
-                            sound.playSfx("temp/" + i['collide_sfx'], 0)
+                        if os.path.exists(self.map_dir + i['collide_sfx']):
+                            sound.playSfx(self.map_dir + i['collide_sfx'], 0)
                         elif os.path.exists("sfx/" + i['collide_sfx']):
                             sound.playSfx("sfx/" + i['collide_sfx'], 0)    
                         i['tile'] = 0
