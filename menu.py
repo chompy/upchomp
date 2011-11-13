@@ -99,6 +99,10 @@ class Menu(object):
         self.font_data = [ "Tap to Start", 0, [0,0] ]
         if not android: self.font_data[0] = "Press Any Key to Start"
         self.font_data[1] = self.font.size(self.font_data[0])
+
+        # Splash Screen Image
+        self.splash = pygame.image.load("gfx/cc_splash_screen.png").convert()
+                                     
                            
         # Load Title Logo
         self.title_logo_a = pygame.image.load("gfx/title_logo_layer1.png").convert_alpha()
@@ -111,9 +115,53 @@ class Menu(object):
         title_logo_pos_b = self.tl_rect_b.x
         title_logo_offset_a = self.tl_rect_a.x - size[0]
         title_logo_offset_b = self.tl_rect_a.x + size[0]
+
+        # Splash BG
+        background = pygame.Surface(size)
+        background.fill((255, 255, 255))
+
+        alpha = 100
+        time = 80
+
+        # Display Splash
+        while not done:
+            # Set frame rate to 30.
+            self.clock.tick(30)
+            events = pygame.event.get()
+
+            # Android events
+            if android:
+                if android.check_pause():
+                    android.wait_for_resume()
+
+            for event in events: # User did something
+                if event.type == pygame.QUIT: # If user clicked close
+                    sys.exit()
+
+                elif event.type == pygame.VIDEORESIZE:
+                    self.resizeTitle(event.size)
+                    background = pygame.Surface(event.size)
+                    background.fill((255, 255, 255))
+                    size = event.size
+
+                elif (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN) and not ((title_logo_offset_a < title_logo_pos_a and not menu_end_state) or (title_logo_offset_a > title_logo_pos_a and menu_end_state)) :
+                    done = True                   
+            
+            self.screen.blit(background, (0,0))
+                              
+            self.screen.blit(self.splash_sized, self.splash_rect)
+            # Go ahead and update the self.screen with what we've drawn.
+            pygame.display.flip()
+
+            time -= 1
+            if time <= 0: done = True
+
+        done = 0
  
         # Play Menu Music
         self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1, 1)
+
+        self.resizeTitle(size)
         
         while not done:
             # Set frame rate to 30.
@@ -175,6 +223,7 @@ class Menu(object):
             pygame.display.flip()
         
         return rState
+       
             
     def resizeTitle(self, size):
     
@@ -198,9 +247,11 @@ class Menu(object):
         if size[0] > size[1]:
             self.title_logo_sized_a = pygame.transform.smoothscale(self.title_logo_a, (size[1], size[1]))
             self.title_logo_sized_b = pygame.transform.smoothscale(self.title_logo_b, (size[1], size[1]))
+            self.splash_sized = pygame.transform.smoothscale(self.splash, (size[1], size[1]))            
         else:
             self.title_logo_sized_a = pygame.transform.smoothscale(self.title_logo_a, (size[0], size[0]))
             self.title_logo_sized_b = pygame.transform.smoothscale(self.title_logo_b, (size[0], size[0]))
+            self.splash_sized = pygame.transform.smoothscale(self.splash, (size[0], size[0]))            
 
         self.tl_rect_a = self.title_logo_sized_a.get_rect()
         self.tl_rect_a.x = (size[0] / 2) - (self.tl_rect_a.w / 2)
@@ -209,6 +260,10 @@ class Menu(object):
         self.tl_rect_b = self.title_logo_sized_b.get_rect()
         self.tl_rect_b.x = self.tl_rect_a.x
         self.tl_rect_b.y = self.tl_rect_a.y
+
+        self.splash_rect = self.splash_sized.get_rect()
+        self.splash_rect.x = self.tl_rect_a.x
+        self.splash_rect.y = self.tl_rect_a.y        
         
         # Move Title Font...
         self.font_data[2] = [ (size[0] / 2) - (self.font_data[1][0] / 2), size[1] - (self.font_data[1][1] * 1.5) ]
