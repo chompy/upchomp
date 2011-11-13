@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, math, sys, os, iniget, dialog, imagehelper, time, hashlib
+import pygame, math, sys, os, iniget, dialog, imagehelper, time, hashlib, zipfile, os, shutil, time
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
@@ -272,15 +272,30 @@ class Menu(object):
         maparrow = pygame.image.load("gfx/map_select_arrow.png").convert_alpha()
         
         # Load Map List
-        mapFiles = os.listdir("./map")
-        mapList = []
+        map_path = "./maps"
+        mapFiles = os.listdir(map_path)
+        mapList = []        
         
         for i in mapFiles:
             ext = i.split(".")
-            if ext[len(ext) - 1] == "map":
-                ini = iniget.iniGet("./map/" + i)
-                totalmaps = len(ini.get("pack","order").split(","))
-                maphash = hashlib.sha224(open("map/" + i).read()).hexdigest()
+            if ext[len(ext) - 1] == "ucm":
+
+                # Unzip Map
+                if not zipfile.is_zipfile(map_path + "/" + i): continue
+
+                # Make Temporary Storage Directory
+                if os.path.exists("temp"): 
+                  shutil.rmtree("temp")
+                  time.sleep(.25)
+                os.mkdir("temp")
+
+                zip_file = zipfile.ZipFile(map_path + "/" + i)
+                zip_file.extract("maps","temp/")
+                zip_file.close()
+            
+                ini = iniget.iniGet("./temp/maps")
+                totalmaps = len(str(ini.get("pack","order")).split(","))
+                maphash = hashlib.sha224(open("temp/maps").read()).hexdigest()
                 
                 highrank = 1
                 for x in ini.get("pack","order").split(","):
@@ -466,13 +481,30 @@ class Menu(object):
         
         # Static Vars
         LIST_SPACING = 32
-        LIST_START_POS = 92         
+        LIST_START_POS = 92        
+
+        # Find Map Pack File
+        if not os.path.exists(mappack):
+          mappack = "maps/" + mappack
+
+        # Unzip Map
+        if not zipfile.is_zipfile(mappack): return None
+
+        # Make Temporary Storage Directory
+        if os.path.exists("temp"): 
+          shutil.rmtree("temp")
+          time.sleep(.25)
+        os.mkdir("temp")
+
+        zip_file = zipfile.ZipFile(mappack)
+        zip_file.extract("maps","temp/")    
+
                                 
         # Get map pack info
-        pack = iniget.iniGet("map/" + mappack)
+        pack = iniget.iniGet("temp/maps")
         maplist = pack.get("pack","order").split(",")
         
-        maphash = hashlib.sha224(open("map/"+mappack).read()).hexdigest()
+        maphash = hashlib.sha224(open("temp/maps").read()).hexdigest()
         current_selection = self.save.getInt(maphash, "progress")
         progress = current_selection
        
@@ -488,8 +520,12 @@ class Menu(object):
                 if len(x) > width: width = len(x)
                 for y in range(len(x)):
                     tiles.append(x[y])    
-                    
-            theme = iniget.iniGet("tile/" + pack.get(i, "theme") + ".ini")
+
+            # Unzip Theme
+            zip_file.extract(pack.get(i, "theme"),"temp/")
+
+            # Get Theme Date
+            theme = iniget.iniGet("temp/" + pack.get(i, "theme"))
             tile_draw = []
             for x in tiles:
                 if theme.getBool(x, "collide") and not theme.get(x, "type"):
@@ -516,6 +552,8 @@ class Menu(object):
         if current_selection > len(map) - 1: current_selection = len(map) - 1
             
         draw_map = 1  
+
+        zip_file.close()
         
         while not selected_stage:
            # Set frame rate to 30.

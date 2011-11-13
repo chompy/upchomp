@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, math, menu, chompy, sound, gamemap, dialog, hud, transition, sys, os, iniget, traceback
+import pygame, math, menu, chompy, sound, gamemap, dialog, hud, transition, sys, os, iniget, traceback, zipfile, shutil, time, hashlib
 
 try:
     import android, android_mixer
@@ -99,18 +99,44 @@ class Game(object):
         # Opening a map... install it.
         if len(sys.argv) > 1:
           size = self.screen.get_size()
-          mappack = iniget.iniGet(sys.argv[1])
+
+          # Unzip Map
+          if not zipfile.is_zipfile(sys.argv[1]):
+            self.gameLoop()
+            return None
+            
+          # Make Temporary Storage Directory
+          if os.path.exists("temp"):
+            shutil.rmtree("temp")
+            time.sleep(.25)
+          os.mkdir("temp")
+
+          zip_file = zipfile.ZipFile(sys.argv[1])
+          zip_file.extract("maps","temp/")
+          zip_file.close()
+            
+          
+          mappack = iniget.iniGet("temp/maps")
+
+          # Get map hash (Used in save file)
+          maphash = hashlib.sha224(open(sys.argv[1]).read()).hexdigest()
+          
           if mappack.get("pack","name") and mappack.get("pack", "order"):         
-              
-              if os.path.isfile("map/" + mappack.get("pack","name").replace(" ", "_") + ".map"):
+
+              oldmaphash = ""
+              if os.path.isfile("maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm"):
+                  oldmaphash = hashlib.sha224(open("maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm").read()).hexdigest()
+
+              if maphash == oldmaphash:
                   print "Failed to install new map pack."
                   self.dlogbox.setMessageBox(size, "The map you are trying to install appears to already be installed.", "Already Installed!", [['OK',self.menu.dialog.closeMessageBox]] )                  
-              else:
-                  import shutil   
-                  shutil.copy (sys.argv[1], "map/" + mappack.get("pack","name").replace(" ", "_") + ".map")
                   
-                  if os.path.isfile("map/" + mappack.get("pack","name").replace(" ", "_") + ".map"):
-                      print "Installed map pack '"+ str(mappack.get("pack","name").replace(" ", "_")) + ".map'."
+              else:
+
+                  shutil.copy (sys.argv[1], "maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm")
+                  
+                  if os.path.isfile("maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm"):
+                      print "Installed map pack '"+ str(mappack.get("pack","name").replace(" ", "_")) + ".ucm'."
                       self.dlogbox.setMessageBox(size, "New map pack has been installed!", "New Map Pack!", [['OK',self.menu.dialog.closeMessageBox]] )  
                   else:
                       print "Failed to install new map pack."

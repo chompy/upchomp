@@ -258,3 +258,20 @@ arank =     The time in seconds required to beat the map with an "A-Rank" rating
 map =       The map, a long string of characters from the tile file where each represents
             a tile. Each line should be the exact same number of character, spaces are 
             ignored.
+
+=======================
+4 > Packing your Map  |
+=======================
+
+Map packs are zip files with ".UCM" extensions. To pack up your map you should do the following.
+
+ 1. Place all files related to your map in the same folder. This includes images and sound files.
+ 2. Rename the file that contains the map data to "maps" with no extension.
+ 3. Remove any extensions from all files containing map tiles.
+ 4. Zip up all the files in that folder, make sure the root directory inside the zip contains your
+    files.
+ 5. Start UpChomp using the command line argument "upchomp name_of_map_file.xxx" to automatically
+    install the map file. (In most cases dragging and dropping the map file on the executable
+    will work too.)
+
+Unfortunately at this time there is no way to test maps without first going through this process.

@@ -82,6 +82,10 @@ It is possible to make custom maps! See 'mapguide.txt' for information on how to
 
    - You can now press "TAB" on the keyboard to immediately restart a level.
 
+ * v1.02 "The Standalone Map Pack Release"
+
+   - Map packs are now read from zip files with a ".ucm" extension.
+
 =======================
 5 > Credits           |
 =======================
