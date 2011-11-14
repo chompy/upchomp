@@ -15,7 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, math, imagehelper
+import pygame, math, imagehelper, os, sys
+
+if hasattr(sys, 'frozen'):
+    app_path = os.path.dirname(sys.executable)
+elif __file__:
+    app_path = os.path.dirname(__file__)
+
+app_path = app_path.replace('\\', '/') + "/"
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
@@ -32,7 +39,7 @@ class Hud(object):
         """ Inits the Hud """
     
         # Load font
-        self.font = pygame.font.Font("font/volter2.ttf",18)
+        self.font = pygame.font.Font(app_path + "font/volter2.ttf",18)
 
         self.object_color = [255, 179, 0]
         self.value_color = [255, 255, 255]
@@ -44,13 +51,13 @@ class Hud(object):
             'heli'      : [1,0]
         }
 
-        image = pygame.image.load("gfx/skills.png").convert_alpha()
+        image = pygame.image.load(app_path + "gfx/skills.png").convert_alpha()
         image_width, image_height = image.get_size()
         self.tile_image_size = [image_width,image_height]
         self.tile_table = imghelp.makeTiles(image, SKILL_TILE_SIZE)
         
         # Get Ready, Go, message.
-        self.ready = [pygame.image.load("gfx/get_ready.png").convert_alpha(), pygame.image.load("gfx/go.png").convert_alpha()]
+        self.ready = [pygame.image.load(app_path + "gfx/get_ready.png").convert_alpha(), pygame.image.load(app_path + "gfx/go.png").convert_alpha()]
         self.ready_time = 0
         
         # Go back to map select if this var is true...
@@ -171,14 +178,14 @@ class Hud(object):
                             
                 if event.key == pygame.K_ESCAPE:
                     self.doMapSelect = 1
-                    self.sound.playSfx("sfx/button.wav", 0)                                                
+                    self.sound.playSfx(app_path + "sfx/button.wav", 0)                                                
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # Back Button button
                 button_rect = pygame.Rect(size[0] - math.floor(SKILL_TILE_SIZE[0] * 1.5), size[1] - math.floor(SKILL_TILE_SIZE[1] * 1.5), SKILL_TILE_SIZE[0], SKILL_TILE_SIZE[1])
                 if button_rect.collidepoint(event.pos[0], event.pos[1]):
                     self.doMapSelect = 1
-                    self.sound.playSfx("sfx/button.wav", 0)
+                    self.sound.playSfx(app_path + "sfx/button.wav", 0)
 
                 # Other buttons
                 if self.skill_data:

@@ -15,7 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, math, imagehelper
+import pygame, math, imagehelper, os, sys
+
+if hasattr(sys, 'frozen'):
+    app_path = os.path.dirname(sys.executable)
+elif __file__:
+    app_path = os.path.dirname(__file__)
+
+app_path = app_path.replace('\\', '/') + "/"
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
@@ -42,7 +49,7 @@ class Chompy(pygame.sprite.Sprite):
         self.sound = sound
 
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("gfx/chompy.png").convert_alpha()
+        self.image = pygame.image.load(app_path + "gfx/chompy.png").convert_alpha()
         self.image2 = self.image
                
         self.rect = self.image.get_rect()
@@ -72,8 +79,8 @@ class Chompy(pygame.sprite.Sprite):
         """
     
         # Heli Skill tiles
-        self.heli = pygame.image.load("gfx/heli.png").convert_alpha()
-        self.splash = pygame.image.load("gfx/splash.png").convert_alpha()
+        self.heli = pygame.image.load(app_path + "gfx/heli.png").convert_alpha()
+        self.splash = pygame.image.load(app_path + "gfx/splash.png").convert_alpha()
         
         heli_size = self.heli.get_size()
         heli_tile = [heli_size[0] / 256, heli_size[1] / 256]
@@ -122,7 +129,7 @@ class Chompy(pygame.sprite.Sprite):
             self.splashPos = pos
             self.splashTimer = 40
             self.hasSplashed = 1  
-            self.sound.playSfx("sfx/splash.wav", 0) 
+            self.sound.playSfx(app_path + "sfx/splash.wav", 0) 
                     
     def activateSkill(self, name):
         """
@@ -138,12 +145,12 @@ class Chompy(pygame.sprite.Sprite):
             self.progress_max = 90
             self.falling = -1
 
-            if self.sound: self.sound.playSfx("sfx/heli.wav", -1)
+            if self.sound: self.sound.playSfx(app_path + "sfx/heli.wav", -1)
             return 1
             
         # Up Skill - Makes Chompy shoot up.
         elif name == "up":
-            if self.sound: self.sound.playSfx("sfx/up.wav", 0)
+            if self.sound: self.sound.playSfx(app_path + "sfx/up.wav", 0)
             self.falling = -10
         else:
             return 0
@@ -169,7 +176,7 @@ class Chompy(pygame.sprite.Sprite):
 
             if self.falling > 0: self.falling = 0
 
-        if self.skills['heli'] == 1: self.sound.stopSfxFile("sfx/heli.wav")
+        if self.skills['heli'] == 1: self.sound.stopSfxFile(app_path + "sfx/heli.wav")
 
         # Start the clock when Chompy is not moving...if it hits 0 game over.
         if self.stopclock > 0:

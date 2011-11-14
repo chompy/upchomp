@@ -15,13 +15,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import hashlib, zipfile, os, shutil, time, iniget
+import hashlib, zipfile, os, sys, shutil, time, iniget
 
+if hasattr(sys, 'frozen'):
+    app_path = os.path.dirname(sys.executable)
+elif __file__:
+    app_path = os.path.dirname(__file__)
+
+app_path = app_path.replace('\\', '/') + "/"
 
 def levelList():
 
   # Map Path
-  map_path = "maps/"
+  map_path = app_path + "maps/"
 
   # Get directory List
   mapFiles = os.listdir(map_path)
@@ -45,8 +51,8 @@ def load(levelFile, extractFile = None ):
   # Find Map File
   if not os.path.exists(levelFile):
 
-    if os.path.exists("maps/" + levelFile):
-      levelFile = "maps/" + levelFile
+    if os.path.exists(app_path + "maps/" + levelFile):
+      levelFile = app_path + "maps/" + levelFile
     else:
       return None
 
@@ -61,22 +67,22 @@ def load(levelFile, extractFile = None ):
 
   if isZip:
     # Make Temp storage directory
-    if os.path.exists("temp"): 
-      shutil.rmtree("temp")
+    if os.path.exists(app_path + "temp"): 
+      shutil.rmtree(app_path + "temp")
       time.sleep(.25)
-    os.mkdir("temp")        
+    os.mkdir(app_path + "temp")
 
     zip_file = zipfile.ZipFile(levelFile)
 
     if not extractFile:
-      zip_file.extractall("temp/")
+      zip_file.extractall(app_path + "temp/")
     else:
       for i in extractFile:
-        zip_file.extract(i, "temp/")
+        zip_file.extract(i, app_path + "temp/")
           
     zip_file.close()
 
-    levelFile = "temp"
+    levelFile = app_path + "temp"
 
   # Return the path to the level files.
   return levelFile + "/"

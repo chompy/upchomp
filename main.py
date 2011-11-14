@@ -17,6 +17,13 @@
 
 import pygame, math, menu, chompy, sound, gamemap, dialog, hud, transition, sys, os, iniget, traceback, zipfile, shutil, time, hashlib
 
+if hasattr(sys, 'frozen'):
+    app_path = os.path.dirname(sys.executable)
+elif __file__:
+    app_path = os.path.dirname(__file__)
+
+app_path = app_path.replace('\\', '/') + "/"
+
 try:
     import android, android_mixer
     print "[OS] Running on Android."
@@ -24,8 +31,8 @@ except ImportError:
     print "[OS] Running on PC."
     android = None
 
-settings = iniget.iniGet("settings.ini")
-error_log = open('error.log', 'w')
+settings = iniget.iniGet(app_path + "settings.ini")
+error_log = open(app_path + 'error.log', 'w')
 
 class Game(object):
 
@@ -60,7 +67,7 @@ class Game(object):
         self.clock=pygame.time.Clock()
 
         # Game Save
-        self.save = iniget.iniGet("game.sav")
+        self.save = iniget.iniGet(app_path + "game.sav")
         
         # Sprites
         self.all_sprites_list = pygame.sprite.RenderPlain()
@@ -106,17 +113,17 @@ class Game(object):
             return None
             
           # Make Temporary Storage Directory
-          if os.path.exists("temp"):
-            shutil.rmtree("temp")
+          if os.path.exists(app_path + "temp"):
+            shutil.rmtree(app_path +"temp")
             time.sleep(.25)
-          os.mkdir("temp")
+          os.mkdir(app_path + "temp")
 
           zip_file = zipfile.ZipFile(sys.argv[1])
-          zip_file.extract("maps","temp/")
+          zip_file.extract("maps", app_path + "temp/")
           zip_file.close()
             
           
-          mappack = iniget.iniGet("temp/maps")
+          mappack = iniget.iniGet(app_path + "temp/maps")
 
           # Get map hash (Used in save file)
           maphash = hashlib.sha224(open(sys.argv[1]).read()).hexdigest()
@@ -124,8 +131,8 @@ class Game(object):
           if mappack.get("pack","name") and mappack.get("pack", "order"):         
 
               oldmaphash = ""
-              if os.path.isfile("maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm"):
-                  oldmaphash = hashlib.sha224(open("maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm").read()).hexdigest()
+              if os.path.isfile(app_path + "maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm"):
+                  oldmaphash = hashlib.sha224(open(app_path + "maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm").read()).hexdigest()
 
               if maphash == oldmaphash:
                   print "Failed to install new map pack."
@@ -133,9 +140,9 @@ class Game(object):
                   
               else:
 
-                  shutil.copy (sys.argv[1], "maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm")
+                  shutil.copy (sys.argv[1], app_path + "maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm")
                   
-                  if os.path.isfile("maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm"):
+                  if os.path.isfile(app_path + "maps/" + mappack.get("pack","name").replace(" ", "_") + ".ucm"):
                       print "Installed map pack '"+ str(mappack.get("pack","name").replace(" ", "_")) + ".ucm'."
                       self.dlogbox.setMessageBox(size, "New map pack has been installed!", "New Map Pack!", [['OK',self.menu.dialog.closeMessageBox]] )  
                   else:
@@ -450,7 +457,7 @@ class Game(object):
                                 
                             else: newrecord = ""
                                 
-                            self.save.parser.read("game.sav")                                
+                            self.save.parser.read(app_path + "game.sav")                                
                                 
                             if aranktime and gametime <= aranktime:
                                 self.dlogbox.setMessageBox(size,"A+! - TIME: " + str(round( time / 1000.0,2 )) + newrecord , "Pwned!!!", [['Retry',self.levelTransition],['Next Level',self.nextLevel]] )

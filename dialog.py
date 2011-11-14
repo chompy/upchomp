@@ -15,7 +15,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, math, imagehelper
+import pygame, math, imagehelper, os, sys
+
+if hasattr(sys, 'frozen'):
+    app_path = os.path.dirname(sys.executable)
+elif __file__:
+    app_path = os.path.dirname(__file__)
+
+app_path = app_path.replace('\\', '/') + "/"
 
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
@@ -53,13 +60,13 @@ class Dialog(object):
         """
     
         # Load the dialog tiles...             
-        image = pygame.image.load("gfx/dialog_box.png").convert_alpha()
+        image = pygame.image.load(app_path + "gfx/dialog_box.png").convert_alpha()
         image_width, image_height = image.get_size()
         self.tile_image_size = [image_width,image_height]
         self.tile_table = imghelp.makeTiles(image, TILE_SIZE)
                   
         # Load font
-        self.font = pygame.font.Font("font/volter.ttf",18)
+        self.font = pygame.font.Font(app_path + "font/volter.ttf",18)
         self.text = ""   
         self.title_color = [255, 179, 0]  
         self.text_color = [255, 255, 255]  
@@ -267,7 +274,7 @@ class Dialog(object):
                 self.buttonstate[i] = 0
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if close_btn.collidepoint(event.pos[0], event.pos[1]):
-                    self.sound.playSfx("sfx/button.wav",0)
+                    self.sound.playSfx(app_path + "sfx/button.wav",0)
                     self.closeMessageBox()                    
                     return -1 
                 for i in range(len(self.button)):
@@ -277,7 +284,7 @@ class Dialog(object):
 
                     # If button click initiate passed function
                     if button_rect.collidepoint(event.pos[0], event.pos[1]):
-                        self.sound.playSfx("sfx/button.wav",0)
+                        self.sound.playSfx(app_path + "sfx/button.wav",0)
                         self.button[i][1]()
                         self.closeMessageBox() 
                                             
@@ -312,12 +319,12 @@ class Dialog(object):
                     
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                     if self.kb_select < 0: self.kb_select = 0
-                    self.sound.playSfx("sfx/button.wav",0)
+                    self.sound.playSfx(app_path + "sfx/button.wav",0)
                     self.button[self.kb_select][1]()
                     self.closeMessageBox()
                     
                 elif event.key == pygame.K_ESCAPE:
-                    self.sound.playSfx("sfx/button.wav",0)
+                    self.sound.playSfx(app_path + "sfx/button.wav",0)
                     self.closeMessageBox()                    
                     return -1 
                                     
@@ -359,7 +366,7 @@ class Dialog(object):
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN: 
                     btn_click = 1
-                    self.sound.playSfx("sfx/button.wav",0)
+                    self.sound.playSfx(app_path + "sfx/button.wav",0)
                             
         # Highlight if selected with keyboard
         if self.kb_mb_select == id: 
@@ -376,7 +383,7 @@ class Dialog(object):
                         if self.kb_mb_select > self.mb_total: self.kb_mb_select = self.mb_total
                     elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                         if self.kb_mb_select < 0: self.kb_mb_select = 0
-                        self.sound.playSfx("sfx/button.wav",0)                        
+                        self.sound.playSfx(app_path + "sfx/button.wav",0)                        
                         btn_click = 1
                         
                 if event.type == pygame.MOUSEMOTION:

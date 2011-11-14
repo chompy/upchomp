@@ -17,6 +17,13 @@
 
 import pygame, math, sys, os, iniget, dialog, imagehelper, time, levelLoader, hashlib
 
+if hasattr(sys, 'frozen'):
+    app_path = os.path.dirname(sys.executable)
+elif __file__:
+    app_path = os.path.dirname(__file__)
+
+app_path = app_path.replace('\\', '/') + "/"
+
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
 
@@ -45,7 +52,7 @@ class Menu(object):
         self.dialog = dialog.Dialog(screen, sound)
         
         # Scroll Arrows
-        scrollarrows = pygame.image.load("gfx/scroll_arrows.png").convert_alpha()
+        scrollarrows = pygame.image.load(app_path + "gfx/scroll_arrows.png").convert_alpha()
         image_width, image_height = scrollarrows.get_size()
         tile_image_size = [image_width,image_height]
         self.scrollarrows_vertical = imghelp.makeTiles(scrollarrows, TILE_SIZE)    
@@ -57,19 +64,19 @@ class Menu(object):
                 self.scrollarrows_horizontal[x][y] = pygame.transform.rotate(self.scrollarrows_horizontal[x][y], 90)        
                 
         # Load font
-        self.font = pygame.font.Font("font/volter.ttf",18)
-        self.titlefont = pygame.font.Font("font/volter2.ttf",28)
+        self.font = pygame.font.Font(app_path + "font/volter.ttf",18)
+        self.titlefont = pygame.font.Font(app_path + "font/volter2.ttf",28)
         
         # Load background
-        self.background = pygame.image.load("gfx/menu_bg.png").convert()
+        self.background = pygame.image.load(app_path + "gfx/menu_bg.png").convert()
         self.bg_rect = self.background.get_rect()  
         self.bgoffset = 0  
         
         # Check mark image
-        self.checkmark = pygame.image.load("gfx/packcomplete.png").convert_alpha()
+        self.checkmark = pygame.image.load(app_path + "gfx/packcomplete.png").convert_alpha()
         
         # High Rank Image
-        self.highrank = pygame.image.load("gfx/toprank.png").convert_alpha()
+        self.highrank = pygame.image.load(app_path + "gfx/toprank.png").convert_alpha()
         
         # Get Sound Object
         self.sound = sound  
@@ -101,12 +108,12 @@ class Menu(object):
         self.font_data[1] = self.font.size(self.font_data[0])
 
         # Splash Screen Image
-        self.splash = pygame.image.load("gfx/cc_splash_screen.png").convert()
+        self.splash = pygame.image.load(app_path + "gfx/cc_splash_screen.png").convert()
                                      
                            
         # Load Title Logo
-        self.title_logo_a = pygame.image.load("gfx/title_logo_layer1.png").convert_alpha()
-        self.title_logo_b = pygame.image.load("gfx/title_logo_layer2.png").convert_alpha()
+        self.title_logo_a = pygame.image.load(app_path + "gfx/title_logo_layer1.png").convert_alpha()
+        self.title_logo_b = pygame.image.load(app_path + "gfx/title_logo_layer2.png").convert_alpha()
 
         # Size stuff to fit self.screen
         self.resizeTitle(size)
@@ -159,7 +166,7 @@ class Menu(object):
         done = 0
  
         # Play Menu Music
-        self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1, 1)
+        self.sound.playSfx(app_path + "sfx/danosongs.com-helium-hues.ogg", -1, 1)
 
         self.resizeTitle(size)
         
@@ -189,7 +196,7 @@ class Menu(object):
                     title_logo_pos_b = self.tl_rect_b.x + size[0]       
                     title_logo_offset_a = self.tl_rect_a.x 
                     title_logo_offset_b = self.tl_rect_a.x   
-                    self.sound.playSfx("sfx/button.wav",0)           
+                    self.sound.playSfx(app_path + "sfx/button.wav",0)           
 
 
             self.renderBg(size)
@@ -324,7 +331,7 @@ class Menu(object):
         LIST_START_POS = 92
         
         # Map Select Arrow
-        maparrow = pygame.image.load("gfx/map_select_arrow.png").convert_alpha()
+        maparrow = pygame.image.load(app_path + "gfx/map_select_arrow.png").convert_alpha()
         
         # Load Map List
         maps = levelLoader.levelList()     
@@ -359,7 +366,7 @@ class Menu(object):
         self.resizeTitle(size)
         
         # Play Menu Music
-        self.sound.playSfx("sfx/danosongs.com-helium-hues.ogg", -1, 1)
+        self.sound.playSfx(app_path + "sfx/danosongs.com-helium-hues.ogg", -1, 1)
         
         while not done:
             # Set frame rate to 30.
@@ -393,18 +400,18 @@ class Menu(object):
                         rect = pygame.Rect(64, x * LIST_SPACING + LIST_START_POS - (map_list_scroll * LIST_SPACING), fontSize[0], fontSize[1])
                         if rect.collidepoint(event.pos[0], event.pos[1]):
                             map_selected = x
-                            self.sound.playSfx("sfx/beep.wav", 0)
+                            self.sound.playSfx(app_path + "sfx/beep.wav", 0)
                         x += 1 
                         
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         map_selected -= 1
-                        self.sound.playSfx("sfx/beep.wav", 0)
+                        self.sound.playSfx(app_path + "sfx/beep.wav", 0)
                         if map_selected < 0: map_selected = 0
                         if scroll_down and map_selected < map_list_scroll: map_list_scroll = map_selected
                     elif event.key == pygame.K_DOWN:
                         map_selected += 1
-                        self.sound.playSfx("sfx/beep.wav", 0)
+                        self.sound.playSfx(app_path + "sfx/beep.wav", 0)
                         if map_selected > len(mapList) - 1: map_selected = len(mapList) - 1                       
                         if scroll_down and map_selected > map_list_scroll: map_list_scroll = map_selected
 

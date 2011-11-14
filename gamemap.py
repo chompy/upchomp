@@ -15,7 +15,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import pygame, math, iniget, imagehelper, hashlib, zipfile, os, shutil, time, levelLoader
+import pygame, math, iniget, imagehelper, hashlib, zipfile, os, sys, shutil, time, levelLoader
+
+if hasattr(sys, 'frozen'):
+    app_path = os.path.dirname(sys.executable)
+elif __file__:
+    app_path = os.path.dirname(__file__)
+
+app_path = app_path.replace('\\', '/') + "/"
+
 # Image Helper Object
 imghelp = imagehelper.imageHelper()
 
@@ -386,16 +394,16 @@ class Gamemap(object):
                                     if i['collide_sfx']:
                                         if os.path.exists(self.map_dir + i['collide_sfx']):
                                             sound.playSfx(self.map_dir + i['collide_sfx'], 0)
-                                        elif os.path.exists("sfx/" + i['collide_sfx']):
-                                            sound.playSfx("sfx/" + i['collide_sfx'], 0)
+                                        elif os.path.exists(app_path + "sfx/" + i['collide_sfx']):
+                                            sound.playSfx(app_path + "sfx/" + i['collide_sfx'], 0)
                                             
                         # Play collision SFX if provided[This one plays when there is no collide animation].
                         elif i['collide_sfx']:
                           
                           if os.path.exists(self.map_dir + i['collide_sfx']):
                               sound.playSfx(self.map_dir + i['collide_sfx'], 0)
-                          elif os.path.exists("sfx/" + i['collide_sfx']):
-                              sound.playSfx("sfx/" + i['collide_sfx'], 0)                                        
+                          elif os.path.exists(app_path + "sfx/" + i['collide_sfx']):
+                              sound.playSfx(app_path + "sfx/" + i['collide_sfx'], 0)                                        
 
                         # Do the pushing.
                         if value[1]: 
@@ -411,8 +419,8 @@ class Gamemap(object):
                     elif i['type'] == "key":
                         if os.path.exists(self.map_dir + i['collide_sfx']):
                             sound.playSfx(self.map_dir + i['collide_sfx'], 0)
-                        elif os.path.exists("sfx/" + i['collide_sfx']):
-                            sound.playSfx("sfx/" + i['collide_sfx'], 0)    
+                        elif os.path.exists(app_path + "sfx/" + i['collide_sfx']):
+                            sound.playSfx(app_path + "sfx/" + i['collide_sfx'], 0)    
                         i['tile'] = 0
                         i['collide'] = 0
                         i['type'] = 0
